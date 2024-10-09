@@ -1,5 +1,12 @@
+.idea
+
 data/
 data_jeannie/
 
-.ipynb_checkpoints
-analysis/result
+.venv
+.env
+*.sqlite
+
+**/.ipynb_checkpoints
+tools/analysis/result
+tools/API/
