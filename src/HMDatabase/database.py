@@ -1,8 +1,9 @@
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine, Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
-def init_engine(database_url: str):
+
+def init_engine(database_url: str) -> Engine:
     """
     Initialize the database engine
     :param database_url: url of the database to connect to
@@ -13,6 +14,7 @@ def init_engine(database_url: str):
     )
     return engine
 
+
 def init_session_maker(database_url: str) -> sessionmaker[Session]:
     """
     Initialize the database session maker
@@ -22,5 +24,6 @@ def init_session_maker(database_url: str) -> sessionmaker[Session]:
     engine = init_engine(database_url)
     db_session_maker = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     return db_session_maker
+
 
 HMDatabaseObject = declarative_base()
