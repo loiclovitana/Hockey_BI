@@ -2,9 +2,13 @@ import os
 import sys
 
 from HMDatabase.database import create_engine, init_session_maker
-from HMDatabase import models
+from HMDatabase import models, crud
 
 from datetime import date
+
+FIRST_SEASON = 2022
+MONTH_START_SEASON = 8
+MONTH_END_SEASON = 7
 
 
 def create_seasons(session, from_year: int, to_year: int | None = None):
@@ -13,8 +17,12 @@ def create_seasons(session, from_year: int, to_year: int | None = None):
     if to_year is None or to_year < 2000:
         to_year = current_year_season + 1
 
-    seasons = [models.Season(name=f"{year}/{year + 1}", is_current=year == current_year_season) for year in
-               range(from_year, to_year)]
+    seasons = [models.Season(name=f"{year}/{year + 1}"
+                             , is_current=year == current_year_season
+                             , start=date.fromisocalendar(year, MONTH_START_SEASON, 1)
+                             , end=date.fromisocalendar(year + 1, MONTH_START_SEASON, 1)
+                             )
+               for year in range(from_year, to_year)]
 
     session.add_all(seasons)
 
@@ -29,7 +37,8 @@ def initialize_database(db_url: str):
     models.HMDatabaseObject.metadata.create_all(db_engine)
 
     session = init_session_maker(db_url)()
-    create_seasons(session, 2022)
+    if crud.get_current_season(session) is None:
+        create_seasons(session, FIRST_SEASON)
 
     session.commit()
 

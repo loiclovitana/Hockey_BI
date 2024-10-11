@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from typing import Type
 
 from sqlalchemy.orm import Session
 from HMDatabase import models
@@ -12,13 +13,13 @@ def get_player(db: Session, player_id: int, season_id: int) -> models.HockeyPlay
     return db.query(models.HockeyPlayer).get((player_id, season_id))
 
 
-def get_players(db: Session, player_ids: list, season_id: int) -> Iterable[models.HockeyPlayer]:
-    return (db.query(models.HockeyPlayer)
-            .filter(models.HockeyPlayer.season_id == season_id
-                    , models.HockeyPlayer.id.in_(player_ids)
-                    )
-            .values())
+def get_players(db: Session, player_ids: list, season_id: int) -> list[Type[models.HockeyPlayer]]:
+    return db.query(models.HockeyPlayer)\
+        .filter(models.HockeyPlayer.season_id == season_id
+                , models.HockeyPlayer.id.in_(player_ids)
+                )\
+        .all()
 
 
-def get_imported_stats_dates(db: Session) :
-    return db.query(models.StatImport.validity_date).all()
+def get_imported_stats_dates(db: Session):
+    return db.query(models.StatImport).all()
