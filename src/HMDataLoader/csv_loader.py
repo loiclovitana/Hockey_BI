@@ -3,9 +3,11 @@ import sys
 from datetime import date
 from os import getenv
 from typing import Any
+import argparse
 
 from sqlalchemy.orm import Session
 
+from HMDataLoader.constants import HM_DATABASE_URL_ENV_NAME
 from HMDatabase import database, crud, models
 
 __DELIMITER = ';'
@@ -125,17 +127,22 @@ def __connect_session(db_access) -> Session:
 
 
 if __name__ == '__main__':
-    database_url = getenv('HM_DATABASE_URL')
-    csv_path = getenv('HM_CSV_IMPORT_PATH')
+    argument_parser = argparse.ArgumentParser(
+        description="Load data from CSV file into a database"
+    )
 
-    if len(sys.argv) > 1:
-        csv_path = sys.argv[1]
-    if csv_path is None:
-        raise Exception('CSV path is not provided')
+    argument_parser.add_argument("-d", "--database-url",
+                                 default=getenv(HM_DATABASE_URL_ENV_NAME),
+                                 help=f"""Connection string to connect to the database were to save the data.
+                                     If not set, use environment variable {HM_DATABASE_URL_ENV_NAME}""")
+    argument_parser.add_argument("-s", "--source_csv", required=True,
+                                 help=f"""Path of CSV file to import. Encoding needs to be {__ENCODING}""")
 
-    if len(sys.argv) > 2:
-        database_url = sys.argv[2]
-    if database_url is None:
-        raise Exception('Database URL not provided and environment variable HM_DATABASE_URL is not set')
+    arguments = argument_parser.parse_args()
 
-    import_csv_to_db(csv_path, database_url)
+    if arguments.database_url is None:
+        print(f"Error: Missing argument 'database-url'.")
+        argument_parser.print_help()
+        sys.exit(1)
+
+    import_csv_to_db(arguments.source_csv, arguments.database_url)
