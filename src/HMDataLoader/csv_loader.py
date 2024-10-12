@@ -1,16 +1,16 @@
+import argparse
 import csv
 import sys
 from datetime import date
 from os import getenv
 from typing import Any
-import argparse
 
 from sqlalchemy.orm import Session
 
 from HMDataLoader.constants import HM_DATABASE_URL_ENV_NAME
 from HMDatabase import database, crud, models
 
-__DELIMITER = ';'
+__DELIMITER = ','
 __ENCODING = 'utf-8-sig'
 
 
@@ -18,6 +18,14 @@ def __batch(iterable, batch_size=1):
     length = len(iterable)
     for start_index in range(0, length, batch_size):
         yield iterable[start_index:min(start_index + batch_size, length)]
+
+
+def __connect_session(db_access) -> Session:
+    if isinstance(db_access, str):
+        return database.init_session_maker(db_access)()
+    if isinstance(db_access, Session):
+        return db_access
+    raise ValueError("Database session must be provided")
 
 
 def import_csv_to_db(csv_file_path, db_access: Session | str):
@@ -82,6 +90,16 @@ def import_csv_to_db(csv_file_path, db_access: Session | str):
 
 
 def load_csv(csv_file_path: str):
+    def to_float(value: str) -> float:
+        return float(value.replace(",", "."))
+
+    def try_convert(field: str, type_cast):
+        try:
+            return type_cast(field)
+        except:
+            print(f'Warning: invalid field cannot convert value "{field}" into type <{type_cast.__name__}>')
+            return None
+
     with open(csv_file_path, encoding=__ENCODING) as csv_file:
         reader: csv.DictReader[dict[str, Any]] = csv.DictReader(csv_file, delimiter=__DELIMITER, quotechar='"')
         players_id = set()
@@ -89,9 +107,9 @@ def load_csv(csv_file_path: str):
         for player in reader:
             player['id'] = try_convert(player['id'], int)
             player['date'] = try_convert(player['date'], date.fromisoformat)
-            player['Price'] = try_convert(player['Price'], float)
-            player['Ownership'] = try_convert(player['Ownership'].replace('%', ''), float)
-            player['HM points'] = try_convert(player['HM points'], float)
+            player['Price'] = try_convert(player['Price'], to_float)
+            player['Ownership'] = try_convert(player['Ownership'].replace('%', ''), to_float)
+            player['HM points'] = try_convert(player['HM points'], to_float)
             player['Appareances'] = try_convert(player['Appareances'], int)
             player['Goal'] = try_convert(player['Goal'], int)
             player['Goal OT'] = try_convert(player['Goal OT'], int)
@@ -107,23 +125,6 @@ def load_csv(csv_file_path: str):
             players_csv_data.append(player)
 
         return players_id, players_csv_data
-
-
-def try_convert(field: str, type_cast):
-    try:
-        return type_cast(field)
-    except:
-        print(f'Warning: invalid field cannot convert value "{field}" into type <{type_cast.__name__}>')
-        return None
-
-
-def __connect_session(db_access) -> Session:
-    if isinstance(db_access, str):
-        return database.init_session_maker(db_access)()
-    if isinstance(db_access, Session):
-        return db_access
-
-    raise ValueError("Database session must be provided")
 
 
 if __name__ == '__main__':
