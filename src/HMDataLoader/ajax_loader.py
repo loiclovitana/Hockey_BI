@@ -1,13 +1,17 @@
 import argparse
 import sys
+from datetime import datetime
 from os import getenv
 from random import randint
 from urllib.parse import quote
 
+import bs4.element
 import requests
 from bs4 import BeautifulSoup
+from sqlalchemy.orm import Session
 
 from HMDataLoader.constants import HM_DATABASE_URL_ENV_NAME, HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME, HM_URL
+from HMDatabase import models, repository, database
 
 AJAX_URL = HM_URL + "ajaxrequest/"
 
@@ -28,17 +32,72 @@ REQUEST_HEADER = {
 }
 
 
+def __connect_session(db_access) -> Session:
+    if isinstance(db_access, str):
+        return database.init_session_maker(db_access)()
+    if isinstance(db_access, Session):
+        return db_access
+    raise ValueError("Database session must be provided")
+
+
 def _random_number() -> str:
     return str(randint(10000000, 99999999))
 
 
-def _parse_players_html_list(player_html_list: str):
+def _scrap_player_row(player_row_html: bs4.element.Tag):
+    player = models.HockeyPlayer(
+        id=int(player_row_html.attrs['attr'])
+        , name=player_row_html.select('.name')[0].text
+        , club=player_row_html.img.attrs['src'].split('/')[-2]
+        , role=player_row_html.div.text
+    )
+    return player
+
+
+def _scrap_player_details(player_details_html):
+    def try_convert(field: str, type_cast):
+        try:
+            return type_cast(field)
+        except:
+            print(f'Warning: invalid field cannot convert value "{field}" into type <{type_cast.__name__}>')
+            return None
+
+    soup = BeautifulSoup(player_details_html, 'html.parser')
+
+    stats = {hist.attrs['label']: hist.attrs['value'] for hist in soup.select(".histogram.horiz")}
+    # TODO clean up duplicates
+    stats['Price'] = try_convert(stats['Price'], float)
+    stats['Ownership'] = try_convert(stats['Ownership'].replace('%', ''), float)
+    stats['HM points'] = try_convert(stats['HM points'], float)
+    stats['Appareances'] = try_convert(stats['Appareances'], int)
+    stats['Goal'] = try_convert(stats['Goal'], int)
+    stats['Goal OT'] = try_convert(stats['Goal OT'], int)
+    stats['Assist #1'] = try_convert(stats['Assist #1'], int)
+    stats['Assist #2'] = try_convert(stats['Assist #2'], int)
+    stats['Assist OT'] = try_convert(stats['Assist OT'], int)
+    stats['Points'] = try_convert(stats['Points'], int)
+    stats['GWG'] = try_convert(stats['GWG'], int)
+    stats['Penalties'] = try_convert(stats['Penalties'], int)
+
+    return models.HockeyPlayerStats(
+        price=stats['Price']
+        , hm_points=stats['HM points']
+        , appearances=stats['Appareances']
+        , goal=stats['Goal']
+        , assists=None if stats['Assist #1'] is None
+        else int(stats['Assist #1']) + int(stats['Assist #2']) + int(stats['Assist OT'])
+        , penalties=stats['Penalties']
+        , plus_minus=stats['+/-']
+    )
+
+
+def _scrap_players_html_list(player_html_list: str):
     soup = BeautifulSoup(player_html_list, 'html.parser')
-    # TODO
-    return []
+    players_rows = soup.select(".row")
+    return [_scrap_player_row(player_row_html) for player_row_html in players_rows]
 
 
-class HMAjaxParser:
+class HMAjaxScrapper:
     session = None
 
     def _check_session_open(self):
@@ -70,11 +129,20 @@ class HMAjaxParser:
 
     def get_players(self):
         self._check_session_open()
-        player_html_list = self._get_player_html_list(club=0) + self._get_player_html_list(club=1)
-        return _parse_players_html_list(player_html_list)
+        player_html_list = self._get_player_html_list(club=0) + self._get_player_html_list(club=-1)
+        return _scrap_players_html_list(player_html_list)
 
     def get_player_stats(self, player_id):
         self._check_session_open()
+        query_data = f"id={player_id}"
+        print(f"Query {player_id}")
+        response = self.session.post(AJAX_URL + "get-player-detail", query_data)
+        connection_success = response.status_code == 200 and len(response.text) != 0
+        if not connection_success:
+            raise ConnectionError(f"Couldn't query the players list from: <{response.status_code}>")
+        player_stats: models.HockeyPlayerStats = _scrap_player_details(response.text)
+        player_stats.player_id = player_id
+        return player_stats
 
     def close_session(self):
         if self.session is None:
@@ -83,11 +151,40 @@ class HMAjaxParser:
         self.session = None
 
 
-def import_from_ajax(database_url, user, password):
-    parser = HMAjaxParser()
+def import_from_ajax(db_access: Session | str, user, password):
+    parser = HMAjaxScrapper()
     parser.connect_to_hm(user, password)
 
     players = parser.get_players()
+    players_id = [player.id for player in players]
+
+    importation = models.StatImport(validity_date=datetime.now(),
+                                    origin='Hockey Manager',
+                                    comment=f"")
+    players_stats = [
+        parser.get_player_stats(player.id)
+        for player in players
+    ]
+
+    for stats in players_stats:
+        stats.importation = importation
+        stats.validity_date = datetime.now()
+
+    database_session: Session = __connect_session(db_access)
+    current_season: models.Season = repository.get_current_season(database_session)
+
+    existing_players: set[str] = {player.id
+                                  for player in repository.get_players(database_session, players_id, current_season.id)}
+    new_players = []
+    for player in players:
+        if player.id not in existing_players:
+            existing_players.add(player.id)
+            player.season_id = current_season.id
+            new_players.append(player)
+    database_session.add_all(new_players)
+
+    database_session.add(importation)
+    database_session.commit()
 
     parser.close_session()
 

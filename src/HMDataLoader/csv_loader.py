@@ -8,7 +8,7 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from HMDataLoader.constants import HM_DATABASE_URL_ENV_NAME
-from HMDatabase import database, crud, models
+from HMDatabase import database, repository, models
 
 __DELIMITER = ','
 __ENCODING = 'utf-8-sig'
@@ -31,14 +31,14 @@ def __connect_session(db_access) -> Session:
 def import_csv_to_db(csv_file_path, db_access: Session | str):
     database_session: Session = __connect_session(db_access)
 
-    current_season: models.Season = crud.get_current_season(database_session)
+    current_season: models.Season = repository.get_current_season(database_session)
 
     already_imported_dates = {importation.validity_date: importation for importation in
-                              crud.get_imported_stats_dates(database_session)}
+                              repository.get_imported_stats_dates(database_session)}
 
     players_id, players_csv_data = load_csv(csv_file_path)
     existing_players = {player.id: player
-                        for player in crud.get_players(database_session, list(players_id), current_season.id)}
+                        for player in repository.get_players(database_session, list(players_id), current_season.id)}
 
     # Add new players
     new_players = []
@@ -60,6 +60,8 @@ def import_csv_to_db(csv_file_path, db_access: Session | str):
         stats_validity_date = player['date']
 
         if stats_validity_date in already_imported_dates.keys():
+            # TODO use parameter if want to check
+            # TODO use date instead of timestamp? or maybe dateDiff
             print(
                 f"Warning: player stats for is already imported for "
                 f"\n\tid={player['id']}"

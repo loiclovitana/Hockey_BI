@@ -1,7 +1,7 @@
-from collections.abc import Iterable
 from typing import Type
 
 from sqlalchemy.orm import Session
+
 from HMDatabase import models
 
 

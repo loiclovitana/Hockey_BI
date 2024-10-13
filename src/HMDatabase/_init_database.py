@@ -1,10 +1,9 @@
 import os
 import sys
-
-from HMDatabase.database import create_engine, init_session_maker
-from HMDatabase import models, crud
-
 from datetime import date
+
+from HMDatabase import models
+from HMDatabase.database import create_engine, init_session_maker
 
 FIRST_SEASON = 2022
 MONTH_START_SEASON = 8
