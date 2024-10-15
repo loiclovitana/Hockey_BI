@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, Engine
-from sqlalchemy.ext.declarative import declarative_base
+
 from sqlalchemy.orm import sessionmaker, Session
 
 
@@ -24,6 +24,3 @@ def init_session_maker(database_url: str) -> sessionmaker[Session]:
     engine = init_engine(database_url)
     db_session_maker = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     return db_session_maker
-
-
-HMDatabaseObject = declarative_base()

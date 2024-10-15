@@ -8,7 +8,8 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from HMDataLoader.constants import HM_DATABASE_URL_ENV_NAME
-from HMDatabase import database, repository, models
+from HMDatabase import repository, models
+from HMDatabase.repository import RepositorySession, create_repository_session_maker
 
 __DELIMITER = ','
 __ENCODING = 'utf-8-sig'
@@ -20,25 +21,27 @@ def __batch(iterable, batch_size=1):
         yield iterable[start_index:min(start_index + batch_size, length)]
 
 
-def __connect_session(db_access) -> Session:
+def __connect_session(db_access: str | Session | RepositorySession) -> RepositorySession:
     if isinstance(db_access, str):
-        return database.init_session_maker(db_access)()
+        return create_repository_session_maker(db_access)()
     if isinstance(db_access, Session):
+        return RepositorySession(db_access)
+    if isinstance(db_access, RepositorySession):
         return db_access
     raise ValueError("Database session must be provided")
 
 
 def import_csv_to_db(csv_file_path, db_access: Session | str):
-    database_session: Session = __connect_session(db_access)
+    database_session: RepositorySession = __connect_session(db_access)
 
-    current_season: models.Season = repository.get_current_season(database_session)
+    current_season: models.Season = database_session.get_current_season()
 
     already_imported_dates = {importation.validity_date: importation for importation in
-                              repository.get_imported_stats_dates(database_session)}
+                              database_session.get_imported_stats_dates()}
 
     players_id, players_csv_data = load_csv(csv_file_path)
     existing_players = {player.id: player
-                        for player in repository.get_players(database_session, list(players_id), current_season.id)}
+                        for player in database_session.get_players(list(players_id), current_season.id)}
 
     # Add new players
     new_players = []
@@ -52,7 +55,7 @@ def import_csv_to_db(csv_file_path, db_access: Session | str):
             existing_players[player['id']] = new_player
             new_players.append(new_player)
 
-    database_session.add_all(new_players)
+    database_session.session.add_all(new_players)
 
     # Add imported date
     imported_dates = dict()
@@ -86,9 +89,9 @@ def import_csv_to_db(csv_file_path, db_access: Session | str):
             , plus_minus=player['+/-']
         )
 
-    database_session.add_all(list(imported_dates.values()))
+    database_session.session.add_all(list(imported_dates.values()))
 
-    database_session.commit()
+    database_session.end_session()
 
 
 def load_csv(csv_file_path: str):

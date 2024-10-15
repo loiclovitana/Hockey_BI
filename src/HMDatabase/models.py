@@ -1,10 +1,9 @@
-import datetime
-
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float, Boolean, Date
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import func
 
-from HMDatabase.database import HMDatabaseObject
+HMDatabaseObject = declarative_base()
 
 
 class Season(HMDatabaseObject):

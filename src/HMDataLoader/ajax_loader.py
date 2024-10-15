@@ -11,7 +11,8 @@ from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
 
 from HMDataLoader.constants import HM_DATABASE_URL_ENV_NAME, HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME, HM_URL
-from HMDatabase import models, repository, database
+from HMDatabase import models
+from HMDatabase.repository import RepositorySession, create_repository_session_maker
 
 AJAX_URL = HM_URL + "ajaxrequest/"
 
@@ -32,10 +33,12 @@ REQUEST_HEADER = {
 }
 
 
-def __connect_session(db_access) -> Session:
+def __connect_session(db_access: str | Session | RepositorySession) -> RepositorySession:
     if isinstance(db_access, str):
-        return database.init_session_maker(db_access)()
+        return create_repository_session_maker(db_access)()
     if isinstance(db_access, Session):
+        return RepositorySession(db_access)
+    if isinstance(db_access, RepositorySession):
         return db_access
     raise ValueError("Database session must be provided")
 
@@ -170,22 +173,22 @@ def import_from_ajax(db_access: Session | str, user, password):
         stats.importation = importation
         stats.validity_date = datetime.now()
 
-    database_session: Session = __connect_session(db_access)
-    current_season: models.Season = repository.get_current_season(database_session)
+    database_session: RepositorySession = __connect_session(db_access)
+    current_season: models.Season = database_session.get_current_season()
 
     existing_players: set[str] = {player.id
-                                  for player in repository.get_players(database_session, players_id, current_season.id)}
+                                  for player in database_session.get_players(players_id, current_season.id)}
     new_players = []
     for player in players:
         if player.id not in existing_players:
             existing_players.add(player.id)
             player.season_id = current_season.id
             new_players.append(player)
-    database_session.add_all(new_players)
 
-    database_session.add(importation)
-    database_session.commit()
+    database_session.session.add_all(new_players)
+    database_session.session.add(importation)
 
+    database_session.end_session()
     parser.close_session()
 
 
