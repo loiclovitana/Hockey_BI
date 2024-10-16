@@ -163,7 +163,7 @@ def import_from_ajax(db_access: Session | str, user, password):
 
     importation = models.StatImport(validity_date=datetime.now(),
                                     origin='Hockey Manager',
-                                    comment=f"")
+                                    comment="")
     players_stats = [
         parser.get_player_stats(player.id)
         for player in players
