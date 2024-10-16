@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float, Boolean, Date
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import func
@@ -10,7 +10,6 @@ class Season(HMDatabaseObject):
     __tablename__ = 'SEASONS'
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    is_current = Column(Boolean)
     start = Column(Date, nullable=False)
     end = Column(Date, nullable=False)
 
@@ -31,9 +30,10 @@ class HockeyPlayerStats(HMDatabaseObject):
     __tablename__ = "HOCKEY_PLAYER_STATS"
 
     player_id = Column(Integer, ForeignKey('HOCKEY_PLAYERS.id'), primary_key=True, nullable=False)
-    import_id = Column(Integer, ForeignKey('STATS_IMPORT.id'), primary_key=True, nullable=False)
-    validity_date = Column(DateTime, nullable=False)
+    season_id = Column(Integer, ForeignKey('SEASONS.id'), primary_key=True, nullable=False)
+    validity_date = Column(DateTime, primary_key=True, nullable=False)
 
+    import_id = Column(Integer, ForeignKey('STATS_IMPORT.id'), nullable=True)
     price = Column(Float, nullable=False)
     ownership = Column(Float)
     hm_points = Column(Integer)
@@ -50,7 +50,6 @@ class HockeyPlayerStats(HMDatabaseObject):
 class StatImport(HMDatabaseObject):
     __tablename__ = "STATS_IMPORT"
     id = Column(Integer, primary_key=True)
-    validity_date = Column(DateTime, nullable=False)
     import_date = Column(DateTime, nullable=False, server_default=func.now())
     origin = Column(String, nullable=False, server_default='Unknown')
     comment = Column(String, server_default="", nullable=False)

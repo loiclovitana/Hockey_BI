@@ -1,6 +1,7 @@
 from typing import Type
 
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.functions import current_timestamp
 
 from HMDatabase import models, database
 
@@ -27,7 +28,10 @@ class RepositorySession:
         self.session.close()
 
     def get_current_season(self) -> models.Season | None:
-        return self.session.query(models.Season).filter(models.Season.is_current).first()
+        return self.session.query(models.Season).filter(
+            models.Season.start <= current_timestamp
+            , models.Season.end >= current_timestamp
+        ).first()
 
     def get_player(self, player_id: int, season_id: int) -> models.HockeyPlayer | None:
         return self.session.query(models.HockeyPlayer).get((player_id, season_id))
