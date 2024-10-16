@@ -1,6 +1,5 @@
 import argparse
 import sys
-from datetime import datetime
 from os import getenv
 from random import randint
 from urllib.parse import quote
@@ -11,6 +10,7 @@ from bs4 import BeautifulSoup
 from sqlalchemy.orm import Session
 
 from HMDataLoader.constants import HM_DATABASE_URL_ENV_NAME, HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME, HM_URL
+from HMDataLoader.player_stats_importer import import_hockey_stats_data
 from HMDatabase import models
 from HMDatabase.repository import RepositorySession, create_repository_session_maker
 
@@ -159,37 +159,16 @@ def import_from_ajax(db_access: Session | str, user, password):
     parser.connect_to_hm(user, password)
 
     players = parser.get_players()
-    players_id = [player.id for player in players]
-
-    importation = models.StatImport(validity_date=datetime.now(),
-                                    origin='Hockey Manager',
-                                    comment="")
     players_stats = [
         parser.get_player_stats(player.id)
         for player in players
     ]
-
-    for stats in players_stats:
-        stats.importation = importation
-        stats.validity_date = datetime.now()
-
-    database_session: RepositorySession = __connect_session(db_access)
-    current_season: models.Season = database_session.get_current_season()
-
-    existing_players: set[str] = {player.id
-                                  for player in database_session.get_players(players_id, current_season.id)}
-    new_players = []
-    for player in players:
-        if player.id not in existing_players:
-            existing_players.add(player.id)
-            player.season_id = current_season.id
-            new_players.append(player)
-
-    database_session.session.add_all(new_players)
-    database_session.session.add(importation)
-
-    database_session.end_session()
     parser.close_session()
+
+    repo = __connect_session(db_access)
+    import_hockey_stats_data(repo, players, players_stats, origin="AJAX", comment="test")
+
+    repo.end_session()
 
 
 if __name__ == '__main__':

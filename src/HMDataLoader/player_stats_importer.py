@@ -1,35 +1,23 @@
-from sqlalchemy.orm import Session
+from datetime import datetime
 
 from HMDatabase import models
-from HMDatabase.repository import RepositorySession, create_repository_session_maker
+from HMDatabase.repository import RepositorySession
 
 
-def __connect_session(db_access: str | Session | RepositorySession) -> RepositorySession:
-    if isinstance(db_access, str):
-        return create_repository_session_maker(db_access)()
-    if isinstance(db_access, Session):
-        db_access.begin_nested()
-        return RepositorySession(db_access)
-    if isinstance(db_access, RepositorySession):
-        db_access.session.begin_nested()
-        return db_access
-    raise ValueError("Database session must be provided")
-
-
-def import_new_players(db_access: str | Session | RepositorySession
+def import_new_players(repository_session: RepositorySession
                        , players: list[models.HockeyPlayer]):
     """
-
-    :param db_access:
+    Import the players into the repository
+    :param repository_session:
     :param players:
     :return:
     """
-    database_session: RepositorySession = __connect_session(db_access)
-    players_id = [player.id for player in players]
-    existing_players: set[str] = {player.id
-                                  for player in database_session.get_players(players_id, current_season.id)}
+    repository_session.session.begin_nested()
+    current_season: models.Season = repository_session.get_current_season()
 
-    current_season: models.Season = database_session.get_current_season()
+    players_id = [player.id for player in players]
+    existing_players: set[int] = {player.id
+                                  for player in repository_session.get_players(players_id, current_season.id)}
 
     new_players = []
     for player in players:
@@ -39,17 +27,46 @@ def import_new_players(db_access: str | Session | RepositorySession
             player.season_id = current_season.id
             new_players.append(player)
 
-    database_session.session.add_all(new_players)
-    database_session.session.commit()
+    repository_session.session.add_all(new_players)
+    repository_session.session.commit()
 
 
-def import_hockey_stats_data(db_access: str | Session | RepositorySession
+def import_hockey_stats_data(repository_session: RepositorySession
                              , players: list[models.HockeyPlayer]
                              , players_stats: list[models.HockeyPlayerStats]
-                             , origin: str = "Unkown"
+                             , origin: str = "Unknown"
                              , comment: str = ""
                              ):
-    database_session: RepositorySession = __connect_session(db_access)
+    """
+    Import the hockey player stats into the database.
+    Create the players that doesn't yet exist.
+    :param repository_session:
+    :param players:
+    :param players_stats:
+    :param origin: indicates the origin of the importation
+    :param comment: added in database
+    :return:
+    """
+    repository_session.session.begin_nested()
 
-    import_new_players(database_session, players)
+    import_new_players(repository_session, players)
+    importation = models.StatImport(origin=origin,
+                                    comment=comment)
 
+    _import_stats(repository_session, importation, players_stats)
+
+    repository_session.session.commit()
+
+
+def _import_stats(database_session, importation, players_stats):
+    database_session.session.begin_nested()
+    current_season: models.Season = database_session.get_current_season()
+
+    for stats in players_stats:
+        stats.season_id = current_season.id  # TODO set correct season for past data
+        stats.importation = importation
+        if stats.validity_date is None:
+            stats.validity_date = datetime.now()
+
+    database_session.session.add(importation)
+    database_session.session.commit()
