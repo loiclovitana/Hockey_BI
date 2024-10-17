@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float, Date
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float, Date, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import func
@@ -19,9 +19,10 @@ class HockeyPlayer(HMDatabaseObject):
 
     id = Column(Integer, primary_key=True)
     season_id = Column(Integer, ForeignKey('SEASONS.id'), primary_key=True, nullable=False)
-    name = Column(String)
-    club = Column(String)
-    role = Column(String)
+    name = Column(String, nullable=False)
+    club = Column(String, nullable=False)
+    role = Column(String, nullable=False)
+    foreigner = Column(Boolean, nullable=False)
 
     season = relationship("Season")
 
