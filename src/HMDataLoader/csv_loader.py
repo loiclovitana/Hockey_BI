@@ -8,10 +8,11 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from HMDataLoader.constants import HM_DATABASE_URL_ENV_NAME
+from HMDataLoader.player_stats_importer import import_hockey_stats_data
 from HMDatabase import repository, models
 from HMDatabase.repository import RepositorySession, create_repository_session_maker
 
-__DELIMITER = ','
+__DELIMITER = ';'
 __ENCODING = 'utf-8-sig'
 
 
@@ -32,53 +33,25 @@ def __connect_session(db_access: str | Session | RepositorySession) -> Repositor
 
 
 def import_csv_to_db(csv_file_path, db_access: Session | str):
-    database_session: RepositorySession = __connect_session(db_access)
-
-    current_season: models.Season = database_session.get_current_season()
-
-    already_imported_dates = {importation.validity_date: importation for importation in
-                              database_session.get_imported_stats_dates()}
-
+    """
+    import a csv file containing the player stats into the database tables.
+    Close the session once finished
+    :param csv_file_path:
+    :param db_access: url of database or opened session
+    :return:
+    """
     players_id, players_csv_data = load_csv(csv_file_path)
-    existing_players = {player.id: player
-                        for player in database_session.get_players(list(players_id), current_season.id)}
 
-    # Add new players
-    new_players = []
-    for player in players_csv_data:
-        if player['id'] not in existing_players.keys():
-            new_player = models.HockeyPlayer(id=int(player['id'])
-                                             , season_id=current_season.id
-                                             , name=player['name']
-                                             , club=player['club']
-                                             , role=player['role'])
-            existing_players[player['id']] = new_player
-            new_players.append(new_player)
+    players = [models.HockeyPlayer(id=int(player['id'])
+                                   , name=player['name']
+                                   , club=player['club']
+                                   , role=player['role'])
+               for player in players_csv_data]
 
-    database_session.session.add_all(new_players)
-
-    # Add imported date
-    imported_dates = dict()
-    for player in players_csv_data:
-        stats_validity_date = player['date']
-
-        if stats_validity_date in already_imported_dates.keys():
-            # TODO use parameter if want to check
-            # TODO use date instead of timestamp? or maybe dateDiff
-            print(
-                f"Warning: player stats for is already imported for "
-                f"\n\tid={player['id']}"
-                f"\n\tdate={stats_validity_date}")
-            continue
-        if stats_validity_date not in imported_dates.keys():
-            imported_dates[stats_validity_date] = models.StatImport(validity_date=stats_validity_date,
-                                                                    origin='CSV',
-                                                                    comment="Legacy import")
-        importation = imported_dates[stats_validity_date]
-        player_stats = models.HockeyPlayerStats(
+    players_stats = [
+        models.HockeyPlayerStats(
             player_id=player['id']
-            , validity_date=stats_validity_date
-            , importation=importation
+            , validity_date=player['date']
             , price=player['Price']
             , hm_points=player['HM points']
             , appearances=player['Appareances']
@@ -88,9 +61,11 @@ def import_csv_to_db(csv_file_path, db_access: Session | str):
             , penalties=player['Penalties']
             , plus_minus=player['+/-']
         )
+        for player in players_csv_data
+    ]
 
-    database_session.session.add_all(list(imported_dates.values()))
-
+    database_session: RepositorySession = __connect_session(db_access)
+    import_hockey_stats_data(database_session, players, players_stats,origin="CSV")
     database_session.end_session()
 
 

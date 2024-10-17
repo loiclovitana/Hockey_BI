@@ -34,6 +34,7 @@ def import_new_players(repository_session: RepositorySession
 def import_hockey_stats_data(repository_session: RepositorySession
                              , players: list[models.HockeyPlayer]
                              , players_stats: list[models.HockeyPlayerStats]
+                             , importation: models.StatImport | None = None
                              , origin: str = "Unknown"
                              , comment: str = ""
                              ):
@@ -43,15 +44,18 @@ def import_hockey_stats_data(repository_session: RepositorySession
     :param repository_session:
     :param players:
     :param players_stats:
-    :param origin: indicates the origin of the importation
-    :param comment: added in database
+    :param importation: importation object in database
+    :param origin: indicates the origin of the importation. ignored if importation object is provided
+    :param comment: added in database. ignored if importation object is provided
     :return:
     """
+    if importation is None:
+        importation = models.StatImport(origin=origin,
+                                        comment=comment)
+
     repository_session.session.begin_nested()
 
     import_new_players(repository_session, players)
-    importation = models.StatImport(origin=origin,
-                                    comment=comment)
 
     _import_stats(repository_session, importation, players_stats)
 
