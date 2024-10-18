@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from HMDatabase import models
-from HMDatabase.repository import RepositorySession
+from hockeymanagerbi.database import models
+from hockeymanagerbi.database.repository import RepositorySession
 
 
 def import_new_players(repository_session: RepositorySession

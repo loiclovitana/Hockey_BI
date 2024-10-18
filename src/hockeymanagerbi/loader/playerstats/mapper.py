@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Any
 
-from HMDatabase import models
+from hockeymanagerbi.database import models
 
 
 def _to_float(value: str) -> float:

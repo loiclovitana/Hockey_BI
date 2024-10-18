@@ -2,9 +2,9 @@ import os
 import sys
 from datetime import date
 
-from HMDatabase import models
-from HMDatabase.database import create_engine
-from HMDatabase.repository import create_repository_session_maker, RepositorySession
+from hockeymanagerbi.database import models
+from hockeymanagerbi.database.database import create_engine
+from hockeymanagerbi.database.repository import create_repository_session_maker, RepositorySession
 
 FIRST_SEASON = 2022
 MONTH_START_SEASON = 8

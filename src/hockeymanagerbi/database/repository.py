@@ -3,7 +3,7 @@ from typing import Type
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import current_date
 
-from HMDatabase import models, database
+from hockeymanagerbi.database import models, database
 
 
 def create_repository_session_maker(database_url: str):
