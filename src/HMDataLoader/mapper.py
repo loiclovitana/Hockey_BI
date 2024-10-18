@@ -9,7 +9,7 @@ def _to_float(value: str) -> float:
 
 
 def _to_bool(value: str) -> bool:
-    value = value.capitalize()
+    value = value.upper()
     return value == 'YES' or value == 'OUI' or value == "Y" or value == '1' or value == 'TRUE' or value == 'T'
 
 
