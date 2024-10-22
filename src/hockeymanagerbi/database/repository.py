@@ -1,3 +1,4 @@
+import datetime
 from typing import Type
 
 from sqlalchemy.orm import Session
@@ -27,12 +28,8 @@ class RepositorySession:
         self.session.commit()
         self.session.close()
 
-    def get_current_season(self) -> models.Season | None:
-
-        return self.session.query(models.Season).filter(
-            models.Season.start <= current_date()
-            , models.Season.end >= current_date()
-        ).first()
+    def get_current_season(self, arcade: bool = False) -> models.Season | None:
+        return self.find_season(datetime.datetime.now(), arcade)
 
     def get_player(self, player_id: int, season_id: int) -> models.HockeyPlayer | None:
         return self.session.query(models.HockeyPlayer).get((player_id, season_id))
@@ -46,3 +43,10 @@ class RepositorySession:
 
     def get_imported_stats_dates(self):
         return self.session.query(models.StatImport).all()
+
+    def find_season(self, validity_date: datetime.datetime, arcade: bool = False):
+        return self.session.query(models.Season).filter(
+            models.Season.start <= validity_date
+            , models.Season.end >= validity_date
+            , models.Season.arcade == arcade
+        ).first()

@@ -28,7 +28,7 @@ FIELDS = {
     "Points": int,
     "GWG": int,
     "Penalties": int,
-    "+/-":int,
+    "+/-": int,
     "Shots": int,
     "role": str,
     "name": str,
@@ -51,8 +51,7 @@ def _try_convert(data_dict: dict[str, str], field_name: str, type_cast):
         return None
 
 
-def map_player_stats(player_stats_data: list[dict[str, str]]) -> (
-        list[models.HockeyPlayer], list[models.HockeyPlayerStats]):
+def _convert_data(player_stats_data: list[dict[str, str]]) -> list[dict[str, Any]]:
     player_stats_converted: list[dict[str, Any]] = []
     for player in player_stats_data:
         player_converted = {
@@ -60,6 +59,12 @@ def map_player_stats(player_stats_data: list[dict[str, str]]) -> (
             for field_name, convertion in FIELDS.items()
         }
         player_stats_converted.append(player_converted)
+    return player_stats_converted
+
+
+def map_player_stats(player_stats_data: list[dict[str, str]]) -> (
+        list[models.HockeyPlayer], list[models.HockeyPlayerStats]):
+    player_stats_converted: list[dict[str, Any]] = _convert_data(player_stats_data)
 
     players = [models.HockeyPlayer(id=player['id']
                                    , name=player['name']

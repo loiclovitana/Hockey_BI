@@ -21,8 +21,14 @@ def create_seasons(db_url: str, from_year: int, to_year: int | None = None):
     seasons = [models.Season(name=f"{year}/{year + 1}"
                              , start=date(year, MONTH_START_SEASON, 1)
                              , end=date(year + 1, MONTH_END_SEASON, 1)
+                             , arcade=False
                              )
-               for year in range(from_year, to_year)]
+               for year in range(from_year, to_year)] + [models.Season(name=f"{year}/{year + 1}"
+                                                                       , start=date(year, MONTH_START_SEASON, 1)
+                                                                       , end=date(year + 1, MONTH_END_SEASON, 1)
+                                                                       , arcade=True
+                                                                       )
+                                                         for year in range(from_year, to_year)]
 
     database_session.session.add_all(seasons)
     database_session.end_session()

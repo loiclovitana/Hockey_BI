@@ -12,6 +12,7 @@ class Season(HMDatabaseObject):
     name = Column(String)
     start = Column(Date, nullable=False)
     end = Column(Date, nullable=False)
+    arcade = Column(Boolean, nullable=False, default=False)
 
 
 class HockeyPlayer(HMDatabaseObject):
