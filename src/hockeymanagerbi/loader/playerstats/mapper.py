@@ -8,9 +8,17 @@ def _to_float(value: str) -> float:
     return float(value.replace(",", ".").replace('%', ''))
 
 
-def _to_bool(value: str) -> bool:
+def _to_bool(value: str) -> bool | None:
     value = value.upper()
-    return value == 'YES' or value == 'OUI' or value == "Y" or value == '1' or value == 'TRUE' or value == 'T'
+    if value == 'YES' or value == 'OUI' \
+            or value == "Y" or value == '1' \
+            or value == 'TRUE' or value == 'T':
+        return True
+    if value == 'NO' or value == 'NON' \
+            or value == "N" or value == '0' \
+            or value == 'FALSE' or value == 'F':
+        return False
+    raise EncodingWarning(f"Boolean value for {value} cannot be converted")
 
 
 FIELDS = {
@@ -80,6 +88,7 @@ def map_player_stats(player_stats_data: list[dict[str, str]]) -> (
             , price=player['Price']
             , hm_points=player['HM points']
             , appearances=player['Appareances']
+            , ownership=player['Ownership']
             , goal=player['Goal']
             , assists=None if player['Assist #1'] is None
             else player['Assist #1'] + player['Assist #2'] + player['Assist OT']

@@ -110,7 +110,7 @@ def _random_number() -> str:
 
 def _scrap_player_row(player_row_html: bs4.element.Tag) -> dict[str, str]:
     return {
-        "id": int(player_row_html.attrs['attr'])
+        "id": player_row_html.attrs['attr']
         , "name": player_row_html.select('.name')[0].text
         , "club": player_row_html.img.attrs['src'].split('/')[-2]
         , "role": player_row_html.div.text
