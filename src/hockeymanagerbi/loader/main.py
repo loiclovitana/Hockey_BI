@@ -1,4 +1,5 @@
 import argparse
+import logging
 import sys
 from os import getenv
 
@@ -69,7 +70,7 @@ if __name__ == '__main__':
 
     def check_exists(argument, name):
         if argument is None:
-            print(f"Error: Missing argument {name}.")
+            logging.error(f"Error: Missing argument {name}.")
             argument_parser.print_help()
             sys.exit(1)
 

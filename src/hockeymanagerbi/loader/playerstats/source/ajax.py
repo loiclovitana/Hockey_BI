@@ -1,3 +1,4 @@
+import logging
 from random import randint
 from collections.abc import Callable
 from urllib.parse import quote
@@ -89,8 +90,9 @@ class HMAjaxScrapper:
     def get_player_stats(self, player_id):
         self._check_session_open()
         query_data = f"id={player_id}"
-        print(f"Query {player_id}")
+        logging.debug(f"==> POST get-player-detail {player_id} {{{query_data}}}")
         response = self.session.post(AJAX_URL + "get-player-detail", query_data)
+        logging.debug(f"<== {response.status_code} {{{response.text}}}")
         connection_success = response.status_code == 200 and len(response.text) != 0
         if not connection_success:
             raise ConnectionError(f"Couldn't query the players list from: <{response.status_code}>")

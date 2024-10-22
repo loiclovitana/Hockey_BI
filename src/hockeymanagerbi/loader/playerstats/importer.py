@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from hockeymanagerbi.database import models
@@ -15,7 +16,7 @@ def import_new_players(repository_session: RepositorySession
     repository_session.session.begin_nested()
     current_season: models.Season = repository_session.get_current_season()
     if current_season is None:
-        print("Warning: No season are opened.")
+        logging.warning(f"No season are currently opened")
 
     players_id = [player.id for player in players]
     existing_players: set[int] = {player.id

@@ -37,7 +37,7 @@ class TestPlayerStatsConverter(unittest.TestCase):
 
         self.assertEqual(1, result[1]['id'])
         self.assertEqual(datetime.date(2020, 1, 1), result[1]['date'])
-        self.assertAlmostEquals(4, result[1]['Ownership'])
+        self.assertAlmostEqual(4, result[1]['Ownership'])
         self.assertEqual(True, result[1]['foreigner'])
 
     def test_convert_not_existing_data(self):

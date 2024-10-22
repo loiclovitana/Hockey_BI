@@ -1,3 +1,4 @@
+import logging
 from datetime import date
 from typing import Any
 
@@ -54,8 +55,7 @@ def _try_convert(data_dict: dict[str, str], field_name: str, type_cast):
     try:
         return type_cast(field)
     except Exception as exception:
-        print(f'Warning: invalid field cannot convert value "{field}" into type <{type_cast.__name__}>: {exception}')
-
+        logging.warning(f'Invalid field cannot convert value "{field}" into type <{type_cast.__name__}>: {exception}')
         return None
 
 
