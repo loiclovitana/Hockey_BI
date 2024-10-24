@@ -1,4 +1,6 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float, Date, Boolean
+import enum
+
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float, Date, Boolean, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import func
@@ -57,3 +59,33 @@ class StatImport(HMDatabaseObject):
     comment = Column(String, server_default="", nullable=False)
 
     stats = relationship("HockeyPlayerStats", back_populates="importation")
+
+
+class Manager(HMDatabaseObject):
+    __tablename__ = "MANAGER"
+    id = Column(Integer, primary_key=True)
+    email = Column(String, unique=True)
+
+    team_0 = Column(String, nullable=True)
+    team_1 = Column(String, nullable=True)
+    team_arcade = Column(String, nullable=True)
+
+
+class TeamCode(enum.Enum):
+    TEAM_0 = 0
+    TEAM_1 = 1
+    TEAM_ARCADE = 2
+
+
+class Team(HMDatabaseObject):
+    __tablename__ = "TEAM"
+    id = Column(Integer, primary_key=True)
+    team = Column(Enum(TeamCode), nullable=False)
+    manager_id = Column(Integer, ForeignKey("MANAGER.id"), nullable=False)
+    player_id = Column(Integer, ForeignKey("HOCKEY_PLAYERS.id"), nullable=False)
+    season_id = Column(Integer, ForeignKey("HOCKEY_PLAYERS.season_id"), nullable=False)
+
+    from_datetime = Column(DateTime, nullable=True)
+    to_datetime = Column(DateTime, nullable=True)
+
+    manager = relationship('Manager')
