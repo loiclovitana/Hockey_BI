@@ -32,7 +32,7 @@ class RepositorySession:
         return self.find_season(datetime.datetime.now(), arcade)
 
     def get_player(self, player_id: int, season_id: int) -> models.HockeyPlayer | None:
-        return self.session.query(models.HockeyPlayer).get((player_id, season_id))
+        return self.session.get(models.HockeyPlayer, (player_id, season_id))
 
     def get_players(self, player_ids: list, season_id: int) -> list[Type[models.HockeyPlayer]]:
         return self.session.query(models.HockeyPlayer) \

@@ -28,12 +28,14 @@ REQUEST_HEADER = {
 }
 
 
-def playerstats_ajax_loader(user, password) -> Callable[[], list[dict[str, str]]]:
+def playerstats_ajax_loader(user: str, password: str) -> Callable[[], list[dict[str, str]]]:
     """
     :param user: login for Hockey manager website
     :param password:
     :return: A callable to get the data
     """
+    if user is None or password is None:
+        raise ConnectionRefusedError("User password to connect to HM are not provided")
 
     def load_data():
         parser = HMAjaxScrapper()
@@ -62,7 +64,6 @@ class HMAjaxScrapper:
     def connect_to_hm(self, user, password):
         self.session = requests.session()
         self.session.headers.update(REQUEST_HEADER)
-
         query_data = (f"fh_u={quote(user)}&"
                       f"fh_p={quote(password)}&"
                       f"randomNumber={_random_number()}")

@@ -7,7 +7,9 @@ from sqlalchemy import create_engine
 
 from hockeymanagerbi.database.creation import initialize_database
 from hockeymanagerbi.database.repository import create_repository_session_maker
-from hockeymanagerbi.loader.main import import_playerstats_from_csv
+from hockeymanagerbi.loader.constants import HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
+from hockeymanagerbi.loader.main import import_playerstats_from_csv, import_playerstats_from_loader
+from hockeymanagerbi.loader.playerstats.source.ajax import HMAjaxScrapper
 
 TEMP_FOLDER = "tmp"
 SQLITE_DB_NAME = "i_test.db"
@@ -62,10 +64,10 @@ class DatabaseTest(unittest.TestCase):
         season_2 = session.find_season(datetime.datetime(2024, 10, 20, 0, 0))
         self.assertNotEqual(season_1.id, season_2.id)
 
-        players = session.get_players([1,2,3], season_1.id)
+        players = session.get_players([1, 2, 3], season_1.id)
         self.assertEqual(2, len(players))
 
-        player = session.get_player(1,season_1.id)
+        player = session.get_player(1, season_1.id)
         self.assertIsNotNone(player)
         self.assertEqual("Alice", player.name)
         self.assertEqual("FRI", player.club)
@@ -92,6 +94,23 @@ class DatabaseTest(unittest.TestCase):
         self.assertEqual("ZUG", player.club)
         self.assertEqual(True, player.foreigner)
         self.assertEqual("DF", player.role)
+
+    def test_load_from_hm(self):
+        user = os.getenv(HM_USER_ENV_NAME)
+        password = os.getenv(HM_PASSWORD_ENV_NAME)
+
+        def load_partial_data():  #
+            parser = HMAjaxScrapper()
+            parser.connect_to_hm(user, password)
+            players_data = parser.get_players()[:2]  # limit test to 2 player
+            for player in players_data:
+                player.update(parser.get_player_stats(player['id']))
+            parser.close_session()
+            return players_data
+
+        session = self.session_maker()
+        import_playerstats_from_loader(load_partial_data, session, origin="AJAX")
+
 
 
 if __name__ == '__main__':
