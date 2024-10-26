@@ -24,6 +24,13 @@ def __connect_session(db_access: str | Session | RepositorySession) -> Repositor
 
 
 def import_playerstats_from_ajax(db_access: Session | str, user, password):
+    """
+    Import data from HockeyManager website
+    :param db_access:
+    :param user:
+    :param password:
+    :return:
+    """
     ajax_loader = playerstats_ajax_loader(user, password)
     import_playerstats_from_loader(ajax_loader, db_access)
 
@@ -46,7 +53,10 @@ def import_playerstats_from_loader(playerstats_loader, db_access: Session | str,
 
     database_session: RepositorySession = __connect_session(db_access)
     import_hockey_stats_data(database_session, players, players_stats, origin=origin)
-    database_session.end_session()
+    if isinstance(db_access, RepositorySession):
+        database_session.session.commit()
+    else:
+        database_session.end_session()
 
 
 if __name__ == '__main__':

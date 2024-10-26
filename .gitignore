@@ -10,3 +10,5 @@ data_jeannie/
 **/.ipynb_checkpoints
 tools/analysis/result
 tools/API/
+
+**/tmp

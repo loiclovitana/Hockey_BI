@@ -1,0 +1,6 @@
+﻿id;role;name;club;foreigner;Price;HM points;HM points AVG;Appareances;Goal;Goal OT;Assist #1;Assist #2;Assist OT;Points;GWG;Penalties;+/-;Shots;Goals Ag.;Saves Nr.;Saves;owned;date;Ownership
+1;GK;Alice;FRI;NON;11.5;16;16;1;0;0;0;0;0;0;0;0;0;0;2;33;0;NON;2023-09-15;
+2;FW;Bob;LAU;NON;10.5;-2;-2;1;0;0;0;0;0;0;0;0;0;0;3;19;0;OUI;2023-09-15;
+1;GK;Alice;FRI;NON;10;11;11;1;0;0;1;0;0;1;0;0;1;;;;;OUI;2023-12-01;10.4%
+2;FW;Bob;LUG;NON;9.5;1;1;1;0;0;0;0;0;0;0;0;1;;;;;NON;2024-10-20;
+3;DF;Eric;ZUG;OUI;7;141;6.4;22;1;0;2;1;0;4;1;16;1;;;;;NON;2024-10-20;3.9%

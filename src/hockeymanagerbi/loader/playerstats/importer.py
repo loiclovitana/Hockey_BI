@@ -19,15 +19,16 @@ def import_new_players(repository_session: RepositorySession
         logging.warning(f"No season are currently opened")
 
     players_id = [player.id for player in players]
-    existing_players: set[int] = {player.id
-                                  for player in repository_session.get_players(players_id, current_season.id)}
+    existing_players: set[(int, int)] = {(player.id, player.season_id)
+                                         for player in repository_session.get_players(players_id, current_season.id)}
 
     new_players = []
     for player in players:
-        if player.id not in existing_players:
-            existing_players.add(player.id)
-            if player.season_id is None:
-                player.season_id = current_season.id
+        if player.season_id is None:
+            player.season_id = current_season.id
+
+        if (player.id, player.season_id) not in existing_players:
+            existing_players.add((player.id, player.season_id))
             new_players.append(player)
 
     repository_session.session.add_all(new_players)

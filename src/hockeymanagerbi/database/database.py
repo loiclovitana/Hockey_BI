@@ -23,4 +23,5 @@ def init_session_maker(database_url: str) -> sessionmaker[Session]:
     """
     engine = init_engine(database_url)
     db_session_maker = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    engine.dispose()
     return db_session_maker

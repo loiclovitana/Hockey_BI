@@ -41,9 +41,12 @@ def initialize_database(db_url: str):
     :return:
     """
     db_engine = create_engine(db_url)
-    models.HMDatabaseObject.metadata.create_all(db_engine)
+    try:
+        models.HMDatabaseObject.metadata.create_all(db_engine)
 
-    create_seasons(db_url, FIRST_SEASON)
+        create_seasons(db_url, FIRST_SEASON)
+    finally:
+        db_engine.dispose()
 
 
 if __name__ == '__main__':
