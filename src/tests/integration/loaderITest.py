@@ -64,34 +64,30 @@ class DatabaseTest(unittest.TestCase):
         season_2 = session.find_season(datetime.datetime(2024, 10, 20, 0, 0))
         self.assertNotEqual(season_1.id, season_2.id)
 
-        players = session.get_players([1, 2, 3], season_1.id)
+        players = session.get_all_players([1, 2, 3], season_1.id)
         self.assertEqual(2, len(players))
 
         player = session.get_player(1, season_1.id)
         self.assertIsNotNone(player)
         self.assertEqual("Alice", player.name)
-        self.assertEqual("FRI", player.club)
         self.assertEqual(False, player.foreigner)
         self.assertEqual("GK", player.role)
 
         player = session.get_player(2, season_1.id)
         self.assertIsNotNone(player)
         self.assertEqual("Bob", player.name)
-        self.assertEqual("LAU", player.club)
         self.assertEqual(False, player.foreigner)
         self.assertEqual("FW", player.role)
 
         player = session.get_player(2, season_2.id)
         self.assertIsNotNone(player)
         self.assertEqual("Bob", player.name)
-        self.assertEqual("LUG", player.club)
+
         self.assertEqual(False, player.foreigner)
         self.assertEqual("FW", player.role)
-
         player = session.get_player(3, season_2.id)
         self.assertIsNotNone(player)
         self.assertEqual("Eric", player.name)
-        self.assertEqual("ZUG", player.club)
         self.assertEqual(True, player.foreigner)
         self.assertEqual("DF", player.role)
 
@@ -102,7 +98,7 @@ class DatabaseTest(unittest.TestCase):
         def load_partial_data():  #
             parser = HMAjaxScrapper()
             parser.connect_to_hm(user, password)
-            players_data = parser.get_players()[:2]  # limit test to 2 player
+            players_data = parser.get_all_players()[:2]  # limit test to 2 player
             for player in players_data:
                 player.update(parser.get_player_stats(player['id']))
             parser.close_session()

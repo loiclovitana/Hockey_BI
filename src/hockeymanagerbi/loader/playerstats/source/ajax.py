@@ -39,14 +39,31 @@ def playerstats_ajax_loader(user: str, password: str) -> Callable[[], list[dict[
 
     def load_data():
         parser = HMAjaxScrapper()
-        parser.connect_to_hm(user, password)
+        try:
+            parser.connect_to_hm(user, password)
 
-        players_data = parser.get_players()
-        for player in players_data:
-            player.update(parser.get_player_stats(player['id']))
-
-        parser.close_session()
+            players_data = parser.get_all_players()
+            for player in players_data:
+                player.update(parser.get_player_stats(player['id']))
+        finally:
+            parser.close_session()
         return players_data
+
+    return load_data
+
+
+def team_players_ajax_loader(user: str, password: str):
+    if user is None or password is None:
+        raise ConnectionRefusedError("User password to connect to HM are not provided")
+
+    def load_data():
+        parser = HMAjaxScrapper()
+        try:
+            parser.connect_to_hm(user, password)
+            data = [player['id'] for player in parser.get_current_team()]
+        finally:
+            parser.close_session()
+        return data
 
     return load_data
 
@@ -83,7 +100,7 @@ class HMAjaxScrapper:
             raise ConnectionError(f"Couldn't query the players list from: <{response.status_code}>")
         return response.text
 
-    def get_players(self):
+    def get_all_players(self):
         self._check_session_open()
         player_html_list = self._get_player_html_list(club=0) + self._get_player_html_list(club=-1)
         return _scrap_players_html_list(player_html_list)
@@ -99,6 +116,10 @@ class HMAjaxScrapper:
             raise ConnectionError(f"Couldn't query the players list from: <{response.status_code}>")
 
         return _scrap_player_details(response.text)
+
+    def get_current_team(self):
+        player_html_list = self._get_player_html_list(club=0)
+        return _scrap_players_html_list(player_html_list)
 
     def close_session(self):
         if self.session is None:

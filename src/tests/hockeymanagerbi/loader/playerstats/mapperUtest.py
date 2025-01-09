@@ -121,12 +121,13 @@ class TestMapPlayerStats(unittest.TestCase):
 
         # Assert: validate that both player and player stats were created with correct arguments
         mock_HockeyPlayer.assert_called_once_with(
-            id=1, name="Player One", club="Club A", role="Forward", foreigner=True
+            id=1, name="Player One", role="Forward", foreigner=True
         )
         mock_HockeyPlayerStats.assert_called_once_with(
             player_id=1,
             validity_date=datetime.date(2023, 10, 1),
             price=15.5,
+            club="Club A",
             hm_points=56.7,
             appearances=20,
             ownership=23.5,
@@ -169,7 +170,7 @@ class TestMapPlayerStats(unittest.TestCase):
 
         # Assert: check correct handling of missing values
         mock_HockeyPlayer.assert_called_once_with(
-            id=2, name="Player Two", club="Club B", role="Goalie", foreigner=None
+            id=2, name="Player Two", role="Goalie", foreigner=None
         )
         mock_HockeyPlayerStats.assert_called_once_with(
             player_id=2,
@@ -177,6 +178,7 @@ class TestMapPlayerStats(unittest.TestCase):
             price=None,  # Missing price should be None
             hm_points=40.0,
             appearances=18,
+            club="Club B",
             ownership=12.5,
             goal=None,  # Missing goal should be None
             assists=None,  # Missing assists should be None
@@ -219,7 +221,7 @@ class TestMapPlayerStats(unittest.TestCase):
         mock_HockeyPlayer.assert_called_once_with(
             id=None,  # Invalid id should be None
             name="Player Three",
-            club="Club C",
+
             role="Forward",
             foreigner=None
         )
@@ -229,6 +231,7 @@ class TestMapPlayerStats(unittest.TestCase):
             price=None,  # Invalid price should be None
             hm_points=100.0,
             appearances=22,
+            club="Club C",
             ownership=100.0,  # Valid ownership conversion
             goal=12,
             assists=7,  # Assist #1 + Assist #2 + Assist OT

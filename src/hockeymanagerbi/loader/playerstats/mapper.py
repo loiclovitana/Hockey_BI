@@ -76,7 +76,7 @@ def map_player_stats(player_stats_data: list[dict[str, str]]) -> (
 
     players = [models.HockeyPlayer(id=player['id']
                                    , name=player['name']
-                                   , club=player['club']
+
                                    , role=player['role']
                                    , foreigner=player['foreigner'])
                for player in player_stats_converted]
@@ -90,6 +90,7 @@ def map_player_stats(player_stats_data: list[dict[str, str]]) -> (
             , appearances=player['Appareances']
             , ownership=player['Ownership']
             , goal=player['Goal']
+            , club=player['club']
             , assists=None if player['Assist #1'] is None
             else player['Assist #1'] + player['Assist #2'] + player['Assist OT']
             , penalties=player['Penalties']

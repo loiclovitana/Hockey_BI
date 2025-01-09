@@ -50,3 +50,14 @@ class RepositorySession:
             , models.Season.end >= validity_date
             , models.Season.arcade == arcade
         ).first()
+
+    def get_team(self, manager: int | models.Manager,
+                 season: int | models.Season, team_code: models.TeamCode) \
+            -> list[Type[models.Team]]:
+        manager_id = manager if isinstance(manager, int) else manager.id
+        season_id = season if isinstance(season, int) else season.id
+        return self.session.query(models.Team).filter(
+            models.Team.manager_id == manager_id,
+            models.Team.season_id == season_id,
+            models.Team.team_code == team_code
+        ).all()

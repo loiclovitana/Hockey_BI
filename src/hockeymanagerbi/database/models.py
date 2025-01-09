@@ -23,7 +23,6 @@ class HockeyPlayer(HMDatabaseObject):
     id = Column(Integer, primary_key=True)
     season_id = Column(Integer, ForeignKey('SEASONS.id'), primary_key=True, nullable=False)
     name = Column(String, nullable=False)
-    club = Column(String, nullable=False)
     role = Column(String, nullable=False)
     foreigner = Column(Boolean, nullable=False)
 
@@ -39,6 +38,7 @@ class HockeyPlayerStats(HMDatabaseObject):
 
     import_id = Column(Integer, ForeignKey('STATS_IMPORT.id'), nullable=True)
     price = Column(Float, nullable=False)
+    club = Column(String, nullable=False)
     ownership = Column(Float)
     hm_points = Column(Integer)
     appearances = Column(Integer)
@@ -80,7 +80,7 @@ class TeamCode(enum.Enum):
 class Team(HMDatabaseObject):
     __tablename__ = "TEAM"
     id = Column(Integer, primary_key=True)
-    team = Column(Enum(TeamCode), nullable=False)
+    team_code = Column(Enum(TeamCode), nullable=False)
     manager_id = Column(Integer, ForeignKey("MANAGER.id"), nullable=False)
     player_id = Column(Integer, ForeignKey("HOCKEY_PLAYERS.id"), nullable=False)
     season_id = Column(Integer, ForeignKey("HOCKEY_PLAYERS.season_id"), nullable=False)
