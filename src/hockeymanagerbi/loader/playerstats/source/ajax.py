@@ -73,11 +73,18 @@ def team_players_ajax_loader(user: str, password: str):
         parser = HMAjaxScrapper()
         try:
             parser.connect_to_hm(user, password)
-            # TODO select team
-            data = [player['id'] for player in parser.get_current_team()]
+
+            teams = parser.get_teams()
+
+            players_data = []
+            for team in teams:
+                team_id = team['id']
+                parser.select_team(team_id)
+                players_data += [(team_id, player['id']) for player in parser.get_current_team()]
+
         finally:
             parser.close_session()
-        return data
+        return players_data
 
     return load_data
 
@@ -90,30 +97,6 @@ class HMAjaxScrapper:
 
     dashboard = None  # Cached for navigation
 
-    def _check_session_open(self):
-        if self.session is None:
-            raise ConnectionError("Parser isn't connected to Hockey Manager")
-
-    def _load_main_dashboard(self):
-        self._check_session_open()
-        MAX_ATTEMPTS = 5
-        attempts = 0
-        while attempts < MAX_ATTEMPTS:
-            response = self.session.get(HM_URL + '/fr/dashboard', headers=PAGE_REQUEST_HEADER)
-            dashboard_soup = BeautifulSoup(response.text)
-            if response.status_code != 200:
-                continue
-            if _is_arcade(dashboard_soup):
-                query_data = f"randomNumber={_random_number()}"
-                self.session.post(AJAX_URL + "switch-classic-arcade", query_data,
-                                  headers=AJAX_REQUEST_HEADER)  # switch mode
-            else:
-                self.dashboard = dashboard_soup
-                break
-            attempts += 1
-        if attempts == MAX_ATTEMPTS:
-            raise Exception("Couldn't load the main page for HM")
-
     def connect_to_hm(self, user, password):
         self.session = requests.session()
         query_data = (f"fh_u={quote(user)}&"
@@ -125,17 +108,6 @@ class HMAjaxScrapper:
         if not connection_success:
             raise ConnectionError(f"Couldn't connect to Hockey Manager: <{response.status_code}>")
         self._load_main_dashboard()
-
-    def _get_player_html_list(self, club: int = 0):
-        query_data = (f"randomNumber={_random_number()}&"
-                      f"club={club}&"
-                      f"role=0&player=&min=1&max=50&country=0&blG=0&blP=0&orderBy=&orderByDirection=")
-        response = self.session.post(AJAX_URL + "transfers-classic-get-list-preview", query_data,
-                                     headers=AJAX_REQUEST_HEADER)
-        connection_success = response.status_code == 200 and len(response.text) != 0
-        if not connection_success:
-            raise ConnectionError(f"Couldn't query the players list from: <{response.status_code}>")
-        return response.text
 
     def get_all_players(self):
         """
@@ -161,8 +133,46 @@ class HMAjaxScrapper:
 
         return _scrap_player_details(response.text)
 
+    def get_teams(self):
+        """
+        :return: data about the existing teams of the player
+        """
+        teams_soups = self.dashboard.select(".is-a-team.selectTeam")
+
+        def _get_points_rank(team_soup):
+            """Get the ranking position and points of a team
+                If none exist return only the points to 0 since the season did not start
+            """
+            points_rank = team_soup.find(attrs={'class': 'team-rank'})
+            if points_rank is None:
+                return {'points': 0}
+            try:
+                points, rank = points_rank.text.split('/')
+                return {
+                    'points': int(points.replace("'", "")),
+                    'rank': int(rank.replace("'", "").replace("e", ""))
+                }
+            except ValueError:
+                return {'points': 0}
+
+        return [
+            {
+                'id': team_soup['attr']
+                , 'name': team_soup.find(attrs={'class': 'team-name'}).text
+                , **_get_points_rank(team_soup)
+            }
+            for team_soup in teams_soups
+        ]
+
     def select_team(self, team_id):
-        raise NotImplementedError("Team selection is not yet implemented")
+        query_data = (f"randomNumber={_random_number()}&"
+                      f"myteam={team_id}")
+        response = self.session.post(AJAX_URL + "use-team", query_data,
+                                     headers=AJAX_REQUEST_HEADER)
+        if response.status_code != 200:
+            raise ConnectionError(f"Could not select the team: Error {response.status_code} - {response.text}")
+        if not response.text:
+            raise ConnectionError(f"Could not select the team {team_id}")
 
     def get_current_team(self):
         """
@@ -176,6 +186,46 @@ class HMAjaxScrapper:
             return
         self.session.close()
         self.session = None
+
+    def _check_session_open(self):
+        if self.session is None:
+            raise ConnectionError("Parser isn't connected to Hockey Manager")
+
+    def _load_main_dashboard(self):
+        """
+        Load the main page of Hockey Manager.
+        If the gamemode is arcade, switch to original
+        :return: None
+        """
+        self._check_session_open()
+        MAX_ATTEMPTS = 5
+        attempts = 0
+        while attempts < MAX_ATTEMPTS:
+            response = self.session.get(HM_URL + '/fr/dashboard', headers=PAGE_REQUEST_HEADER)
+            dashboard_soup = BeautifulSoup(response.text)
+            if response.status_code != 200:
+                continue
+            if _is_arcade(dashboard_soup):
+                query_data = f"randomNumber={_random_number()}"
+                self.session.post(AJAX_URL + "switch-classic-arcade", query_data,
+                                  headers=AJAX_REQUEST_HEADER)  # switch mode
+            else:
+                self.dashboard = dashboard_soup
+                break
+            attempts += 1
+        if attempts == MAX_ATTEMPTS:
+            raise Exception("Couldn't load the main page for HM")
+
+    def _get_player_html_list(self, club: int = 0):
+        query_data = (f"randomNumber={_random_number()}&"
+                      f"club={club}&"
+                      f"role=0&player=&min=1&max=50&country=0&blG=0&blP=0&orderBy=&orderByDirection=")
+        response = self.session.post(AJAX_URL + "transfers-classic-get-list-preview", query_data,
+                                     headers=AJAX_REQUEST_HEADER)
+        connection_success = response.status_code == 200 and len(response.text) != 0
+        if not connection_success:
+            raise ConnectionError(f"Couldn't query the players list from: <{response.status_code}>")
+        return response.text
 
 
 def _random_number() -> str:
@@ -201,24 +251,6 @@ def _scrap_players_html_list(player_html_list: str) -> list[dict[str, str]]:
     soup = BeautifulSoup(player_html_list, 'html.parser')
     players_rows = soup.select(".row")
     return [_scrap_player_row(player_row_html) for player_row_html in players_rows]
-
-
-def _get_points_rank(team_soup):
-    """
-    Get the number of points and position of the team in team html soup
-    :param team_soup: the html soup of the team button
-    :return: dictionary with points and rank
-    """
-    points_rank = team_soup.find(attrs={'class': 'team-rank'})
-    if points_rank is None:
-        return {'points': 0}
-    try:
-        return {
-            'points': int(points_rank.text.split('/')[0].replace("'", "")),
-            'rank': int(points_rank.text.split('/')[1].replace("'", "").replace("e", ""))
-        }
-    except ValueError:
-        return {'points': 0}
 
 
 def _is_arcade(soup):
