@@ -1,15 +1,12 @@
 import datetime
-import unittest
 import os
-import shutil
-
-from sqlalchemy import create_engine
+import unittest
 
 from hockeymanagerbi.database.creation import initialize_database
 from hockeymanagerbi.database.repository import create_repository_session_maker
 from hockeymanagerbi.loader.constants import HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
 from hockeymanagerbi.loader.main import import_playerstats_from_csv, import_playerstats_from_loader
-from hockeymanagerbi.loader.playerstats.source.ajax import HMAjaxScrapper
+from hockeymanagerbi.loader.playerstats.source.website import HMAjaxScrapper
 
 TEMP_FOLDER = "tmp"
 SQLITE_DB_NAME = "i_test.db"
@@ -55,7 +52,7 @@ class DatabaseTest(unittest.TestCase):
 
     def test_import_csv(self):
         session = self.session_maker()
-        import_playerstats_from_csv("tests/integration/ressources/player_stats.csv", session)
+        import_playerstats_from_csv("tests/integration/resources/player_stats.csv", session)
 
         season_1 = session.find_season(datetime.datetime(2023, 9, 15, 0, 0))
         season_1_bis = session.find_season(datetime.datetime(2023, 12, 1, 0, 0))
@@ -64,7 +61,7 @@ class DatabaseTest(unittest.TestCase):
         season_2 = session.find_season(datetime.datetime(2024, 10, 20, 0, 0))
         self.assertNotEqual(season_1.id, season_2.id)
 
-        players = session.get_all_players([1, 2, 3], season_1.id)
+        players = session.get_players([1, 2, 3], season_1.id)
         self.assertEqual(2, len(players))
 
         player = session.get_player(1, season_1.id)
@@ -106,7 +103,6 @@ class DatabaseTest(unittest.TestCase):
 
         session = self.session_maker()
         import_playerstats_from_loader(load_partial_data, session, origin="AJAX")
-
 
 
 if __name__ == '__main__':

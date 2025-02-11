@@ -1,8 +1,6 @@
-import logging
-from random import randint
-from collections.abc import Callable
 from urllib.parse import quote
-
+from random import randint
+import logging
 import bs4.element
 import requests
 from bs4 import BeautifulSoup
@@ -39,54 +37,6 @@ PAGE_REQUEST_HEADER = {
     "Pragma": "no-cache",
     "Cache-Control": "no-cache"
 }
-
-
-def playerstats_ajax_loader(user: str, password: str) -> Callable[[], list[dict[str, str]]]:
-    """
-    :param user: login for Hockey manager website
-    :param password:
-    :return: A callable to get the data
-    """
-    if user is None or password is None:
-        raise ConnectionRefusedError("User password to connect to HM are not provided")
-
-    def load_data():
-        parser = HMAjaxScrapper()
-        try:
-            parser.connect_to_hm(user, password)
-
-            players_data = parser.get_all_players()
-            for player in players_data:
-                player.update(parser.get_player_stats(player['id']))
-        finally:
-            parser.close_session()
-        return players_data
-
-    return load_data
-
-
-def team_players_ajax_loader(user: str, password: str):
-    if user is None or password is None:
-        raise ConnectionRefusedError("User password to connect to HM are not provided")
-
-    def load_data():
-        parser = HMAjaxScrapper()
-        try:
-            parser.connect_to_hm(user, password)
-
-            teams = parser.get_teams()
-
-            players_data = []
-            for team in teams:
-                team_id = team['id']
-                parser.select_team(team_id)
-                players_data += [(team_id, player['id']) for player in parser.get_current_team()]
-
-        finally:
-            parser.close_session()
-        return players_data
-
-    return load_data
 
 
 class HMAjaxScrapper:
@@ -202,7 +152,7 @@ class HMAjaxScrapper:
         attempts = 0
         while attempts < MAX_ATTEMPTS:
             response = self.session.get(HM_URL + '/fr/dashboard', headers=PAGE_REQUEST_HEADER)
-            dashboard_soup = BeautifulSoup(response.text)
+            dashboard_soup = BeautifulSoup(response.text, features="html.parser")
             if response.status_code != 200:
                 continue
             if _is_arcade(dashboard_soup):

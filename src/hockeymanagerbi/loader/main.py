@@ -6,7 +6,7 @@ from os import getenv
 from sqlalchemy.orm import Session
 
 from hockeymanagerbi.loader.constants import HM_DATABASE_URL_ENV_NAME, HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
-from hockeymanagerbi.loader.playerstats.source.ajax import playerstats_ajax_loader
+from hockeymanagerbi.loader.playerstats.source.website import playerstats_ajax_loader
 from hockeymanagerbi.loader.playerstats.importer import import_hockey_stats_data
 from hockeymanagerbi.loader.playerstats.mapper import map_player_stats
 from hockeymanagerbi.database.repository import RepositorySession, create_repository_session_maker
