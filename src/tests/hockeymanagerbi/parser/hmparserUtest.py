@@ -72,6 +72,17 @@ class TestScrappingFunctions(unittest.TestCase):
         self.assertEqual("DF", result[1]['role'])
         self.assertEqual("True", result[1]['foreigner'])
 
+    def test_is_arcade(self):
+        with open("tests/resources/main_page.html") as f:
+            main_page_html = BeautifulSoup(f.read(), features="html.parser")
+        is_arcade = hmparser._is_arcade(main_page_html)
+        self.assertFalse(is_arcade)
+
+        with open("tests/resources/main_page_arcade.html") as f:
+            main_page_html = BeautifulSoup(f.read(), features="html.parser")
+        is_arcade = hmparser._is_arcade(main_page_html)
+        self.assertTrue(is_arcade)
+
 
 if __name__ == '__main__':
     unittest.main()

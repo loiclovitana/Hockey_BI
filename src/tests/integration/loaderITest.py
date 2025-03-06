@@ -5,8 +5,10 @@ import unittest
 from hockeymanagerbi.database.creation import initialize_database
 from hockeymanagerbi.database.repository import create_repository_session_maker
 from hockeymanagerbi.loader.constants import HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
-from hockeymanagerbi.loader.main import import_playerstats_from_csv, import_playerstats_from_loader
+from hockeymanagerbi.loader.main import import_playerstats_from_csv, import_playerstats_from_loader, \
+    import_teamplayers_from_loader
 from hockeymanagerbi.loader.playerstats.source.website import HMAjaxScrapper
+from hockeymanagerbi.loader.teamplayers.source.website import team_players_ajax_loader
 
 TEMP_FOLDER = "tmp"
 SQLITE_DB_NAME = "i_test.db"
@@ -103,6 +105,14 @@ class DatabaseTest(unittest.TestCase):
 
         session = self.session_maker()
         import_playerstats_from_loader(load_partial_data, session, origin="AJAX")
+
+    def test_load_team_players(self):
+        user = os.getenv(HM_USER_ENV_NAME)
+        password = os.getenv(HM_PASSWORD_ENV_NAME)
+
+        session = self.session_maker()
+        loader = team_players_ajax_loader(user, password)
+        import_teamplayers_from_loader(loader, user, session)
 
 
 if __name__ == '__main__':

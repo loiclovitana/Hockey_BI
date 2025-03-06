@@ -49,15 +49,18 @@ class RepositorySession:
             models.Season.start <= validity_date
             , models.Season.end >= validity_date
             , models.Season.arcade == arcade
-        ).first()
+        ).one()
 
     def get_team(self, manager: int | models.Manager,
-                 season: int | models.Season, team_code: models.TeamCode) \
+                 season: int | models.Season, team_code: str) \
             -> list[Type[models.Team]]:
         manager_id = manager if isinstance(manager, int) else manager.id
         season_id = season if isinstance(season, int) else season.id
         return self.session.query(models.Team).filter(
             models.Team.manager_id == manager_id,
             models.Team.season_id == season_id,
-            models.Team.team_code == team_code
+            models.Team.team == team_code
         ).all()
+
+    def get_manager_by_email(self, email: str):
+        return self.session.query(models.Manager).filter(models.Manager.email == email).one_or_none()

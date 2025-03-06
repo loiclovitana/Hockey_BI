@@ -66,21 +66,11 @@ class Manager(HMDatabaseObject):
     id = Column(Integer, primary_key=True)
     email = Column(String, unique=True)
 
-    team_0 = Column(String, nullable=True)
-    team_1 = Column(String, nullable=True)
-    team_arcade = Column(String, nullable=True)
-
-
-class TeamCode(enum.Enum):
-    TEAM_0 = 0
-    TEAM_1 = 1
-    TEAM_ARCADE = 2
-
 
 class Team(HMDatabaseObject):
     __tablename__ = "TEAM"
     id = Column(Integer, primary_key=True)
-    team_code = Column(Enum(TeamCode), nullable=False)
+    team = Column(String, unique=False, nullable=False)
     manager_id = Column(Integer, ForeignKey("MANAGER.id"), nullable=False)
     player_id = Column(Integer, ForeignKey("HOCKEY_PLAYERS.id"), nullable=False)
     season_id = Column(Integer, ForeignKey("HOCKEY_PLAYERS.season_id"), nullable=False)
