@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from hmtracker.database.repository import RepositorySession, create_repository_session_maker
 from hmtracker.database import models
-from hmtracker.loader.constants import HM_DATABASE_URL_ENV_NAME, HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
+from hmtracker.constants import HM_DATABASE_URL_ENV_NAME, HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
 from hmtracker.loader.playerstats.importer import import_hockey_stats_data
 from hmtracker.loader.playerstats.mapper import map_player_stats
 from hmtracker.loader.playerstats.source.file import __ENCODING, playerstats_csv_loader
