@@ -2,13 +2,13 @@ import datetime
 import os
 import unittest
 
-from hockeymanagerbi.database.creation import initialize_database
-from hockeymanagerbi.database.repository import create_repository_session_maker
-from hockeymanagerbi.loader.constants import HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
-from hockeymanagerbi.loader.main import import_playerstats_from_csv, import_playerstats_from_loader, \
+from hmtracker.database.creation import initialize_database
+from hmtracker.database.repository import create_repository_session_maker
+from hmtracker.loader.constants import HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
+from hmtracker.loader.main import import_playerstats_from_csv, import_playerstats_from_loader, \
     import_teamplayers_from_loader
-from hockeymanagerbi.loader.playerstats.source.website import HMAjaxScrapper
-from hockeymanagerbi.loader.teamplayers.source.website import team_players_ajax_loader
+from hmtracker.loader.playerstats.source.website import HMAjaxScrapper
+from hmtracker.loader.teamplayers.source.website import team_players_ajax_loader
 
 TEMP_FOLDER = "tmp"
 SQLITE_DB_NAME = "i_test.db"

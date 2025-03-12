@@ -16,7 +16,7 @@ Includes to:
 
 ---
 
-## Backend [`src/hockeymanagerbi`](src/hockeymanagerbi)
+## Backend [`src/hmtracker`](src/hmtracker)
 > [!CAUTION]
 > Development in progress!
 
@@ -37,14 +37,14 @@ This backend aim to:
 #### Initialize the database
 This creates the necessary schema and tables for the backend. Also initialize the seasons.
 ```shell
-python hockeymanagerbi/database/creation.py <database-url>
+python hmtracker/database/creation.py <database-url>
 ```
 
 #### Load the current player stats
 Scrape player data from the Hockey Manager website and store it in database.
 You will need your account credentials.
 ```shell
-python hockeymanagerbi/loader/main.py -d <database-url> -u <hm-useremail> -p <password>
+python hmtracker/loader/main.py -d <database-url> -u <hm-useremail> -p <password>
 ```
 This script is aimed to be run regularly (every time player change price and performance). So better set a cron job for it.
 

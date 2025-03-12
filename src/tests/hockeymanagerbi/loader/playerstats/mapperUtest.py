@@ -2,7 +2,7 @@ import datetime
 import unittest
 from unittest.mock import MagicMock, patch
 
-import hockeymanagerbi.loader.playerstats.mapper as mapper
+import hmtracker.loader.playerstats.mapper as mapper
 
 
 class TestPlayerStatsConverter(unittest.TestCase):
@@ -83,8 +83,8 @@ class TestPlayerStatsConverter(unittest.TestCase):
 
 class TestMapPlayerStats(unittest.TestCase):
 
-    @patch('hockeymanagerbi.database.models.HockeyPlayer')
-    @patch('hockeymanagerbi.database.models.HockeyPlayerStats')
+    @patch('hmtracker.database.models.HockeyPlayer')
+    @patch('hmtracker.database.models.HockeyPlayerStats')
     def test_map_player_stats(self, mock_HockeyPlayerStats, mock_HockeyPlayer):
         # Arrange: mock data for player stats
         player_stats_data = [
@@ -137,8 +137,8 @@ class TestMapPlayerStats(unittest.TestCase):
             plus_minus=10
         )
 
-    @patch('hockeymanagerbi.database.models.HockeyPlayer')
-    @patch('hockeymanagerbi.database.models.HockeyPlayerStats')
+    @patch('hmtracker.database.models.HockeyPlayer')
+    @patch('hmtracker.database.models.HockeyPlayerStats')
     def test_map_player_stats_with_missing_values(self, mock_HockeyPlayerStats, mock_HockeyPlayer):
         # Arrange: simulate player stats data with missing fields
         player_stats_data = [
@@ -186,8 +186,8 @@ class TestMapPlayerStats(unittest.TestCase):
             plus_minus=5
         )
 
-    @patch('hockeymanagerbi.database.models.HockeyPlayer')
-    @patch('hockeymanagerbi.database.models.HockeyPlayerStats')
+    @patch('hmtracker.database.models.HockeyPlayer')
+    @patch('hmtracker.database.models.HockeyPlayerStats')
     def test_map_player_stats_with_invalid_values(self, mock_HockeyPlayerStats, mock_HockeyPlayer):
         # Arrange: simulate invalid data that should trigger warnings
         player_stats_data = [

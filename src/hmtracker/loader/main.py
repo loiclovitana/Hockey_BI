@@ -6,15 +6,15 @@ from os import getenv
 
 from sqlalchemy.orm import Session
 
-from hockeymanagerbi.database.repository import RepositorySession, create_repository_session_maker
-from hockeymanagerbi.database import models
-from hockeymanagerbi.loader.constants import HM_DATABASE_URL_ENV_NAME, HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
-from hockeymanagerbi.loader.playerstats.importer import import_hockey_stats_data
-from hockeymanagerbi.loader.playerstats.mapper import map_player_stats
-from hockeymanagerbi.loader.playerstats.source.file import __ENCODING, playerstats_csv_loader
-from hockeymanagerbi.loader.playerstats.source.website import playerstats_ajax_loader
-from hockeymanagerbi.loader.teamplayers.importer import import_team,import_manager
-from hockeymanagerbi.loader.teamplayers.source.website import team_players_ajax_loader
+from hmtracker.database.repository import RepositorySession, create_repository_session_maker
+from hmtracker.database import models
+from hmtracker.loader.constants import HM_DATABASE_URL_ENV_NAME, HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
+from hmtracker.loader.playerstats.importer import import_hockey_stats_data
+from hmtracker.loader.playerstats.mapper import map_player_stats
+from hmtracker.loader.playerstats.source.file import __ENCODING, playerstats_csv_loader
+from hmtracker.loader.playerstats.source.website import playerstats_ajax_loader
+from hmtracker.loader.teamplayers.importer import import_team,import_manager
+from hmtracker.loader.teamplayers.source.website import team_players_ajax_loader
 
 
 def __connect_session(db_access: str | Session | RepositorySession) -> RepositorySession:

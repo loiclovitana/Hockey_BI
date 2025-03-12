@@ -2,7 +2,7 @@ import logging
 from datetime import date
 from typing import Any
 
-from hockeymanagerbi.database import models
+from hmtracker.database import models
 
 
 def _to_float(value: str) -> float:

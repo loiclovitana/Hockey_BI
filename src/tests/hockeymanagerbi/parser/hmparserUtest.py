@@ -1,7 +1,7 @@
 import unittest
 
 from bs4 import BeautifulSoup
-from hockeymanagerbi.parser import hmparser
+from hmtracker.parser import hmparser
 
 
 class TestScrappingFunctions(unittest.TestCase):

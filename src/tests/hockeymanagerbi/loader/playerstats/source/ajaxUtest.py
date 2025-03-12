@@ -1,15 +1,15 @@
 import unittest
 from unittest.mock import patch
 
-from hockeymanagerbi.loader.playerstats.source import website
+from hmtracker.loader.playerstats.source import website
 
 
 class TestPlayerStatsAjaxLoader(unittest.TestCase):
 
-    @patch('hockeymanagerbi.parser.hmparser.HMAjaxScrapper.connect_to_hm')
-    @patch('hockeymanagerbi.parser.hmparser.HMAjaxScrapper.get_all_players')
-    @patch('hockeymanagerbi.parser.hmparser.HMAjaxScrapper.get_player_stats')
-    @patch('hockeymanagerbi.parser.hmparser.HMAjaxScrapper.close_session')
+    @patch('hmtracker.parser.hmparser.HMAjaxScrapper.connect_to_hm')
+    @patch('hmtracker.parser.hmparser.HMAjaxScrapper.get_all_players')
+    @patch('hmtracker.parser.hmparser.HMAjaxScrapper.get_player_stats')
+    @patch('hmtracker.parser.hmparser.HMAjaxScrapper.close_session')
     def test_playerstats_ajax_loader(self, mock_close_session, mock_get_player_stats, mock_get_all_players,
                                      mock_connect_to_hm):
         # Arrange

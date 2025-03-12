@@ -5,7 +5,7 @@ import bs4.element
 import requests
 from bs4 import BeautifulSoup
 
-from hockeymanagerbi.loader.constants import HM_URL
+from hmtracker.loader.constants import HM_URL
 
 AJAX_URL = HM_URL + "ajaxrequest/"
 

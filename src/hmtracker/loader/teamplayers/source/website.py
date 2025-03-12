@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from hockeymanagerbi.parser.hmparser import HMAjaxScrapper
+from hmtracker.parser.hmparser import HMAjaxScrapper
 
 
 def team_players_ajax_loader(user: str, password: str) -> Callable:

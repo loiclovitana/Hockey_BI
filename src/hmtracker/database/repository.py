@@ -4,7 +4,7 @@ from typing import Type
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import current_date
 
-from hockeymanagerbi.database import models, database
+from hmtracker.database import models, database
 
 
 def create_repository_session_maker(database_url: str):
@@ -28,13 +28,22 @@ class RepositorySession:
         self.session.commit()
         self.session.close()
 
-    def get_current_season(self, arcade: bool = False) -> models.Season | None:
+    def get_current_season(self, arcade: bool = False) -> Type[models.Season] | None:
         return self.find_season(datetime.datetime.now(), arcade)
 
     def get_player(self, player_id: int, season_id: int) -> models.HockeyPlayer | None:
         return self.session.get(models.HockeyPlayer, (player_id, season_id))
 
-    def get_players(self, player_ids: list, season_id: int) -> list[Type[models.HockeyPlayer]]:
+    def get_players(self, player_ids: list = None, season_id: int = None) -> list[Type[models.HockeyPlayer]]:
+        if season_id is None:
+            season_id = self.get_current_season().id
+
+        if player_ids is None:
+            return self.session.query(models.HockeyPlayer) \
+                .filter(models.HockeyPlayer.season_id == season_id
+                        ) \
+                .all()
+
         return self.session.query(models.HockeyPlayer) \
             .filter(models.HockeyPlayer.season_id == season_id
                     , models.HockeyPlayer.id.in_(player_ids)
@@ -44,7 +53,7 @@ class RepositorySession:
     def get_imported_stats_dates(self):
         return self.session.query(models.StatImport).all()
 
-    def find_season(self, validity_date: datetime.datetime, arcade: bool = False):
+    def find_season(self, validity_date: datetime.datetime, arcade: bool = False) -> Type[models.Season]:
         return self.session.query(models.Season).filter(
             models.Season.start <= validity_date
             , models.Season.end >= validity_date

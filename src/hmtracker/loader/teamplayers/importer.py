@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
-from hockeymanagerbi.database import models
-from hockeymanagerbi.database.repository import RepositorySession
+from hmtracker.database import models
+from hmtracker.database.repository import RepositorySession
 
 
 def import_manager(repository_session: RepositorySession,
