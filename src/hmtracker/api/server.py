@@ -1,24 +1,24 @@
-from fastapi import FastAPI
-from os import getenv
-from hmtracker.database import repository as repo
+from typing import Annotated
 
-from .routers import admin
+from fastapi import FastAPI, Depends
+from fastapi.security import OAuth2PasswordRequestForm
+
+from hmtracker.api.admin_login import create_access_token
+from .routers import admin, players
 
 app = FastAPI()
-repo_session_maker = repo.create_repository_session_maker(getenv("HM_DATABASE_URL"))
 
 app.include_router(admin.router)
-
-
-@app.get("/all-players")
-async def get_players():
-    session: repo.RepositorySession = repo_session_maker()
-    players = session.get_players()
-    p = dict(players._mapping)
-    session.end_session()
-    return p
+app.include_router(players.router)
 
 
 @app.get("/ping")
 async def ping_server():
     return True
+
+
+@app.post("/admin/login")
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+    access_token = create_access_token(username=form_data.username, password=form_data.password)
+    print(access_token)
+    return {"access_token": access_token, "type": "bearer"}

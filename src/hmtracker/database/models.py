@@ -8,6 +8,10 @@ from sqlalchemy.sql.functions import func
 HMDatabaseObject = declarative_base()
 
 
+def to_json(dbObject: HMDatabaseObject) -> dict:
+    return {c.name: getattr(dbObject, c.name) for c in dbObject.__table__.columns}
+
+
 class Season(HMDatabaseObject):
     __tablename__ = 'SEASONS'
     id = Column(Integer, primary_key=True)

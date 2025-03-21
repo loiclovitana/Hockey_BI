@@ -24,12 +24,23 @@ class RepositorySession:
     def __del__(self):
         self.end_session()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.end_session()
+
     def end_session(self):
         self.session.commit()
         self.session.close()
 
     def get_current_season(self, arcade: bool = False) -> Type[models.Season] | None:
         return self.find_season(datetime.datetime.now(), arcade)
+
+    def get_season(self, season_id: int) -> Type[models.Season] | None:
+        if season_id is None:
+            return self.get_current_season()
+        return self.session.query(models.Season).get(season_id)
 
     def get_player(self, player_id: int, season_id: int) -> models.HockeyPlayer | None:
         return self.session.get(models.HockeyPlayer, (player_id, season_id))
@@ -73,3 +84,13 @@ class RepositorySession:
 
     def get_manager_by_email(self, email: str):
         return self.session.query(models.Manager).filter(models.Manager.email == email).one_or_none()
+
+    def get_player_stats(self, player_ids: list[int], season_id: int = None):
+
+        season = self.get_current_season() if season_id is None else self.get_season(season_id)
+
+        return self.session.query(models.HockeyPlayerStats) \
+            .filter(
+            models.HockeyPlayerStats.validity_date.between(season.start, season.end),
+            models.HockeyPlayerStats.player_id.in_(player_ids)
+        ).all()
