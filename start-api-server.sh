@@ -15,7 +15,7 @@ Options:
 
 BASEDIR=$(dirname $0)
 RESSOURCE_DIR="$BASEDIR/resources/"
-SOURCE_DIR="$BASEDIR/src/"
+SOURCE_DIR="$BASEDIR/backend/"
 SECRETS="$RESSOURCE_DIR/.env"
 
 ## === ARGUMENT PARSING ==== 
@@ -49,7 +49,7 @@ fi
 
 ## === MAIN ==== 
 
-export PYTHON_PATH="${PYTHONPATH}:${BASEDIR}/src/"
+export PYTHON_PATH="${PYTHONPATH}:${SOURCE_DIR}"
 set -a
 source $SECRETS
 set +a
