@@ -1,7 +1,8 @@
+from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi import HTTPException, status
 from hmtracker import admin
-from hmtracker.api.admin_login import admin_login_scheme
+from hmtracker.api.admin_login import admin_login_scheme, decode_token
 
 router = APIRouter(
     prefix="/admin",
@@ -13,6 +14,12 @@ router = APIRouter(
 @router.post("/load/start")
 def start_loading() -> None:
     admin.start_loading()
+
+@router.get("/user")
+def get_admin_user(token: Annotated[str, Depends(admin_login_scheme)]):
+    username = decode_token(token)
+    return {"username":username}
+    
 
 
 @router.get("/operation")

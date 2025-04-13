@@ -35,7 +35,7 @@ def create_access_token(username: str, password: str) -> str:
     return encrypted_token
 
 
-async def decode_token(token):
+def decode_token(token):
     try:
         decoded_token = jwt.decode(token, SECRET_KEY, algorithms=[ENCRYPTION_ALGORITHM])
         username = decoded_token.get("username")
