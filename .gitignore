@@ -7,6 +7,8 @@ data_jeannie/
 .venv
 .env
 .env.local
+*-local.*
+*.local.*
 *.sqlite
 
 **/.ipynb_checkpoints

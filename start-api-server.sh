@@ -14,8 +14,8 @@ Options:
 ## === DEFAULT VALUES ==== 
 
 BASEDIR=$(dirname $0)
-RESSOURCE_DIR="$BASEDIR/resources/"
-SOURCE_DIR="$BASEDIR/backend/"
+RESSOURCE_DIR="$BASEDIR/backend/resources/"
+SOURCE_DIR="$BASEDIR/backend/src/"
 SECRETS="$RESSOURCE_DIR/.env"
 
 ## === ARGUMENT PARSING ==== 

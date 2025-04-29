@@ -20,5 +20,4 @@ async def ping_server():
 @app.post("/admin/login")
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     access_token = create_access_token(username=form_data.username, password=form_data.password)
-    print(access_token)
     return {"access_token": access_token, "type": "bearer"}
