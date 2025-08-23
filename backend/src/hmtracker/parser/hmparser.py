@@ -11,7 +11,7 @@ AJAX_URL = HM_URL + "ajaxrequest/"
 
 AJAX_REQUEST_HEADER = {
     "Accept": "*/*",
-    "Accept-Encoding": "gzip, deflate, br, zstd",
+    'Accept-Encoding': 'identity',
     "Accept-Language": "en-US,en;q=0.5",
     "Connection": "keep-alive",
     "Content-Length": "90",
@@ -54,9 +54,9 @@ class HMAjaxScrapper:
                       f"randomNumber={_random_number()}")
 
         response = self.session.post(AJAX_URL + "try-login", query_data, headers=AJAX_REQUEST_HEADER)
-        connection_success = response.status_code == 200 and response.text == '1'
+        connection_success = response.status_code == 200 and "1" ==  response.text
         if not connection_success:
-            raise ConnectionError(f"Couldn't connect to Hockey Manager: <{response.status_code}>")
+            raise ConnectionError(f"Couldn't connect to Hockey Manager: <{response.status_code}>\n{response.text}")
         self._load_main_dashboard()
 
     def get_all_players(self):
@@ -64,7 +64,11 @@ class HMAjaxScrapper:
         :return: a list containing information of all players in HM
         """
         self._check_session_open()
-        player_html_list = self._get_player_html_list(club=0) + self._get_player_html_list(club=-1)
+        player_html_list =  self._get_player_html_list(club=0)
+        try :
+            player_html_list +=self._get_player_html_list(club=-1)
+        except ConnectionError as e:
+            logging.warning(f"Couldn't get player team, maybe the admin still doesn't have a team. ")
         return _scrap_players_html_list(player_html_list)
 
     def get_player_stats(self, player_id):
