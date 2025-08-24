@@ -1,6 +1,7 @@
 import datetime
 import os
 import unittest
+from importlib import resources
 
 from hmtracker.database.creation import initialize_database
 from hmtracker.database.repository import create_repository_session_maker
@@ -54,7 +55,8 @@ class DatabaseTest(unittest.TestCase):
 
     def test_import_csv(self):
         session = self.session_maker()
-        import_playerstats_from_csv("tests/integration/resources/player_stats.csv", session)
+        csv_path = resources.files("tests.resources") / "player_stats.csv"
+        import_playerstats_from_csv(str(csv_path), session)
 
         season_1 = session.find_season(datetime.datetime(2023, 9, 15, 0, 0))
         season_1_bis = session.find_season(datetime.datetime(2023, 12, 1, 0, 0))

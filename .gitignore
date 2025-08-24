@@ -1,6 +1,7 @@
 .idea
 .vscode
 **/__pycache__/*
+**.egg-info
 data/
 data_jeannie/
 
@@ -17,3 +18,5 @@ tools/API/
 
 **/tmp
 .admins
+
+node_modules
