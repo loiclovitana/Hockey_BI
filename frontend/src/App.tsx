@@ -1,34 +1,81 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import {
+  ThemeProvider,
+  CssBaseline,
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Box,
+} from '@mui/material'
+import { Menu as MenuIcon } from '@mui/icons-material'
+import { theme } from './theme'
+import { Sidebar } from './components/Sidebar'
+import { Dashboard } from './pages/Dashboard'
+import { Players } from './pages/Players'
+import { Analytics } from './pages/Analytics'
+import { Settings } from './pages/Settings'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+
+  const handleSidebarToggle = () => {
+    setSidebarOpen(!sidebarOpen)
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <Box sx={{ display: 'flex' }}>
+          <AppBar
+            position="fixed"
+            sx={{
+              zIndex: (theme) => theme.zIndex.drawer + 1,
+            }}
+          >
+            <Toolbar>
+              <IconButton
+                color="inherit"
+                aria-label="toggle sidebar"
+                edge="start"
+                onClick={handleSidebarToggle}
+                sx={{ mr: 2 }}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Typography variant="h6" noWrap component="div">
+                Hockey BI
+              </Typography>
+            </Toolbar>
+          </AppBar>
+          
+          <Sidebar open={sidebarOpen} />
+          
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              p: 0,
+              marginLeft: sidebarOpen ? '240px' : 0,
+              transition: (theme) => theme.transitions.create('margin-left', {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.leavingScreen,
+              }),
+            }}
+          >
+            <Toolbar />
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/players" element={<Players />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/settings" element={<Settings />} />
+            </Routes>
+          </Box>
+        </Box>
+      </Router>
+    </ThemeProvider>
   )
 }
 
