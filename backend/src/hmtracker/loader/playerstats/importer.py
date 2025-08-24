@@ -5,8 +5,9 @@ from hmtracker.database import models
 from hmtracker.database.repository import RepositorySession
 
 
-def import_new_players(repository_session: RepositorySession
-                       , players: list[models.HockeyPlayer]):
+def import_new_players(
+    repository_session: RepositorySession, players: list[models.HockeyPlayer]
+):
     """
     Import the players into the repository
     :param repository_session:
@@ -14,13 +15,16 @@ def import_new_players(repository_session: RepositorySession
     :return:
     """
     repository_session.session.begin_nested()
-    current_season: models.Season = repository_session.get_current_season()
+    current_season: models.Season | None = repository_session.get_current_season()
     if current_season is None:
-        logging.warning(f"No season are currently opened")
+        logging.error("No season are currently opened, exiting")
+        return
 
     players_id = [player.id for player in players]
-    existing_players: set[(int, int)] = {(player.id, player.season_id)
-                                         for player in repository_session.get_players(players_id, current_season.id)}
+    existing_players: set[tuple[int, int]] = {
+        (player.id, player.season_id)
+        for player in repository_session.get_players(players_id, current_season.id)
+    }
 
     new_players = []
     for player in players:
@@ -35,13 +39,14 @@ def import_new_players(repository_session: RepositorySession
     repository_session.session.commit()
 
 
-def import_hockey_stats_data(repository_session: RepositorySession
-                             , players: list[models.HockeyPlayer]
-                             , players_stats: list[models.HockeyPlayerStats]
-                             , importation: models.StatImport | None = None
-                             , origin: str = "Unknown"
-                             , comment: str = ""
-                             ):
+def import_hockey_stats_data(
+    repository_session: RepositorySession,
+    players: list[models.HockeyPlayer],
+    players_stats: list[models.HockeyPlayerStats],
+    importation: models.StatImport | None = None,
+    origin: str = "Unknown",
+    comment: str = "",
+):
     """
     Import the hockey player stats into the database.
     Create the players that doesn't yet exist.
@@ -54,8 +59,7 @@ def import_hockey_stats_data(repository_session: RepositorySession
     :return:
     """
     if importation is None:
-        importation = models.StatImport(origin=origin,
-                                        comment=comment)
+        importation = models.StatImport(origin=origin, comment=comment)
 
     repository_session.session.begin_nested()
 
@@ -68,9 +72,17 @@ def import_hockey_stats_data(repository_session: RepositorySession
     repository_session.session.commit()
 
 
-def _import_stats(database_session, importation, players_stats):
+def _import_stats(
+    database_session: RepositorySession,
+    importation,
+    players_stats: list[models.HockeyPlayerStats],
+):
     database_session.session.begin_nested()
-    current_season: models.Season = database_session.get_current_season()
+    current_season: models.Season | None = database_session.get_current_season()
+
+    if current_season is None:
+        logging.error("No season are currently opened, exiting")
+        return
 
     for stats in players_stats:
         stats.importation = importation
@@ -83,16 +95,24 @@ def _import_stats(database_session, importation, players_stats):
     database_session.session.commit()
 
 
-def _attach_seasons(database_session: RepositorySession
-                    , players: list[models.HockeyPlayer]
-                    , players_stats: list[models.HockeyPlayerStats]
-                    , arcade=False):
+def _attach_seasons(
+    database_session: RepositorySession,
+    players: list[models.HockeyPlayer],
+    players_stats: list[models.HockeyPlayerStats],
+    arcade=False,
+):
     if len(players) != len(players_stats):
         raise IndexError("There should be one player for each stats")
 
-    all_validity_date = {stats.validity_date for stats in players_stats if stats.validity_date is not None}
-    season_for_date = {validity_date: database_session.find_season(validity_date, arcade)
-                       for validity_date in all_validity_date}
+    all_validity_date = {
+        stats.validity_date
+        for stats in players_stats
+        if stats.validity_date is not None
+    }
+    season_for_date = {
+        validity_date: database_session.find_season(validity_date, arcade)
+        for validity_date in all_validity_date
+    }
 
     for player, stats in zip(players, players_stats):
         if stats.validity_date is None:

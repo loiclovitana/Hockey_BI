@@ -58,5 +58,10 @@ build-backend = "hatchling.build"
 packages = ["src/hmtracker","src/test"]
 
 [dependency-groups]
-dev = []
+dev = [
+    "mypy>=1.17.1",
+    "ruff>=0.12.10",
+    "types-beautifulsoup4>=4.12.0.20250516",
+    "types-requests>=2.32.4.20250809",
+]
 

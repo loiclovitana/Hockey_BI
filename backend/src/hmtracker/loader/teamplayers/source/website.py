@@ -22,9 +22,11 @@ def team_players_ajax_loader(user: str, password: str) -> Callable:
             teams = parser.get_teams()
 
             for team in teams:
-                team_id = team['id']
+                team_id = team["id"]
                 parser.select_team(team_id)
-                teams_players[team_id] = [player['id'] for player in parser.get_current_team()]
+                teams_players[team_id] = [
+                    player["id"] for player in parser.get_current_team()
+                ]
 
         finally:
             parser.close_session()

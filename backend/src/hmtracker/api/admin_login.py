@@ -16,7 +16,6 @@ admin_login_scheme = OAuth2PasswordBearer(tokenUrl="admin/login")
 
 
 def create_access_token(username: str, password: str) -> str:
-
     if not admin.is_admin(username, password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -26,10 +25,14 @@ def create_access_token(username: str, password: str) -> str:
     if not SECRET_KEY:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Encryption on server is unavailable"
+            detail="Encryption on server is unavailable",
         )
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    token = {"username": username, "is_admin": True, "expiration": expire.isoformat(timespec='minutes')}
+    token = {
+        "username": username,
+        "is_admin": True,
+        "expiration": expire.isoformat(timespec="minutes"),
+    }
     encrypted_token = jwt.encode(token, SECRET_KEY, algorithm=ENCRYPTION_ALGORITHM)
 
     return encrypted_token

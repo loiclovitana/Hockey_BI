@@ -9,18 +9,14 @@ def main():
 
     if args.prod:
         # Production mode
-        uvicorn.run(
-            "src.hmtracker.api.server:app",
-            host="0.0.0.0",
-            workers=4
-        )
+        uvicorn.run("src.hmtracker.api.server:app", host="0.0.0.0", workers=4)
     else:
         # Development mode with auto-reload
         uvicorn.run(
             "src.hmtracker.api.server:app",
             host="127.0.0.1",
             reload=True,
-            reload_dirs=["src"]
+            reload_dirs=["src"],
         )
 
 

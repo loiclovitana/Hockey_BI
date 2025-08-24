@@ -9,9 +9,7 @@ def init_engine(database_url: str) -> Engine:
     :param database_url: url of the database to connect to
     :return: the database engine
     """
-    engine = create_engine(
-        database_url, connect_args={"check_same_thread": False}
-    )
+    engine = create_engine(database_url, connect_args={"check_same_thread": False})
     return engine
 
 

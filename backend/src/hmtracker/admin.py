@@ -1,7 +1,12 @@
+import logging
 from threading import Thread
 from os import getenv
 
-from hmtracker.constants import HM_DATABASE_URL_ENV_NAME, HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
+from hmtracker.constants import (
+    HM_DATABASE_URL_ENV_NAME,
+    HM_USER_ENV_NAME,
+    HM_PASSWORD_ENV_NAME,
+)
 import hmtracker.loader.main as loader
 from hashlib import sha256
 
@@ -11,7 +16,15 @@ HMTRACKER_ADMIN_USER_ENV = "HMTRACKER_ADMIN_USER"
 HMTRACKER_ADMIN_PASSWORD_ENV = "HMTRACKER_ADMIN_PASSWORD"
 __PASSWORD_ENCODING = "UTF-8"
 __ADMIN_USER = getenv(HMTRACKER_ADMIN_USER_ENV)
-__ADMIN_HASH_PASSWORD = sha256(getenv(HMTRACKER_ADMIN_PASSWORD_ENV).encode(__PASSWORD_ENCODING)).digest()
+__ADMIN_PASSWORD = getenv(HMTRACKER_ADMIN_PASSWORD_ENV)
+__ADMIN_HASH_PASSWORD: bytes | None = None
+if __ADMIN_PASSWORD is not None:
+    __ADMIN_HASH_PASSWORD = sha256(
+        __ADMIN_PASSWORD.encode(__PASSWORD_ENCODING)
+    ).digest()
+
+
+del __ADMIN_PASSWORD
 
 
 class ServerBusyException(Exception):
@@ -34,16 +47,18 @@ def is_running_operation() -> bool:
 def check_operation():
     global _current_operation
     if is_running_operation() and _current_operation is not None:
-        raise ServerBusyException(f"Server is currently busy with operation: {_current_operation.name}")
+        raise ServerBusyException(
+            f"Server is currently busy with operation: {_current_operation.name}"
+        )
     del _current_operation
     _current_operation = None
 
 
-def get_current_operation() -> str:
+def get_current_operation() -> str | None:
     global _current_operation
-    if not is_running_operation():
+    if not is_running_operation() or _current_operation is None:
         return None
-    return _current_operation.getName()
+    return _current_operation.name
 
 
 def _Operation(name: str):
@@ -65,5 +80,9 @@ def start_loading():
     database_url = getenv(HM_DATABASE_URL_ENV_NAME)
     hm_user = getenv(HM_USER_ENV_NAME)
     hm_password = getenv(HM_PASSWORD_ENV_NAME)
-
+    if database_url is None or hm_user is None or hm_password is None:
+        logging.error(
+            f"{HM_DATABASE_URL_ENV_NAME if database_url is None else ''} - {HM_USER_ENV_NAME if hm_user is None else ''}{HM_PASSWORD_ENV_NAME if hm_password is None else ''} are not defined. aborting operation"
+        )
+        return
     loader.import_playerstats_from_ajax(database_url, hm_user, hm_password)

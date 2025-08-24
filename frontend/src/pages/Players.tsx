@@ -1,5 +1,5 @@
-import React from 'react'
-import { Box, Typography, Paper } from '@mui/material'
+import React from "react";
+import { Box, Typography, Paper } from "@mui/material";
 
 export const Players: React.FC = () => {
   return (
@@ -13,5 +13,5 @@ export const Players: React.FC = () => {
         </Typography>
       </Paper>
     </Box>
-  )
-}
+  );
+};

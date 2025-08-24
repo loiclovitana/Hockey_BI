@@ -2,14 +2,15 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from os import getenv
+from hmtracker.constants import HM_DATABASE_URL_ENV_NAME
 from hmtracker.database import repository as repo, models
 
-router = APIRouter(
-    prefix="/players",
-    tags=["players"]
-)
+router = APIRouter(prefix="/players", tags=["players"])
 
-repo_session_maker = repo.create_repository_session_maker(getenv("HM_DATABASE_URL"))
+_HM_DATABASE_URL = getenv(HM_DATABASE_URL_ENV_NAME)
+if _HM_DATABASE_URL is None:
+    raise SystemError(f"{HM_DATABASE_URL_ENV_NAME} is not defined")
+repo_session_maker = repo.create_repository_session_maker(_HM_DATABASE_URL)
 
 
 def get_session():
