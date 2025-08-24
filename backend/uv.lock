@@ -279,6 +279,9 @@ requires-dist = [
     { name = "websockets", specifier = "==15.0.1" },
 ]
 
+[package.metadata.requires-dev]
+dev = []
+
 [[package]]
 name = "httpcore"
 version = "1.0.7"

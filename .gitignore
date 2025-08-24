@@ -18,3 +18,5 @@ tools/API/
 
 **/tmp
 .admins
+
+node_modules
