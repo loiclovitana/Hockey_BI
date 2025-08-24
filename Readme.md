@@ -1,6 +1,11 @@
 # Hockey BI
-Hockey BI is a project designed to gather, store, and analyze data from the Swiss hockey league and the [Hockey Manager website](https://www.hockeymanager.ch/). 
+Hockey BI is a project designed to gather, store, and analyze data from the Swiss hockey league. 
 By scraping data and storing it in a structured backend, this project enables in-depth analysis, player valuation insights, and actionable recommendations for fantasy hockey enthusiasts and analysts.
+
+> [!CAUTION]
+> This project is not affiliated with, endorsed by, or connected to hockeymanager.ch or its owners.
+> The website hockeymanager.ch and its contents are protected by intellectual property laws and are the exclusive property of Redesign Sagl de Camorino.
+> Use of this software may violate the Terms of Service of hockeymanager.ch or other applicable laws. The authors of this project do not assume any responsibility for misuse. You are solely responsible for ensuring that your use of this software complies with all legal and contractual obligations.
 
 ---
 
@@ -17,7 +22,7 @@ Includes to:
 ---
 
 ## Backend [`src/hmtracker`](src/hmtracker)
-> [!CAUTION]
+> [!WARNING]
 > Development in progress!
 
 This backend aim to:
@@ -60,3 +65,4 @@ This script is aimed to be run regularly (every time player change price and per
  - User friendly interface to connect to HM and load teams data.
  - Client-side scraping to ensure user credentials remain private.
  - Interactive visualizations (e.g., best players to buy/sell, performance trends).
+
