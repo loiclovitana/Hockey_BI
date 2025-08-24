@@ -1,6 +1,6 @@
 import datetime
-from typing import Type
 
+from sqlalchemy import Column
 from sqlalchemy.orm import Session
 
 from hmtracker.database import models, database
@@ -12,10 +12,8 @@ def create_repository_session_maker(database_url: str):
 
 
 class RepositorySession:
-    session: Session = None
-
     def __init__(self, session: Session):
-        self.session = session
+        self.session: Session = session
 
     def __str__(self):
         return f"""RepositorySession(session = {self.session})"""
@@ -33,10 +31,10 @@ class RepositorySession:
         self.session.commit()
         self.session.close()
 
-    def get_current_season(self, arcade: bool = False) -> Type[models.Season] | None:
+    def get_current_season(self, arcade: bool = False) -> models.Season | None:
         return self.find_season(datetime.datetime.now(), arcade)
 
-    def get_season(self, season_id: int) -> Type[models.Season] | None:
+    def get_season(self, season_id: int) -> models.Season | None:
         if season_id is None:
             return self.get_current_season()
         return self.session.query(models.Season).get(season_id)
@@ -45,10 +43,13 @@ class RepositorySession:
         return self.session.get(models.HockeyPlayer, (player_id, season_id))
 
     def get_players(
-        self, player_ids: list = None, season_id: int = None
-    ) -> list[Type[models.HockeyPlayer]]:
+        self, player_ids: list | None = None, season_id: int | Column[int] | None = None
+    ) -> list[models.HockeyPlayer]:
         if season_id is None:
-            season_id = self.get_current_season().id
+            current_season = self.get_current_season()
+            if current_season is None:
+                return []
+            season_id = current_season.id
 
         if player_ids is None:
             return (
@@ -71,7 +72,7 @@ class RepositorySession:
 
     def find_season(
         self, validity_date: datetime.datetime, arcade: bool = False
-    ) -> Type[models.Season]:
+    ) -> models.Season:
         return (
             self.session.query(models.Season)
             .filter(
@@ -84,7 +85,7 @@ class RepositorySession:
 
     def get_team(
         self, manager: int | models.Manager, season: int | models.Season, team_code: str
-    ) -> list[Type[models.Team]]:
+    ) -> list[models.Team]:
         manager_id = manager if isinstance(manager, int) else manager.id
         season_id = season if isinstance(season, int) else season.id
         return (
@@ -104,12 +105,14 @@ class RepositorySession:
             .one_or_none()
         )
 
-    def get_player_stats(self, player_ids: list[int], season_id: int = None):
+    def get_player_stats(self, player_ids: list[int], season_id: int | None = None):
         season = (
             self.get_current_season()
             if season_id is None
             else self.get_season(season_id)
         )
+        if season is None:
+            return None
 
         return (
             self.session.query(models.HockeyPlayerStats)

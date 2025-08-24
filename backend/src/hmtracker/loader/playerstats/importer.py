@@ -15,12 +15,13 @@ def import_new_players(
     :return:
     """
     repository_session.session.begin_nested()
-    current_season: models.Season = repository_session.get_current_season()
+    current_season: models.Season | None = repository_session.get_current_season()
     if current_season is None:
-        logging.warning("No season are currently opened")
+        logging.error("No season are currently opened, exiting")
+        return
 
     players_id = [player.id for player in players]
-    existing_players: set[(int, int)] = {
+    existing_players: set[tuple[int, int]] = {
         (player.id, player.season_id)
         for player in repository_session.get_players(players_id, current_season.id)
     }
@@ -71,9 +72,17 @@ def import_hockey_stats_data(
     repository_session.session.commit()
 
 
-def _import_stats(database_session, importation, players_stats):
+def _import_stats(
+    database_session: RepositorySession,
+    importation,
+    players_stats: list[models.HockeyPlayerStats],
+):
     database_session.session.begin_nested()
-    current_season: models.Season = database_session.get_current_season()
+    current_season: models.Season | None = database_session.get_current_season()
+
+    if current_season is None:
+        logging.error("No season are currently opened, exiting")
+        return
 
     for stats in players_stats:
         stats.importation = importation

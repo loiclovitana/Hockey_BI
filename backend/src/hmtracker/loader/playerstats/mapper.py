@@ -84,7 +84,7 @@ def _convert_data(player_stats_data: list[dict[str, str]]) -> list[dict[str, Any
 
 def map_player_stats(
     player_stats_data: list[dict[str, str]],
-) -> (list[models.HockeyPlayer], list[models.HockeyPlayerStats]):
+) -> tuple[list[models.HockeyPlayer], list[models.HockeyPlayerStats]]:
     player_stats_converted: list[dict[str, Any]] = _convert_data(player_stats_data)
 
     players = [

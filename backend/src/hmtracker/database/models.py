@@ -1,5 +1,5 @@
+from datetime import date, datetime
 from sqlalchemy import (
-    Column,
     ForeignKey,
     Integer,
     String,
@@ -8,11 +8,12 @@ from sqlalchemy import (
     Date,
     Boolean,
 )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, mapped_column, Mapped, DeclarativeBase
 from sqlalchemy.sql.functions import func
 
-HMDatabaseObject = declarative_base()
+
+class HMDatabaseObject(DeclarativeBase):
+    pass
 
 
 def to_json(dbObject: HMDatabaseObject) -> dict:
@@ -21,23 +22,23 @@ def to_json(dbObject: HMDatabaseObject) -> dict:
 
 class Season(HMDatabaseObject):
     __tablename__ = "SEASONS"
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    start = Column(Date, nullable=False)
-    end = Column(Date, nullable=False)
-    arcade = Column(Boolean, nullable=False, default=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String)
+    start: Mapped[date] = mapped_column(Date, nullable=False)
+    end: Mapped[date] = mapped_column(Date, nullable=False)
+    arcade: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
 
 class HockeyPlayer(HMDatabaseObject):
     __tablename__ = "HOCKEY_PLAYERS"
 
-    id = Column(Integer, primary_key=True)
-    season_id = Column(
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    season_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("SEASONS.id"), primary_key=True, nullable=False
     )
-    name = Column(String, nullable=False)
-    role = Column(String, nullable=False)
-    foreigner = Column(Boolean, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    role: Mapped[str] = mapped_column(String, nullable=False)
+    foreigner: Mapped[bool] = mapped_column(Boolean, nullable=False)
 
     season = relationship("Season")
 
@@ -45,24 +46,28 @@ class HockeyPlayer(HMDatabaseObject):
 class HockeyPlayerStats(HMDatabaseObject):
     __tablename__ = "HOCKEY_PLAYER_STATS"
 
-    player_id = Column(
+    player_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("HOCKEY_PLAYERS.id"), primary_key=True, nullable=False
     )
-    season_id = Column(
+    season_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("SEASONS.id"), primary_key=True, nullable=False
     )
-    validity_date = Column(DateTime, primary_key=True, nullable=False)
+    validity_date: Mapped[datetime] = mapped_column(
+        DateTime, primary_key=True, nullable=False
+    )
 
-    import_id = Column(Integer, ForeignKey("STATS_IMPORT.id"), nullable=True)
-    price = Column(Float, nullable=False)
-    club = Column(String, nullable=False)
-    ownership = Column(Float)
-    hm_points = Column(Integer)
-    appearances = Column(Integer)
-    goal = Column(Integer)
-    assists = Column(Integer)
-    penalties = Column(Integer)
-    plus_minus = Column(Integer)
+    import_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("STATS_IMPORT.id"), nullable=True
+    )
+    price: Mapped[float] = mapped_column(Float, nullable=False)
+    club: Mapped[str] = mapped_column(String, nullable=False)
+    ownership: Mapped[float | None] = mapped_column(Float)
+    hm_points: Mapped[int | None] = mapped_column(Integer)
+    appearances: Mapped[int | None] = mapped_column(Integer)
+    goal: Mapped[int | None] = mapped_column(Integer)
+    assists: Mapped[int | None] = mapped_column(Integer)
+    penalties: Mapped[int | None] = mapped_column(Integer)
+    plus_minus: Mapped[int | None] = mapped_column(Integer)
 
     player = relationship("HockeyPlayer")
     importation = relationship("StatImport", back_populates="stats")
@@ -70,29 +75,39 @@ class HockeyPlayerStats(HMDatabaseObject):
 
 class StatImport(HMDatabaseObject):
     __tablename__ = "STATS_IMPORT"
-    id = Column(Integer, primary_key=True)
-    import_date = Column(DateTime, nullable=False, server_default=func.now())
-    origin = Column(String, nullable=False, server_default="Unknown")
-    comment = Column(String, server_default="", nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    import_date: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.now()
+    )
+    origin: Mapped[str] = mapped_column(
+        String, nullable=False, server_default="Unknown"
+    )
+    comment: Mapped[str] = mapped_column(String, server_default="", nullable=False)
 
     stats = relationship("HockeyPlayerStats", back_populates="importation")
 
 
 class Manager(HMDatabaseObject):
     __tablename__ = "MANAGER"
-    id = Column(Integer, primary_key=True)
-    email = Column(String, unique=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    email: Mapped[str | None] = mapped_column(String, unique=True)
 
 
 class Team(HMDatabaseObject):
     __tablename__ = "TEAM"
-    id = Column(Integer, primary_key=True)
-    team = Column(String, unique=False, nullable=False)
-    manager_id = Column(Integer, ForeignKey("MANAGER.id"), nullable=False)
-    player_id = Column(Integer, ForeignKey("HOCKEY_PLAYERS.id"), nullable=False)
-    season_id = Column(Integer, ForeignKey("HOCKEY_PLAYERS.season_id"), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    team: Mapped[str] = mapped_column(String, unique=False, nullable=False)
+    manager_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("MANAGER.id"), nullable=False
+    )
+    player_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("HOCKEY_PLAYERS.id"), nullable=False
+    )
+    season_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("HOCKEY_PLAYERS.season_id"), nullable=False
+    )
 
-    from_datetime = Column(DateTime, nullable=True)
-    to_datetime = Column(DateTime, nullable=True)
+    from_datetime: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    to_datetime: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     manager = relationship("Manager")

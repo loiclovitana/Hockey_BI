@@ -4,6 +4,7 @@ import logging
 import bs4.element
 import requests
 from bs4 import BeautifulSoup
+from requests import Session
 
 from hmtracker.constants import HM_URL
 
@@ -44,9 +45,9 @@ class HMAjaxScrapper:
     Scrapper for HockeyManager website
     """
 
-    session = None
-
-    dashboard = None  # Cached for navigation
+    def __init__(self) -> None:
+        self.session: Session | None = None
+        self.dashboard: BeautifulSoup | None = None  # Cached for navigation
 
     def connect_to_hm(self, user, password):
         self.session = requests.session()
@@ -68,7 +69,6 @@ class HMAjaxScrapper:
         """
         :return: a list containing information of all players in HM
         """
-        self._check_session_open()
         player_html_list = self._get_player_html_list(club=0)
         try:
             player_html_list += self._get_player_html_list(club=-1)
@@ -83,10 +83,10 @@ class HMAjaxScrapper:
         :param player_id:
         :return: dictionary of statistics for a given player
         """
-        self._check_session_open()
+        session = self._get_open_session()
         query_data = f"id={player_id}"
         logging.debug(f"==> POST get-player-detail {player_id} {{{query_data}}}")
-        response = self.session.post(
+        response = session.post(
             AJAX_URL + "get-player-detail", query_data, headers=AJAX_REQUEST_HEADER
         )
         logging.debug(f"<== {response.status_code} {{{response.text}}}")
@@ -130,8 +130,9 @@ class HMAjaxScrapper:
         ]
 
     def select_team(self, team_id):
+        session = self._get_open_session()
         query_data = f"randomNumber={_random_number()}&myteam={team_id}"
-        response = self.session.post(
+        response = session.post(
             AJAX_URL + "use-team", query_data, headers=AJAX_REQUEST_HEADER
         )
         if response.status_code != 200:
@@ -154,9 +155,10 @@ class HMAjaxScrapper:
         self.session.close()
         self.session = None
 
-    def _check_session_open(self):
+    def _get_open_session(self) -> Session:
         if self.session is None:
             raise ConnectionError("Parser isn't connected to Hockey Manager")
+        return self.session
 
     def _load_main_dashboard(self):
         """
@@ -164,11 +166,11 @@ class HMAjaxScrapper:
         If the gamemode is arcade, switch to original
         :return: None
         """
-        self._check_session_open()
+        session = self._get_open_session()
         MAX_ATTEMPTS = 5
         attempts = 0
         while attempts < MAX_ATTEMPTS:
-            response = self.session.get(
+            response = session.get(
                 HM_URL + "/fr/dashboard", headers=PAGE_REQUEST_HEADER
             )
             dashboard_soup = BeautifulSoup(response.text, features="html.parser")
@@ -176,7 +178,7 @@ class HMAjaxScrapper:
                 continue
             if _is_arcade(dashboard_soup):
                 query_data = f"randomNumber={_random_number()}"
-                self.session.post(
+                session.post(
                     AJAX_URL + "switch-classic-arcade",
                     query_data,
                     headers=AJAX_REQUEST_HEADER,
@@ -189,12 +191,13 @@ class HMAjaxScrapper:
             raise Exception("Couldn't load the main page for HM")
 
     def _get_player_html_list(self, club: int = 0):
+        session = self._get_open_session()
         query_data = (
             f"randomNumber={_random_number()}&"
             f"club={club}&"
             f"role=0&player=&min=1&max=50&country=0&blG=0&blP=0&orderBy=&orderByDirection="
         )
-        response = self.session.post(
+        response = session.post(
             AJAX_URL + "transfers-classic-get-list-preview",
             query_data,
             headers=AJAX_REQUEST_HEADER,
@@ -215,8 +218,10 @@ def _scrap_player_row(player_row_html: bs4.element.Tag) -> dict[str, str]:
     return {
         "id": player_row_html.attrs["attr"],
         "name": player_row_html.select(".name")[0].text,
-        "club": player_row_html.img.attrs["src"].split("/")[-2],
-        "role": player_row_html.div.text,
+        "club": player_row_html.img.attrs.get("src", "/").split("/")[-2]
+        if player_row_html.img
+        else "",
+        "role": player_row_html.div.text if player_row_html.div else "",
         "foreigner": str(len(player_row_html.select(".ch")) != 0),
     }
 

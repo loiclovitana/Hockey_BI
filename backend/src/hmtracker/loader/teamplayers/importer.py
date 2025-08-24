@@ -19,7 +19,7 @@ def import_team(
     manager: models.Manager,
     team_code: str,
     players_ids: list[int],
-    at_datetime: datetime = None,
+    at_datetime: datetime | None = None,
 ):
     players_ids = [int(player_id) for player_id in players_ids]
     if at_datetime is None:
