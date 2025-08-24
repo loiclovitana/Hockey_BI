@@ -6,8 +6,11 @@ from importlib import resources
 from hmtracker.database.creation import initialize_database
 from hmtracker.database.repository import create_repository_session_maker
 from hmtracker.constants import HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
-from hmtracker.loader.main import import_playerstats_from_csv, import_playerstats_from_loader, \
-    import_teamplayers_from_loader
+from hmtracker.loader.main import (
+    import_playerstats_from_csv,
+    import_playerstats_from_loader,
+    import_teamplayers_from_loader,
+)
 from hmtracker.loader.playerstats.source.website import HMAjaxScrapper
 from hmtracker.loader.teamplayers.source.website import team_players_ajax_loader
 
@@ -22,7 +25,9 @@ class DatabaseTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         if os.path.exists(TEMP_FOLDER):
-            raise FileExistsError(f"'{TEMP_FOLDER}' already exists aborting test to avoid unwanted deletion")
+            raise FileExistsError(
+                f"'{TEMP_FOLDER}' already exists aborting test to avoid unwanted deletion"
+            )
         os.mkdir(TEMP_FOLDER)
 
         initialize_database(SQLITE_DB)
@@ -101,7 +106,7 @@ class DatabaseTest(unittest.TestCase):
             parser.connect_to_hm(user, password)
             players_data = parser.get_all_players()[:2]  # limit test to 2 player
             for player in players_data:
-                player.update(parser.get_player_stats(player['id']))
+                player.update(parser.get_player_stats(player["id"]))
             parser.close_session()
             return players_data
 
@@ -117,5 +122,5 @@ class DatabaseTest(unittest.TestCase):
         import_teamplayers_from_loader(loader, user, session)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -4,10 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from os import getenv
 from hmtracker.database import repository as repo, models
 
-router = APIRouter(
-    prefix="/players",
-    tags=["players"]
-)
+router = APIRouter(prefix="/players", tags=["players"])
 
 repo_session_maker = repo.create_repository_session_maker(getenv("HM_DATABASE_URL"))
 

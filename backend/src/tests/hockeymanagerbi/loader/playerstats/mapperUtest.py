@@ -6,17 +6,10 @@ import hmtracker.loader.playerstats.mapper as mapper
 
 
 class TestPlayerStatsConverter(unittest.TestCase):
-    correct_data = [{
-        "id": "13",
-        "date": "2020-12-30",
-        "Ownership": "2.9%",
-        "foreigner": "true"
-    }, {
-        "id": "1",
-        "date": "2020-01-01",
-        "Ownership": "4",
-        "foreigner": "Oui"
-    }]
+    correct_data = [
+        {"id": "13", "date": "2020-12-30", "Ownership": "2.9%", "foreigner": "true"},
+        {"id": "1", "date": "2020-01-01", "Ownership": "4", "foreigner": "Oui"},
+    ]
 
     def test_existing_fields(self):
         self.assertIn("id", mapper.FIELDS)
@@ -30,40 +23,37 @@ class TestPlayerStatsConverter(unittest.TestCase):
 
         self.assertEqual(2, len(result))
 
-        self.assertEqual(13, result[0]['id'])
-        self.assertEqual(datetime.date(2020, 12, 30), result[0]['date'])
-        self.assertAlmostEqual(2.9, result[0]['Ownership'])
-        self.assertEqual(True, result[0]['foreigner'])
+        self.assertEqual(13, result[0]["id"])
+        self.assertEqual(datetime.date(2020, 12, 30), result[0]["date"])
+        self.assertAlmostEqual(2.9, result[0]["Ownership"])
+        self.assertEqual(True, result[0]["foreigner"])
 
-        self.assertEqual(1, result[1]['id'])
-        self.assertEqual(datetime.date(2020, 1, 1), result[1]['date'])
-        self.assertAlmostEqual(4, result[1]['Ownership'])
-        self.assertEqual(True, result[1]['foreigner'])
+        self.assertEqual(1, result[1]["id"])
+        self.assertEqual(datetime.date(2020, 1, 1), result[1]["date"])
+        self.assertAlmostEqual(4, result[1]["Ownership"])
+        self.assertEqual(True, result[1]["foreigner"])
 
     def test_convert_not_existing_data(self):
         result = mapper._convert_data([{"invalid field": "useless"}])
 
         self.assertEqual(1, len(result))
         self.assertNotIn("invalid field", result[0])
-        self.assertIsNone(result[0]['id'])
-        self.assertIsNone(result[0]['date'])
-        self.assertIsNone(result[0]['Ownership'])
-        self.assertIsNone(result[0]['foreigner'])
+        self.assertIsNone(result[0]["id"])
+        self.assertIsNone(result[0]["date"])
+        self.assertIsNone(result[0]["Ownership"])
+        self.assertIsNone(result[0]["foreigner"])
 
     def test_convert_invalid_data(self):
-        result = mapper._convert_data([{
-            "id": "Id:12",
-            "date": "today",
-            "Ownership": "non",
-            "foreigner": "very"
-        }])
+        result = mapper._convert_data(
+            [{"id": "Id:12", "date": "today", "Ownership": "non", "foreigner": "very"}]
+        )
 
         self.assertEqual(1, len(result))
         self.assertIn("id", result[0])
-        self.assertIsNone(result[0]['id'])
-        self.assertIsNone(result[0]['date'])
-        self.assertIsNone(result[0]['Ownership'])
-        self.assertIsNone(result[0]['foreigner'])
+        self.assertIsNone(result[0]["id"])
+        self.assertIsNone(result[0]["date"])
+        self.assertIsNone(result[0]["Ownership"])
+        self.assertIsNone(result[0]["foreigner"])
 
     def test_map_player_stats(self):
         players, players_stats = mapper.map_player_stats(self.correct_data)
@@ -82,9 +72,8 @@ class TestPlayerStatsConverter(unittest.TestCase):
 
 
 class TestMapPlayerStats(unittest.TestCase):
-
-    @patch('hmtracker.database.models.HockeyPlayer')
-    @patch('hmtracker.database.models.HockeyPlayerStats')
+    @patch("hmtracker.database.models.HockeyPlayer")
+    @patch("hmtracker.database.models.HockeyPlayerStats")
     def test_map_player_stats(self, mock_HockeyPlayerStats, mock_HockeyPlayer):
         # Arrange: mock data for player stats
         player_stats_data = [
@@ -108,7 +97,7 @@ class TestMapPlayerStats(unittest.TestCase):
                 "GWG": "2",
                 "Penalties": "15",
                 "+/-": "10",
-                "Shots": "100"
+                "Shots": "100",
             }
         ]
 
@@ -134,12 +123,14 @@ class TestMapPlayerStats(unittest.TestCase):
             goal=10,
             assists=9,  # Assist #1 + Assist #2 + Assist OT
             penalties=15,
-            plus_minus=10
+            plus_minus=10,
         )
 
-    @patch('hmtracker.database.models.HockeyPlayer')
-    @patch('hmtracker.database.models.HockeyPlayerStats')
-    def test_map_player_stats_with_missing_values(self, mock_HockeyPlayerStats, mock_HockeyPlayer):
+    @patch("hmtracker.database.models.HockeyPlayer")
+    @patch("hmtracker.database.models.HockeyPlayerStats")
+    def test_map_player_stats_with_missing_values(
+        self, mock_HockeyPlayerStats, mock_HockeyPlayer
+    ):
         # Arrange: simulate player stats data with missing fields
         player_stats_data = [
             {
@@ -183,12 +174,14 @@ class TestMapPlayerStats(unittest.TestCase):
             goal=None,  # Missing goal should be None
             assists=None,  # Missing assists should be None
             penalties=10,
-            plus_minus=5
+            plus_minus=5,
         )
 
-    @patch('hmtracker.database.models.HockeyPlayer')
-    @patch('hmtracker.database.models.HockeyPlayerStats')
-    def test_map_player_stats_with_invalid_values(self, mock_HockeyPlayerStats, mock_HockeyPlayer):
+    @patch("hmtracker.database.models.HockeyPlayer")
+    @patch("hmtracker.database.models.HockeyPlayerStats")
+    def test_map_player_stats_with_invalid_values(
+        self, mock_HockeyPlayerStats, mock_HockeyPlayer
+    ):
         # Arrange: simulate invalid data that should trigger warnings
         player_stats_data = [
             {
@@ -221,9 +214,8 @@ class TestMapPlayerStats(unittest.TestCase):
         mock_HockeyPlayer.assert_called_once_with(
             id=None,  # Invalid id should be None
             name="Player Three",
-
             role="Forward",
-            foreigner=None
+            foreigner=None,
         )
         mock_HockeyPlayerStats.assert_called_once_with(
             player_id=None,  # Invalid id
@@ -236,9 +228,9 @@ class TestMapPlayerStats(unittest.TestCase):
             goal=12,
             assists=7,  # Assist #1 + Assist #2 + Assist OT
             penalties=20,
-            plus_minus=8
+            plus_minus=8,
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

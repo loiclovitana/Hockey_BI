@@ -1,6 +1,13 @@
-import enum
-
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float, Date, Boolean, Enum
+from sqlalchemy import (
+    Column,
+    ForeignKey,
+    Integer,
+    String,
+    DateTime,
+    Float,
+    Date,
+    Boolean,
+)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.functions import func
@@ -13,7 +20,7 @@ def to_json(dbObject: HMDatabaseObject) -> dict:
 
 
 class Season(HMDatabaseObject):
-    __tablename__ = 'SEASONS'
+    __tablename__ = "SEASONS"
     id = Column(Integer, primary_key=True)
     name = Column(String)
     start = Column(Date, nullable=False)
@@ -25,7 +32,9 @@ class HockeyPlayer(HMDatabaseObject):
     __tablename__ = "HOCKEY_PLAYERS"
 
     id = Column(Integer, primary_key=True)
-    season_id = Column(Integer, ForeignKey('SEASONS.id'), primary_key=True, nullable=False)
+    season_id = Column(
+        Integer, ForeignKey("SEASONS.id"), primary_key=True, nullable=False
+    )
     name = Column(String, nullable=False)
     role = Column(String, nullable=False)
     foreigner = Column(Boolean, nullable=False)
@@ -36,11 +45,15 @@ class HockeyPlayer(HMDatabaseObject):
 class HockeyPlayerStats(HMDatabaseObject):
     __tablename__ = "HOCKEY_PLAYER_STATS"
 
-    player_id = Column(Integer, ForeignKey('HOCKEY_PLAYERS.id'), primary_key=True, nullable=False)
-    season_id = Column(Integer, ForeignKey('SEASONS.id'), primary_key=True, nullable=False)
+    player_id = Column(
+        Integer, ForeignKey("HOCKEY_PLAYERS.id"), primary_key=True, nullable=False
+    )
+    season_id = Column(
+        Integer, ForeignKey("SEASONS.id"), primary_key=True, nullable=False
+    )
     validity_date = Column(DateTime, primary_key=True, nullable=False)
 
-    import_id = Column(Integer, ForeignKey('STATS_IMPORT.id'), nullable=True)
+    import_id = Column(Integer, ForeignKey("STATS_IMPORT.id"), nullable=True)
     price = Column(Float, nullable=False)
     club = Column(String, nullable=False)
     ownership = Column(Float)
@@ -59,7 +72,7 @@ class StatImport(HMDatabaseObject):
     __tablename__ = "STATS_IMPORT"
     id = Column(Integer, primary_key=True)
     import_date = Column(DateTime, nullable=False, server_default=func.now())
-    origin = Column(String, nullable=False, server_default='Unknown')
+    origin = Column(String, nullable=False, server_default="Unknown")
     comment = Column(String, server_default="", nullable=False)
 
     stats = relationship("HockeyPlayerStats", back_populates="importation")
@@ -82,4 +95,4 @@ class Team(HMDatabaseObject):
     from_datetime = Column(DateTime, nullable=True)
     to_datetime = Column(DateTime, nullable=True)
 
-    manager = relationship('Manager')
+    manager = relationship("Manager")

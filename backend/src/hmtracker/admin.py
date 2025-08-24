@@ -1,7 +1,11 @@
 from threading import Thread
 from os import getenv
 
-from hmtracker.constants import HM_DATABASE_URL_ENV_NAME, HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
+from hmtracker.constants import (
+    HM_DATABASE_URL_ENV_NAME,
+    HM_USER_ENV_NAME,
+    HM_PASSWORD_ENV_NAME,
+)
 import hmtracker.loader.main as loader
 from hashlib import sha256
 
@@ -11,7 +15,9 @@ HMTRACKER_ADMIN_USER_ENV = "HMTRACKER_ADMIN_USER"
 HMTRACKER_ADMIN_PASSWORD_ENV = "HMTRACKER_ADMIN_PASSWORD"
 __PASSWORD_ENCODING = "UTF-8"
 __ADMIN_USER = getenv(HMTRACKER_ADMIN_USER_ENV)
-__ADMIN_HASH_PASSWORD = sha256(getenv(HMTRACKER_ADMIN_PASSWORD_ENV).encode(__PASSWORD_ENCODING)).digest()
+__ADMIN_HASH_PASSWORD = sha256(
+    getenv(HMTRACKER_ADMIN_PASSWORD_ENV).encode(__PASSWORD_ENCODING)
+).digest()
 
 
 class ServerBusyException(Exception):
@@ -34,7 +40,9 @@ def is_running_operation() -> bool:
 def check_operation():
     global _current_operation
     if is_running_operation() and _current_operation is not None:
-        raise ServerBusyException(f"Server is currently busy with operation: {_current_operation.name}")
+        raise ServerBusyException(
+            f"Server is currently busy with operation: {_current_operation.name}"
+        )
     del _current_operation
     _current_operation = None
 

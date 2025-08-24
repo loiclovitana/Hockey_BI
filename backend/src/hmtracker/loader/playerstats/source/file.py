@@ -1,8 +1,8 @@
 import csv
 from collections.abc import Callable
 
-__DELIMITER = ';'
-__ENCODING = 'utf-8-sig'
+__DELIMITER = ";"
+__ENCODING = "utf-8-sig"
 
 
 def playerstats_csv_loader(csv_file_path: str) -> Callable[[], list[dict[str, str]]]:

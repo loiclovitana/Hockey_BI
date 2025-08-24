@@ -58,5 +58,7 @@ build-backend = "hatchling.build"
 packages = ["src/hmtracker","src/test"]
 
 [dependency-groups]
-dev = []
+dev = [
+    "ruff>=0.12.10",
+]
 

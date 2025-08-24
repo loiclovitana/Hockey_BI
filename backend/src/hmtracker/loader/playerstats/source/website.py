@@ -3,8 +3,9 @@ from collections.abc import Callable
 from hmtracker.parser.hmparser import HMAjaxScrapper
 
 
-
-def playerstats_ajax_loader(user: str, password: str) -> Callable[[], list[dict[str, str]]]:
+def playerstats_ajax_loader(
+    user: str, password: str
+) -> Callable[[], list[dict[str, str]]]:
     """
     :param user: login for Hockey manager website
     :param password:
@@ -20,11 +21,9 @@ def playerstats_ajax_loader(user: str, password: str) -> Callable[[], list[dict[
 
             players_data = parser.get_all_players()
             for player in players_data:
-                player.update(parser.get_player_stats(player['id']))
+                player.update(parser.get_player_stats(player["id"]))
         finally:
             parser.close_session()
         return players_data
 
     return load_data
-
-
