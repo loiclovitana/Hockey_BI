@@ -1,14 +1,13 @@
-import { createTheme } from '@mui/material/styles'
+import { createTheme } from "@mui/material/styles";
 
 export const theme = createTheme({
-  
   palette: {
-    mode:"dark",
+    mode: "dark",
     primary: {
-      main: '#d25419ff',
+      main: "#d25419ff",
     },
     secondary: {
-      main: '#dc0000ff',
+      main: "#dc0000ff",
     },
   },
   typography: {
@@ -18,9 +17,9 @@ export const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: 'none',
+          textTransform: "none",
         },
       },
     },
   },
-})
+});

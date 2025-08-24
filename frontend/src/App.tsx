@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import {
   ThemeProvider,
   CssBaseline,
@@ -8,27 +8,27 @@ import {
   Typography,
   IconButton,
   Box,
-} from '@mui/material'
-import { Menu as MenuIcon } from '@mui/icons-material'
-import { theme } from './theme'
-import { Sidebar } from './components/Sidebar'
-import { Dashboard } from './pages/Dashboard'
-import { Players } from './pages/Players'
-import { Analytics } from './pages/Analytics'
-import { Settings } from './pages/Settings'
+} from "@mui/material";
+import { Menu as MenuIcon } from "@mui/icons-material";
+import { theme } from "./theme";
+import { Sidebar } from "./components/Sidebar";
+import { Dashboard } from "./pages/Dashboard";
+import { Players } from "./pages/Players";
+import { Analytics } from "./pages/Analytics";
+import { Settings } from "./pages/Settings";
 
 function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleSidebarToggle = () => {
-    setSidebarOpen(!sidebarOpen)
-  }
+    setSidebarOpen(!sidebarOpen);
+  };
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box sx={{ display: 'flex' }}>
+        <Box sx={{ display: "flex" }}>
           <AppBar
             position="fixed"
             sx={{
@@ -50,19 +50,20 @@ function App() {
               </Typography>
             </Toolbar>
           </AppBar>
-          
+
           <Sidebar open={sidebarOpen} />
-          
+
           <Box
             component="main"
             sx={{
               flexGrow: 1,
               p: 0,
-              marginLeft: sidebarOpen ? '240px' : 0,
-              transition: (theme) => theme.transitions.create('margin-left', {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.leavingScreen,
-              }),
+              marginLeft: sidebarOpen ? "240px" : 0,
+              transition: (theme) =>
+                theme.transitions.create("margin-left", {
+                  easing: theme.transitions.easing.sharp,
+                  duration: theme.transitions.duration.leavingScreen,
+                }),
             }}
           >
             <Toolbar />
@@ -76,7 +77,7 @@ function App() {
         </Box>
       </Router>
     </ThemeProvider>
-  )
+  );
 }
 
-export default App
+export default App;

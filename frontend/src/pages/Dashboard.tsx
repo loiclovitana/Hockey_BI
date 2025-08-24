@@ -1,5 +1,5 @@
-import React from 'react'
-import { Box, Typography, Paper } from '@mui/material'
+import React from "react";
+import { Box, Typography, Paper } from "@mui/material";
 
 export const Dashboard: React.FC = () => {
   return (
@@ -9,9 +9,10 @@ export const Dashboard: React.FC = () => {
       </Typography>
       <Paper sx={{ p: 2, mt: 2 }}>
         <Typography variant="body1">
-          Welcome to the Hockey BI Dashboard. Here you can view an overview of your hockey data and analytics.
+          Welcome to the Hockey BI Dashboard. Here you can view an overview of
+          your hockey data and analytics.
         </Typography>
       </Paper>
     </Box>
-  )
-}
+  );
+};
