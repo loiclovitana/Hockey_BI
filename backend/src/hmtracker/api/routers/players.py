@@ -45,4 +45,7 @@ async def get_player(player_id: int, session: SessionDep):
 async def get_players_stats(players_ids: list[int], session: SessionDep):
     players_stats = session.get_player_stats(players_ids)
 
+    if players_stats is None:
+        raise HTTPException(status_code=404,detail=f"No player found")
+
     return [dict(ps.__dict__) for ps in players_stats]

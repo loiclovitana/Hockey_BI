@@ -3,7 +3,7 @@ from random import randint
 import logging
 import bs4.element
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from requests import Session
 
 from hmtracker.constants import HM_URL
@@ -38,6 +38,9 @@ PAGE_REQUEST_HEADER = {
     "Pragma": "no-cache",
     "Cache-Control": "no-cache",
 }
+
+class ScrappingError(Exception):
+    """Exception for scrapping"""
 
 
 class HMAjaxScrapper:
@@ -102,6 +105,7 @@ class HMAjaxScrapper:
         """
         :return: data about the existing teams of the player
         """
+        assert self.dashboard is not None, "Scrapper needs to be connected to HM"
         teams_soups = self.dashboard.select(".is-a-team.selectTeam")
 
         def _get_points_rank(team_soup):
@@ -119,11 +123,15 @@ class HMAjaxScrapper:
                 }
             except ValueError:
                 return {"points": 0}
-
+        def get_team_name(team_soup : Tag):
+            team_name_element = team_soup.find(attrs={"class": "team-name"})
+            if team_name_element is None:
+                raise ScrappingError("Name of team couldn't be found in team object")
+            return team_name_element.text
         return [
             {
                 "id": team_soup["attr"],
-                "name": team_soup.find(attrs={"class": "team-name"}).text,
+                "name": get_team_name(team_soup),
                 **_get_points_rank(team_soup),
             }
             for team_soup in teams_soups
