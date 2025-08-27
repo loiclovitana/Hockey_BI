@@ -1,17 +1,48 @@
-import React from "react";
-import { Box, Typography, Paper } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Box } from "@mui/material";
+import { type HockeyPlayer, getPlayersPlayersGet } from "../client"
+import { HockeyPlayerList } from "../components/HockeyPlayerList";
+import { PlayerDashboard } from "../components/PlayerDashboard";
+
+
 
 export const Players: React.FC = () => {
-  return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Players
-      </Typography>
-      <Paper sx={{ p: 2, mt: 2 }}>
-        <Typography variant="body1">
-          Player statistics and information will be displayed here.
-        </Typography>
-      </Paper>
+  const [loading, setLoading] = useState(true);
+  const [players, setPlayers] = useState<HockeyPlayer[]>([]);
+  const [selectedPlayer, setSelectedPlayer] = useState<HockeyPlayer|null>(null);
+  
+  useEffect(() => {
+    const response = getPlayersPlayersGet().then(response => { 
+    if (response.error) {
+      console.error(response.error)
+    }
+    if (response.data) {
+      setPlayers(response.data);
+    }
+  }).catch(
+
+  ).finally(
+    () => setLoading(false)
+  )
+}, [])
+
+return (
+  <Box sx={{ display: 'flex', height: 'calc(100vh - 64px)', gap: 2, p: 2 }}>
+    <Box sx={{ 
+      width: '300px', 
+      minWidth: '300px',
+      height: '100%',
+    }}>
+      <HockeyPlayerList players={players} setSelectedHockeyPlayer={setSelectedPlayer} selectedPlayer={selectedPlayer}/>
     </Box>
-  );
+    
+    <Box sx={{ 
+      flex: 1,
+      height: '100%',
+      width: '100%'
+    }}>
+      <PlayerDashboard selectedPlayer={selectedPlayer} />
+    </Box>
+  </Box>
+);
 };

@@ -17,6 +17,12 @@ import { Players } from "./pages/Players";
 import { Analytics } from "./pages/Analytics";
 import { Settings } from "./pages/Settings";
 
+import { client } from './client/client.gen';
+
+client.setConfig({
+  baseUrl: 'http://localhost:8000/',
+});
+
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -56,9 +62,7 @@ function App() {
           <Box
             component="main"
             sx={{
-              flexGrow: 1,
-              p: 0,
-              marginLeft: sidebarOpen ? "240px" : 0,
+               marginLeft: sidebarOpen ? "140px" : "-100px",
               transition: (theme) =>
                 theme.transitions.create("margin-left", {
                   easing: theme.transitions.easing.sharp,

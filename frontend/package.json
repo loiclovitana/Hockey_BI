@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "format": "prettier --write . --list-different"
+    "format": "prettier --write . --list-different",
+    "generate": "openapi-ts"
+
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -21,6 +23,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@hey-api/openapi-ts": "0.81.1",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^5.0.0",
