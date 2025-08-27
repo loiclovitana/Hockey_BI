@@ -1,5 +1,5 @@
 import React from "react";
-import { Paper, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { type HockeyPlayer } from "../client";
 
 interface PlayerDashboardProps {
@@ -8,7 +8,7 @@ interface PlayerDashboardProps {
 
 export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({ selectedPlayer }) => {
   return (
-    <Paper sx={{ p: 3, height: '100%' }}>
+    <Box sx={{ p: 3, height: '100%' }}>
       {selectedPlayer ? (
         <>
           <Typography variant="h4" gutterBottom>
@@ -26,6 +26,6 @@ export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({ selectedPlayer
           Select a player to view details
         </Typography>
       )}
-    </Paper>
+    </Box>
   );
 };

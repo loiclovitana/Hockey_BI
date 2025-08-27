@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box } from "@mui/material";
+import { Box, Paper } from "@mui/material";
 import { type HockeyPlayer, getPlayersPlayersGet } from "../client"
 import { HockeyPlayerList } from "../components/HockeyPlayerList";
 import { PlayerDashboard } from "../components/PlayerDashboard";
@@ -12,7 +12,7 @@ export const Players: React.FC = () => {
   const [selectedPlayer, setSelectedPlayer] = useState<HockeyPlayer|null>(null);
   
   useEffect(() => {
-    const response = getPlayersPlayersGet().then(response => { 
+    getPlayersPlayersGet().then(response => { 
     if (response.error) {
       console.error(response.error)
     }
@@ -27,14 +27,16 @@ export const Players: React.FC = () => {
 }, [])
 
 return (
-  <Box sx={{ display: 'flex', height: 'calc(100vh - 64px)', gap: 2, p: 2 }}>
-    <Box sx={{ 
+  <Box sx={{ display: 'flex', height:"100%", gap: 2, p: 2 }}>
+    <Paper elevation={2}
+    sx={{ 
       width: '300px', 
       minWidth: '300px',
       height: '100%',
+      px:1
     }}>
       <HockeyPlayerList players={players} setSelectedHockeyPlayer={setSelectedPlayer} selectedPlayer={selectedPlayer}/>
-    </Box>
+    </Paper>
     
     <Box sx={{ 
       flex: 1,

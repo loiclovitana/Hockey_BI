@@ -37,16 +37,21 @@ export const HockeyPlayerList: React.FC<HockeyPlayerListProps> = ({
   );
 
   return (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <Box sx={{ flex: 1, height: "100%", display: "flex", flexDirection: "column" }}>
       <TextField
         fullWidth
         variant="outlined"
         placeholder="Search players..."
+        size="small"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        sx={{ mb: 2 }}
+        sx={{ 
+          backgroundColor: "background.paper",
+          boxShadow: 1,
+          mt:2
+        }}
       />
-      <List sx={{ flex: 1, overflow: 'auto' }}>
+      <List  sx={{ flex: 1, overflow: 'auto', pt:1 }}>
         {filteredPlayers.map((player) => (
           <ListItem key={player.id} disablePadding>
             <ListItemButton

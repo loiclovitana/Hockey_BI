@@ -23,6 +23,8 @@ client.setConfig({
   baseUrl: 'http://localhost:8000/',
 });
 
+const SIDEBAR_WIDTH = "240px";
+
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -34,7 +36,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Box sx={{ display: "flex" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
           <AppBar
             position="fixed"
             sx={{
@@ -57,20 +59,23 @@ function App() {
             </Toolbar>
           </AppBar>
 
-          <Sidebar open={sidebarOpen} />
+          <Box sx={{ display: "flex", flexDirection: "row", flex: 1,
+            maxHeight:"100vh"
+            , pt: (theme) => `${theme.mixins.toolbar.minHeight}px` }}>
+            <Sidebar open={sidebarOpen} width={SIDEBAR_WIDTH}/>
 
-          <Box
-            component="main"
-            sx={{
-               marginLeft: sidebarOpen ? "140px" : "-100px",
-              transition: (theme) =>
-                theme.transitions.create("margin-left", {
-                  easing: theme.transitions.easing.sharp,
-                  duration: theme.transitions.duration.leavingScreen,
-                }),
-            }}
-          >
-            <Toolbar />
+            <Box
+              component="main"
+              sx={{
+                 marginLeft: sidebarOpen ? 0 : "-"+SIDEBAR_WIDTH,
+                 flex: 1,
+                transition: (theme) =>
+                  theme.transitions.create("margin-left", {
+                    easing: theme.transitions.easing.easeInOut,
+                    duration: theme.transitions.duration.short,
+                  }),
+              }}
+            >
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/players" element={<Players />} />
@@ -78,6 +83,7 @@ function App() {
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </Box>
+        </Box>
         </Box>
       </Router>
     </ThemeProvider>
