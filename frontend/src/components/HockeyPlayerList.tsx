@@ -7,6 +7,8 @@ import {
   Box,
   TextField,
 } from "@mui/material";
+import PublicIcon from "@mui/icons-material/Public";
+import  SwissIcon   from "../assets/flag-switzerland.svg";
 import { type HockeyPlayer } from "../client";
 
 interface HockeyPlayerListProps {
@@ -60,7 +62,16 @@ export const HockeyPlayerList: React.FC<HockeyPlayerListProps> = ({
             >
               <ListItemText
                 primary={player.name}
-                secondary={`${player.role} ${player.foreigner ? "• Foreign" : ""}`}
+                secondary={
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <span>{player.role}</span>
+                    {player.foreigner ? (
+                      <PublicIcon sx={{ fontSize: 16 }} />
+                    ) : (
+                      <img src={SwissIcon} style={{height:"16px"}}></img>
+                    )}
+                  </Box>
+                }
               />
             </ListItemButton>
           </ListItem>

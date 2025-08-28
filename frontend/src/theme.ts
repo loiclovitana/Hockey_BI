@@ -9,17 +9,11 @@ export const theme = createTheme({
     secondary: {
       main: "#dc0000ff",
     },
+    background: {
+      default: "#1c1815ff",
+    },
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: "none",
-        },
-      },
-    },
-  },
+  }
 });
