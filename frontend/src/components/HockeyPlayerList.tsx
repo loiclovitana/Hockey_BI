@@ -63,14 +63,13 @@ export const HockeyPlayerList: React.FC<HockeyPlayerListProps> = ({
               <ListItemText
                 primary={player.name}
                 secondary={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <span>{player.role}</span>
+                    <span>{player.role}
                     {player.foreigner ? (
-                      <PublicIcon sx={{ fontSize: 16 }} />
+                      <PublicIcon sx={{ fontSize: 16,mx:1 }} />
                     ) : (
-                      <img src={SwissIcon} style={{height:"16px"}}></img>
+                      <img src={SwissIcon} style={{height:"16px",marginLeft:"5px"}}></img>
                     )}
-                  </Box>
+                    </span>
                 }
               />
             </ListItemButton>

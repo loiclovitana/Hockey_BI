@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 
 from hmtracker.api.admin_login import create_access_token
-from .routers import admin, players
+from .routers import admin, players,myteam
 
 api = FastAPI()
 app= CORSMiddleware(
@@ -17,6 +17,7 @@ app= CORSMiddleware(
 
 api.include_router(admin.router)
 api.include_router(players.router)
+api.include_router(myteam.router)
 
 
 @api.get("/ping")

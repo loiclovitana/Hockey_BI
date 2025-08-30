@@ -87,6 +87,7 @@ class Manager(HMDatabaseObject):
     __tablename__ = "MANAGER"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str | None] = mapped_column(String, unique=True)
+    last_import :Mapped[datetime | None] = mapped_column(DateTime,nullable=True)
 
 
 class Team(HMDatabaseObject):

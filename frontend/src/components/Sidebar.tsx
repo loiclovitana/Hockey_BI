@@ -12,8 +12,6 @@ import {
 import {
   Dashboard as DashboardIcon,
   Sports as SportsIcon,
-  Analytics as AnalyticsIcon,
-  Settings as SettingsIcon,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -25,9 +23,7 @@ interface SidebarProps {
 
 const menuItems = [
   { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
-  { text: "Players", icon: <SportsIcon />, path: "/players" },
-  { text: "Analytics", icon: <AnalyticsIcon />, path: "/analytics" },
-  { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
+  { text: "Players", icon: <SportsIcon />, path: "/players" }
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ open , width}) => {

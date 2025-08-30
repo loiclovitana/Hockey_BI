@@ -14,8 +14,6 @@ import { theme } from "./theme";
 import { Sidebar } from "./components/Sidebar";
 import { Dashboard } from "./pages/Dashboard";
 import { Players } from "./pages/Players";
-import { Analytics } from "./pages/Analytics";
-import { Settings } from "./pages/Settings";
 
 import { client } from './client/client.gen';
 
@@ -79,8 +77,6 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/players" element={<Players />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/settings" element={<Settings />} />
             </Routes>
           </Box>
         </Box>

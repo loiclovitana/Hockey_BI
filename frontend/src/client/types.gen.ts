@@ -31,6 +31,16 @@ export type BodyLoginAdminLoginPost = {
 };
 
 /**
+ * DashBoardData
+ */
+export type DashBoardData = {
+    /**
+     * My Teams
+     */
+    my_teams: Array<Team>;
+};
+
+/**
  * HTTPValidationError
  */
 export type HttpValidationError = {
@@ -122,6 +132,40 @@ export type HockeyPlayerStats = {
      * Plus Minus
      */
     plus_minus?: number | null;
+};
+
+/**
+ * Team
+ */
+export type Team = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Team
+     */
+    team: string;
+    /**
+     * Manager Id
+     */
+    manager_id: number;
+    /**
+     * Player Id
+     */
+    player_id: number;
+    /**
+     * Season Id
+     */
+    season_id: number;
+    /**
+     * From Datetime
+     */
+    from_datetime?: string | null;
+    /**
+     * To Datetime
+     */
+    to_datetime?: string | null;
 };
 
 /**
@@ -262,6 +306,40 @@ export type GetPlayerStatsPlayersStatsIdPlayerIdGetResponses = {
 };
 
 export type GetPlayerStatsPlayersStatsIdPlayerIdGetResponse = GetPlayerStatsPlayersStatsIdPlayerIdGetResponses[keyof GetPlayerStatsPlayersStatsIdPlayerIdGetResponses];
+
+export type LoadMyteamLoadPostData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Hm User
+         */
+        hm_user: string;
+        /**
+         * Hm Password
+         */
+        hm_password: string;
+    };
+    url: '/myteam/load';
+};
+
+export type LoadMyteamLoadPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type LoadMyteamLoadPostError = LoadMyteamLoadPostErrors[keyof LoadMyteamLoadPostErrors];
+
+export type LoadMyteamLoadPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: DashBoardData;
+};
+
+export type LoadMyteamLoadPostResponse = LoadMyteamLoadPostResponses[keyof LoadMyteamLoadPostResponses];
 
 export type PingServerPingGetData = {
     body?: never;

@@ -98,6 +98,27 @@ class RepositorySession:
             .all()
         )
 
+    def get_teams(
+        self, manager: int | models.Manager, season: int | models.Season | None = None
+    ) -> list[models.Team]:
+        manager_id = manager if isinstance(manager, int) else manager.id
+        if season is None:
+            return ( self.session.query(models.Team)
+                .filter(
+                    models.Team.manager_id == manager_id,
+                )
+                .all()
+            )
+        season_id = season if isinstance(season, int) else season.id
+        return (
+            self.session.query(models.Team)
+            .filter(
+                models.Team.manager_id == manager_id,
+                models.Team.season_id == season_id,
+            )
+            .all()
+        )
+
     def get_manager_by_email(self, email: str):
         return (
             self.session.query(models.Manager)

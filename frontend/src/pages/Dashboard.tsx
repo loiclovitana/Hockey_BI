@@ -1,18 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Typography, Paper } from "@mui/material";
+import { type DashBoardData } from "../client";
+import { TeamLoginForm } from "../components/TeamLoginForm";
 
 export const Dashboard: React.FC = () => {
-  return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Dashboard
-      </Typography>
-      <Paper sx={{ p: 2, mt: 2 }}>
-        <Typography variant="body1">
-          Welcome to the Hockey BI Dashboard. Here you can view an overview of
-          your hockey data and analytics.
+  const [dashboardData, setDashboardData] = useState<DashBoardData | null>(null);
+
+
+  if (dashboardData) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h4" gutterBottom>
+          Dashboard
         </Typography>
-      </Paper>
-    </Box>
-  );
+        <Paper sx={{ p: 2, mt: 2 }}>
+          <Typography variant="body1">
+            OK
+          </Typography>
+        </Paper>
+      </Box>
+    );
+  }
+
+  return <TeamLoginForm onSuccess={setDashboardData} />;
 };
