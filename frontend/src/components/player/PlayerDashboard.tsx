@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
-import { type HockeyPlayerStats, getPlayerStatsPlayersStatsIdPlayerIdGet, type LastPlayerStats } from "../client";
+import { type HockeyPlayerStats, getPlayerStatsPlayersStatsIdPlayerIdGet, type LastPlayerStats } from "../../client";
 import { PlayerStatsDataGrid } from "./PlayerStatsDataGrid";
 import { HockeyPlayerOwnershipChart } from "./HockeyPlayerOwnershipChart";
 

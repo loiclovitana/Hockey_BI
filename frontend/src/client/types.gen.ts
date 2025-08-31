@@ -34,10 +34,11 @@ export type BodyLoginAdminLoginPost = {
  * DashBoardData
  */
 export type DashBoardData = {
+    manager: Manager;
     /**
      * My Teams
      */
-    my_teams: Array<Team>;
+    my_teams: Array<Array<Team>>;
 };
 
 /**
@@ -132,6 +133,10 @@ export type HockeyPlayerStats = {
      * Plus Minus
      */
     plus_minus?: number | null;
+    /**
+     * Estimated Value
+     */
+    readonly estimated_value: number;
 };
 
 /**
@@ -140,6 +145,24 @@ export type HockeyPlayerStats = {
 export type LastPlayerStats = {
     player_info: HockeyPlayer;
     player_stats: HockeyPlayerStats | null;
+};
+
+/**
+ * Manager
+ */
+export type Manager = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Email
+     */
+    email?: string | null;
+    /**
+     * Last Import
+     */
+    last_import?: string | null;
 };
 
 /**

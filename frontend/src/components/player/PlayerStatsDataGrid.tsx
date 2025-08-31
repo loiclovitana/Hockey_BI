@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import { type HockeyPlayerStats } from "../client";
+import { type HockeyPlayerStats } from "../../client";
 
 interface PlayerStatsDataGridProps {
   playerStats: HockeyPlayerStats[] | null;

@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { Menu as MenuIcon } from "@mui/icons-material";
 import { theme } from "./theme";
-import { Sidebar } from "./components/Sidebar";
+import { Sidebar } from "./components/common/Sidebar";
 import { Dashboard } from "./pages/Dashboard";
 import { Players } from "./pages/Players";
 import { PlayerStatsProvider } from "./context/PlayerStatsProvider";

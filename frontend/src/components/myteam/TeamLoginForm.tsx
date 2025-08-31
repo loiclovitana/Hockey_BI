@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Box, Typography,  TextField, Button, Container } from "@mui/material";
-import { loadMyteamLoadPost, type DashBoardData } from "../client";
+import { loadMyteamLoadPost, type DashBoardData } from "../../client";
 
 interface TeamLoginFormProps {
   onSuccess: (data: DashBoardData) => void;

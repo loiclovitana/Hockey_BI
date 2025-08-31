@@ -26,7 +26,8 @@ SessionDep = Annotated[repo.RepositorySession, Depends(get_session)]
 
 
 class DashBoardData(BaseModel):
-    my_teams:list[api_models.Team]
+    manager:api_models.Manager
+    my_teams:list[list[api_models.Team]]
     
 
 @router.post("/load")
@@ -38,7 +39,20 @@ async def load(hm_user:str,hm_password:str,session: SessionDep) -> DashBoardData
     manager = session.get_manager_by_email(hm_user)
     if manager is None:
         raise HTTPException(status_code=500,detail="Manager wasn't saved correctly")
+    teams = [api_models.Team.model_validate(team.__dict__) for team in session.get_teams(manager=manager)]
     
+    # Group teams by team attribute and sort
+    teams_by_group = {}
+    for team in teams:
+        group_key = team.team
+        if group_key not in teams_by_group:
+            teams_by_group[group_key] = []
+        teams_by_group[group_key].append(team)
+    
+    # Sort groups by key and create sorted list of team lists
+    sorted_team_groups = [teams_by_group[key] for key in sorted(teams_by_group.keys())]
+
     return  DashBoardData(
-        my_teams=[ api_models.Team.model_validate(team.__dict__) for team in session.get_teams(manager=manager)]
+        manager=api_models.Manager.model_validate(manager.__dict__),
+        my_teams=sorted_team_groups
     )

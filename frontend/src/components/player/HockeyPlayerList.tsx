@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import PublicIcon from "@mui/icons-material/Public";
 import  SwissIcon   from "../assets/flag-switzerland.svg";
-import { type LastPlayerStats } from "../client";
+import { type LastPlayerStats } from "../../client";
 
 interface HockeyPlayerItemProps {
   player: LastPlayerStats;
@@ -46,13 +46,13 @@ const HockeyPlayerItem: React.FC<HockeyPlayerItemProps> = ({
   );
 };
 
-interface HockeyPlayerListProps {
+interface HockeyPlayerSearchProps {
   players: LastPlayerStats[];
   selectedPlayer?: LastPlayerStats|null;
   setSelectedHockeyPlayer: (player: LastPlayerStats) => void;
 }
 
-export const HockeyPlayerList: React.FC<HockeyPlayerListProps> = ({
+export const HockeyPlayerSearch: React.FC<HockeyPlayerSearchProps> = ({
   players,
   selectedPlayer,
   setSelectedHockeyPlayer,
