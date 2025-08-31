@@ -135,6 +135,14 @@ export type HockeyPlayerStats = {
 };
 
 /**
+ * LastPlayerStats
+ */
+export type LastPlayerStats = {
+    player_info: HockeyPlayer;
+    player_stats: HockeyPlayerStats | null;
+};
+
+/**
  * Team
  */
 export type Team = {
@@ -306,6 +314,23 @@ export type GetPlayerStatsPlayersStatsIdPlayerIdGetResponses = {
 };
 
 export type GetPlayerStatsPlayersStatsIdPlayerIdGetResponse = GetPlayerStatsPlayersStatsIdPlayerIdGetResponses[keyof GetPlayerStatsPlayersStatsIdPlayerIdGetResponses];
+
+export type GetLatestPlayerStatsPlayersLatestGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/players/latest/';
+};
+
+export type GetLatestPlayerStatsPlayersLatestGetResponses = {
+    /**
+     * Response Get Latest Player Stats Players Latest  Get
+     * Successful Response
+     */
+    200: Array<LastPlayerStats>;
+};
+
+export type GetLatestPlayerStatsPlayersLatestGetResponse = GetLatestPlayerStatsPlayersLatestGetResponses[keyof GetLatestPlayerStatsPlayersLatestGetResponses];
 
 export type LoadMyteamLoadPostData = {
     body?: never;

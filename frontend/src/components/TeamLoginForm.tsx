@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Typography, Paper, TextField, Button, Container } from "@mui/material";
+import { Box, Typography,  TextField, Button, Container } from "@mui/material";
 import { loadMyteamLoadPost, type DashBoardData } from "../client";
 
 interface TeamLoginFormProps {
@@ -48,10 +48,17 @@ export const TeamLoginForm: React.FC<TeamLoginFormProps> = ({ onSuccess }) => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 8 }}>
-      <Paper sx={{ p: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom align="center">
-          Load Team Data
+    <Container  
+      sx={{ 
+        mt: 8,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+        <Typography variant="h2" gutterBottom align="center">
+          Start now
         </Typography>
         
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
@@ -87,10 +94,9 @@ export const TeamLoginForm: React.FC<TeamLoginFormProps> = ({ onSuccess }) => {
             disabled={loading || !hmUser.trim() || !hmPassword.trim()}
             sx={{ mt: 2 }}
           >
-            {loading ? "Loading..." : "Load Team"}
+            {loading ? "Loading..." : "Load my HM data"}
           </Button>
         </Box>
-      </Paper>
     </Container>
   );
 };

@@ -5,6 +5,7 @@ from os import getenv
 from hmtracker.constants import HM_DATABASE_URL_ENV_NAME
 from hmtracker.database import repository as repo, models
 from hmtracker.api import models as api_models
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/players", tags=["players"])
 
@@ -51,3 +52,25 @@ async def get_player_stats(player_id: int, session: SessionDep) -> list[api_mode
         raise HTTPException(status_code=404,detail=f"No player found")
     print(players_stats)
     return [api_models.HockeyPlayerStats.model_validate(stat.__dict__) for stat in players_stats]
+
+
+class LastPlayerStats(BaseModel):
+    player_info : api_models.HockeyPlayer
+    player_stats: api_models.HockeyPlayerStats | None
+
+@router.get("/latest/")
+async def get_latest_player_stats(session:SessionDep) -> list[LastPlayerStats]:
+    players = [api_models.HockeyPlayer.model_validate(p.__dict__) for p in  session.get_players()]
+    stats = session.get_current_player_stats([p.id for p in players])
+    if stats is None:
+        raise HTTPException(status_code=404,detail="No player stats could be found for current season")
+    current_players_stats ={ stat.player_id:api_models.HockeyPlayerStats.model_validate(stat.__dict__) for stat in stats}
+
+    last_player_stats = [
+        LastPlayerStats(
+            player_info=player,
+            player_stats=current_players_stats.get(player.id)
+        )
+        for player in players
+    ]
+    return last_player_stats

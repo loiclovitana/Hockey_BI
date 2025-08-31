@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
-import { type HockeyPlayerStats, type HockeyPlayer, getPlayerStatsPlayersStatsIdPlayerIdGet } from "../client";
+import { type HockeyPlayerStats, getPlayerStatsPlayersStatsIdPlayerIdGet, type LastPlayerStats } from "../client";
 import { PlayerStatsDataGrid } from "./PlayerStatsDataGrid";
 import { HockeyPlayerOwnershipChart } from "./HockeyPlayerOwnershipChart";
 
 interface PlayerDashboardProps {
-  selectedPlayer: HockeyPlayer | null;
+  selectedPlayer: LastPlayerStats | null;
 }
 
 export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({ selectedPlayer }) => {
@@ -17,7 +17,7 @@ export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({ selectedPlayer
       setPlayerStats(null);
       return
     }
-    getPlayerStatsPlayersStatsIdPlayerIdGet({path:{player_id:selectedPlayer?.id}}).then(
+    getPlayerStatsPlayersStatsIdPlayerIdGet({path:{player_id:selectedPlayer?.player_info.id}}).then(
       res => {
         if(res.data){
           setPlayerStats(res.data)
@@ -31,13 +31,13 @@ export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({ selectedPlayer
       {selectedPlayer ? (
         <>
           <Typography variant="h4" gutterBottom>
-            {selectedPlayer.name}
+            {selectedPlayer.player_info.name}
           </Typography>
           <Typography variant="body1" sx={{ mt: 2 }}>
-            {selectedPlayer.role}
+            {selectedPlayer.player_info.role}
           </Typography>
           <Typography variant="body1">
-            {selectedPlayer.foreigner ? "Foreigner" : "Local"}
+            {selectedPlayer.player_info.foreigner ? "Foreigner" : "Local"}
           </Typography>
           <PlayerStatsDataGrid playerStats={playerStats} />
           <HockeyPlayerOwnershipChart playerStats={playerStats} />

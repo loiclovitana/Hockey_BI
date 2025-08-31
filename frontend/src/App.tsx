@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import {
   ThemeProvider,
@@ -14,6 +14,7 @@ import { theme } from "./theme";
 import { Sidebar } from "./components/Sidebar";
 import { Dashboard } from "./pages/Dashboard";
 import { Players } from "./pages/Players";
+import { PlayerStatsProvider } from "./context/PlayerStatsProvider";
 
 import { client } from './client/client.gen';
 
@@ -33,8 +34,9 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <PlayerStatsProvider>
+        <Router>
+        <Box sx={{ display: "flex", height: "100vh" }}>
           <AppBar
             position="fixed"
             sx={{
@@ -57,7 +59,7 @@ function App() {
             </Toolbar>
           </AppBar>
 
-          <Box sx={{ display: "flex", flexDirection: "row", flex: 1,
+          <Box sx={{ display: "flex",  flex: 1,
             maxHeight:"100vh"
             , pt: (theme) => `${theme.mixins.toolbar.minHeight}px` }}>
             <Sidebar open={sidebarOpen} width={SIDEBAR_WIDTH}/>
@@ -81,7 +83,8 @@ function App() {
           </Box>
         </Box>
         </Box>
-      </Router>
+        </Router>
+      </PlayerStatsProvider>
     </ThemeProvider>
   );
 }

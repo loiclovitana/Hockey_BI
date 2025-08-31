@@ -22,5 +22,5 @@ export const Dashboard: React.FC = () => {
     );
   }
 
-  return <TeamLoginForm onSuccess={setDashboardData} />;
+  return <TeamLoginForm onSuccess={setDashboardData}/>;
 };
