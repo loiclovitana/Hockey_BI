@@ -50,7 +50,6 @@ async def get_player_stats(player_id: int, session: SessionDep) -> list[api_mode
 
     if players_stats is None or len(players_stats)==0:
         raise HTTPException(status_code=404,detail=f"No player found")
-    print(players_stats)
     return [api_models.HockeyPlayerStats.model_validate(stat.__dict__) for stat in players_stats]
 
 
