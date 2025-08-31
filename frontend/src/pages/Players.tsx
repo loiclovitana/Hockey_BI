@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { Box, Paper } from "@mui/material";
 import {   type LastPlayerStats } from "../client"
-import { HockeyPlayerSearch } from "../components/player/HockeyPlayerList";
+import { HockeyPlayerSearch } from "../components/player/HockeyPlayerSearch";
 import { PlayerDashboard } from "../components/player/PlayerDashboard";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { ErrorMessage } from "../components/common/ErrorMessage";

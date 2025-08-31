@@ -1,7 +1,7 @@
 import React from "react";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { Box, Typography } from "@mui/material";
-import { type HockeyPlayerStats } from "../client";
+import { type HockeyPlayerStats } from "../../client";
 
 interface HockeyPlayerOwnershipChartProps {
   playerStats: HockeyPlayerStats[] | null;

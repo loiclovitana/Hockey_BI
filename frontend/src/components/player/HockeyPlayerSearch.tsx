@@ -9,7 +9,7 @@ import {
   Pagination,
 } from "@mui/material";
 import PublicIcon from "@mui/icons-material/Public";
-import  SwissIcon   from "../assets/flag-switzerland.svg";
+import  SwissIcon   from "../../assets/flag-switzerland.svg";
 import { type LastPlayerStats } from "../../client";
 
 interface HockeyPlayerItemProps {
