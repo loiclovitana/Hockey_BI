@@ -10,6 +10,7 @@ import {
   Paper,
   Checkbox,
   Typography,
+  Box,
 } from '@mui/material';
 import { type LastPlayerStats } from '../client/';
 
@@ -97,11 +98,11 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({
               <TableCell>Player Name</TableCell>
               <TableCell>Role</TableCell>
               <TableCell>Club</TableCell>
-              <TableCell align="right">Price</TableCell>
               <TableCell align="right">HM Points</TableCell>
               <TableCell align="right">Goals</TableCell>
               <TableCell align="right">Assists</TableCell>
               <TableCell align="right">Appearances</TableCell>
+              <TableCell align="right">Price</TableCell>
               <TableCell align="right">Estimated Value</TableCell>
             </TableRow>
           </TableHead>
@@ -137,9 +138,7 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({
                   </TableCell>
                   <TableCell>{row.player_info.role}</TableCell>
                   <TableCell>{row.player_stats?.club || '-'}</TableCell>
-                  <TableCell align="right">
-                    {row.player_stats?.price?.toLocaleString() || '-'}
-                  </TableCell>
+                  
                   <TableCell align="right">
                     {row.player_stats?.hm_points || '-'}
                   </TableCell>
@@ -153,7 +152,26 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({
                     {row.player_stats?.appearances || '-'}
                   </TableCell>
                   <TableCell align="right">
-                    {row.player_stats?.estimated_value?.toLocaleString() || '-'}
+                    {row.player_stats?.price || '-'} 
+                  </TableCell>
+                  <TableCell align="right">
+                    {(() => {
+                      if(!row.player_stats){return '-';}
+                      const price = row.player_stats.price;
+                      const estimatedValue = row.player_stats.estimated_value || price;
+                      
+                      const difference = estimatedValue - price;
+                      const sign = difference > 0 ? '+' : '';
+                      const color = difference > 0 ? 'success.main' :difference < 0 ?  'error.main':"primary.main";
+                      return (
+                        <Box component="span">
+                          {estimatedValue.toFixed(1)}{' '}
+                          <Box component="span" sx={{ color }}>
+                            ({sign}{difference.toFixed(1)})
+                          </Box>
+                        </Box>
+                      );
+                    })()}
                   </TableCell>
                 </TableRow>
               );
