@@ -16,10 +16,6 @@ class HMDatabaseObject(DeclarativeBase):
     pass
 
 
-def to_json(dbObject: HMDatabaseObject) -> dict:
-    return {c.name: getattr(dbObject, c.name) for c in dbObject.__table__.columns}
-
-
 class Season(HMDatabaseObject):
     __tablename__ = "SEASONS"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -91,6 +87,7 @@ class Manager(HMDatabaseObject):
     __tablename__ = "MANAGER"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str | None] = mapped_column(String, unique=True)
+    last_import :Mapped[datetime | None] = mapped_column(DateTime,nullable=True)
 
 
 class Team(HMDatabaseObject):

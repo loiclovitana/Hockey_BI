@@ -98,12 +98,34 @@ class RepositorySession:
             .all()
         )
 
+    def get_teams(
+        self, manager: int | models.Manager, season: int | models.Season | None = None
+    ) -> list[models.Team]:
+        manager_id = manager if isinstance(manager, int) else manager.id
+        if season is None:
+            return ( self.session.query(models.Team)
+                .filter(
+                    models.Team.manager_id == manager_id,
+                )
+                .all()
+            )
+        season_id = season if isinstance(season, int) else season.id
+        return (
+            self.session.query(models.Team)
+            .filter(
+                models.Team.manager_id == manager_id,
+                models.Team.season_id == season_id,
+            )
+            .all()
+        )
+
     def get_manager_by_email(self, email: str):
         return (
             self.session.query(models.Manager)
             .filter(models.Manager.email == email)
             .one_or_none()
         )
+
 
     def get_player_stats(self, player_ids: list[int], season_id: int | None = None):
         season = (
@@ -113,8 +135,8 @@ class RepositorySession:
         )
         if season is None:
             return None
-
-        return (
+        
+        query =  (
             self.session.query(models.HockeyPlayerStats)
             .filter(
                 models.HockeyPlayerStats.validity_date.between(
@@ -122,5 +144,48 @@ class RepositorySession:
                 ),
                 models.HockeyPlayerStats.player_id.in_(player_ids),
             )
-            .all()
+            .order_by(models.HockeyPlayerStats.player_id,models.HockeyPlayerStats.validity_date.desc())
+            
         )
+        
+        return query.all()
+    
+    def get_current_player_stats(self, player_ids: list[int], season_id: int | None = None):
+        season = (
+            self.get_current_season()
+            if season_id is None
+            else self.get_season(season_id)
+        )
+        if season is None:
+            return None
+        
+        from sqlalchemy import func
+        
+        subquery = (
+            self.session.query(
+                models.HockeyPlayerStats.player_id,
+                func.max(models.HockeyPlayerStats.validity_date).label('max_date')
+            )
+            .filter(
+                models.HockeyPlayerStats.validity_date.between(
+                    season.start, season.end
+                ),
+                models.HockeyPlayerStats.player_id.in_(player_ids),
+            )
+            .group_by(models.HockeyPlayerStats.player_id)
+            .subquery()
+        )
+        
+        query = (
+            self.session.query(models.HockeyPlayerStats)
+            .join(
+                subquery,
+                (models.HockeyPlayerStats.player_id == subquery.c.player_id) &
+                (models.HockeyPlayerStats.validity_date == subquery.c.max_date)
+            )
+            .order_by(models.HockeyPlayerStats.player_id)
+        )
+        
+        return query.all()
+
+

@@ -3,7 +3,7 @@ from random import randint
 import logging
 import bs4.element
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from requests import Session
 
 from hmtracker.constants import HM_URL
@@ -39,6 +39,13 @@ PAGE_REQUEST_HEADER = {
     "Cache-Control": "no-cache",
 }
 
+MY_TEAM_CLUB_ID = -1
+
+NOT_IN_MY_TEAM_CLUB_ID = 0
+
+class ScrappingError(Exception):
+    """Exception for scrapping"""
+
 
 class HMAjaxScrapper:
     """
@@ -69,9 +76,9 @@ class HMAjaxScrapper:
         """
         :return: a list containing information of all players in HM
         """
-        player_html_list = self._get_player_html_list(club=0)
+        player_html_list = self._get_player_html_list(club=NOT_IN_MY_TEAM_CLUB_ID)
         try:
-            player_html_list += self._get_player_html_list(club=-1)
+            player_html_list += self._get_player_html_list(club=MY_TEAM_CLUB_ID)
         except ConnectionError:
             logging.warning(
                 "Couldn't get player team, maybe the admin still doesn't have a team. "
@@ -102,6 +109,7 @@ class HMAjaxScrapper:
         """
         :return: data about the existing teams of the player
         """
+        assert self.dashboard is not None, "Scrapper needs to be connected to HM"
         teams_soups = self.dashboard.select(".is-a-team.selectTeam")
 
         def _get_points_rank(team_soup):
@@ -119,11 +127,15 @@ class HMAjaxScrapper:
                 }
             except ValueError:
                 return {"points": 0}
-
+        def get_team_name(team_soup : Tag):
+            team_name_element = team_soup.find(attrs={"class": "team-name"})
+            if team_name_element is None:
+                raise ScrappingError("Name of team couldn't be found in team object")
+            return team_name_element.text
         return [
             {
                 "id": team_soup["attr"],
-                "name": team_soup.find(attrs={"class": "team-name"}).text,
+                "name": get_team_name(team_soup),
                 **_get_points_rank(team_soup),
             }
             for team_soup in teams_soups
@@ -146,7 +158,7 @@ class HMAjaxScrapper:
         """
         :return: a list of all player in the selected team
         """
-        player_html_list = self._get_player_html_list(club=0)
+        player_html_list = self._get_player_html_list(club=MY_TEAM_CLUB_ID)
         return _scrap_players_html_list(player_html_list)
 
     def close_session(self):

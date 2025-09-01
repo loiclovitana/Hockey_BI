@@ -4,6 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from os import getenv
 from hmtracker.constants import HM_DATABASE_URL_ENV_NAME
 from hmtracker.database import repository as repo, models
+from hmtracker.api import models as api_models
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/players", tags=["players"])
 
@@ -22,15 +24,15 @@ SessionDep = Annotated[repo.RepositorySession, Depends(get_session)]
 
 
 @router.get("/")
-async def get_players(session: SessionDep) -> list[dict]:
+async def get_players(session: SessionDep) -> list[api_models.HockeyPlayer]:
     """
     Get all players of the current season
     """
     players = session.get_players()
-    return [models.to_json(p) for p in players]
+    return [api_models.HockeyPlayer.model_validate(p.__dict__) for p in players]
 
 
-@router.get("/{player_id}")
+@router.get("/id/{player_id}")
 async def get_player(player_id: int, session: SessionDep):
     """
     Get the data of one player
@@ -38,11 +40,36 @@ async def get_player(player_id: int, session: SessionDep):
     players = session.get_players(player_ids=[player_id])
     if not players:
         raise HTTPException(status_code=404, detail="Player not found")
-    return dict(players[0].__dict__)
+    return api_models.HockeyPlayer.model_validate(players[0].__dict__)
+
+    
+
+@router.get("/stats/id/{player_id}")
+async def get_player_stats(player_id: int, session: SessionDep) -> list[api_models.HockeyPlayerStats]:
+    players_stats = session.get_player_stats([player_id])
+
+    if players_stats is None or len(players_stats)==0:
+        raise HTTPException(status_code=404,detail=f"No player found")
+    return [api_models.HockeyPlayerStats.model_validate(stat.__dict__) for stat in players_stats]
 
 
-@router.get("/stats")
-async def get_players_stats(players_ids: list[int], session: SessionDep):
-    players_stats = session.get_player_stats(players_ids)
+class LastPlayerStats(BaseModel):
+    player_info : api_models.HockeyPlayer
+    player_stats: api_models.HockeyPlayerStats | None
 
-    return [dict(ps.__dict__) for ps in players_stats]
+@router.get("/latest/")
+async def get_latest_player_stats(session:SessionDep) -> list[LastPlayerStats]:
+    players = [api_models.HockeyPlayer.model_validate(p.__dict__) for p in  session.get_players()]
+    stats = session.get_current_player_stats([p.id for p in players])
+    if stats is None:
+        raise HTTPException(status_code=404,detail="No player stats could be found for current season")
+    current_players_stats ={ stat.player_id:api_models.HockeyPlayerStats.model_validate(stat.__dict__) for stat in stats}
+
+    last_player_stats = [
+        LastPlayerStats(
+            player_info=player,
+            player_stats=current_players_stats.get(player.id)
+        )
+        for player in players
+    ]
+    return last_player_stats

@@ -12,25 +12,21 @@ import {
 import {
   Dashboard as DashboardIcon,
   Sports as SportsIcon,
-  Analytics as AnalyticsIcon,
-  Settings as SettingsIcon,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const drawerWidth = 240;
 
 interface SidebarProps {
   open: boolean;
+  width:string;
 }
 
 const menuItems = [
   { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
-  { text: "Players", icon: <SportsIcon />, path: "/players" },
-  { text: "Analytics", icon: <AnalyticsIcon />, path: "/analytics" },
-  { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
+  { text: "Players", icon: <SportsIcon />, path: "/players" }
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ open }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ open , width}) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -44,11 +40,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ open }) => {
       anchor="left"
       open={open}
       sx={{
-        width: drawerWidth,
+        width: width,
         flexShrink: 0,
         "& .MuiDrawer-paper": {
-          width: drawerWidth,
-          boxSizing: "border-box",
+          width: width,
         },
       }}
     >
@@ -60,18 +55,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ open }) => {
               <ListItemButton
                 selected={location.pathname === item.path}
                 onClick={() => handleNavigation(item.path)}
-                sx={{
-                  "&.Mui-selected": {
-                    backgroundColor: "primary.main",
-                    color: "primary.contrastText",
-                    "&:hover": {
-                      backgroundColor: "primary.dark",
-                    },
-                    "& .MuiListItemIcon-root": {
-                      color: "primary.contrastText",
-                    },
-                  },
-                }}
               >
                 <ListItemIcon>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.text} />

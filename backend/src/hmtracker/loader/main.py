@@ -48,7 +48,7 @@ def import_playerstats_from_ajax(db_access: Session | str, user, password):
     import_playerstats_from_loader(ajax_loader, db_access)
 
 
-def import_playerstats_from_csv(csv_file_path, db_access: Session | str):
+def import_playerstats_from_csv(csv_file_path, db_access: Session | str| RepositorySession):
     """
     import a csv file containing the player stats into the database tables.
     Close the session once finished
@@ -61,7 +61,7 @@ def import_playerstats_from_csv(csv_file_path, db_access: Session | str):
 
 
 def import_playerstats_from_loader(
-    playerstats_loader, db_access: Session | str, origin="Unknown"
+    playerstats_loader, db_access: Session | str| RepositorySession, origin="Unknown"
 ):
     players_data = playerstats_loader()
     players, players_stats = map_player_stats(players_data)
@@ -75,13 +75,13 @@ def import_playerstats_from_loader(
 
 
 def import_teamplayers_from_loader(
-    teamplayers_loader: Callable, hm_user_email: str, db_access: Session | str
+    teamplayers_loader: Callable, hm_user_email: str, db_access: Session | str| RepositorySession
 ):
     team_players: dict[str, list[int]] = teamplayers_loader()
 
     database_session: RepositorySession = __connect_session(db_access)
 
-    hm_manager: models.Manager = database_session.get_manager_by_email(hm_user_email)
+    hm_manager: models.Manager | None = database_session.get_manager_by_email(hm_user_email)
     if hm_manager is None:
         hm_manager = import_manager(database_session, hm_user_email)
 
