@@ -59,7 +59,7 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({
     onSelectionChange?.(newSelected);
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
