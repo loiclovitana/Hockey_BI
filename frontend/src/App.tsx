@@ -18,8 +18,10 @@ import { PlayerStatsProvider } from "./context/PlayerStatsProvider";
 
 import { client } from './client/client.gen';
 
+const backend_url = import.meta.env.VITE_BACKEND_URL;
+
 client.setConfig({
-  baseUrl: 'http://localhost:8000/',
+  baseUrl: backend_url? backend_url:'http://localhost:8000/',
 });
 
 const SIDEBAR_WIDTH = "240px";
