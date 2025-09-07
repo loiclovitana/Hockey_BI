@@ -55,6 +55,11 @@ function App() {
               >
                 <MenuIcon />
               </IconButton>
+              <img 
+                src="/ico.svg" 
+                alt="Hockey BI Logo" 
+                style={{ height: '46px', marginRight: '12px' }}
+              />
               <Typography variant="h6" noWrap component="div">
                 Hockey BI
               </Typography>
