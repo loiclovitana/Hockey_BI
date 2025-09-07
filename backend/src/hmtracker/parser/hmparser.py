@@ -43,6 +43,7 @@ MY_TEAM_CLUB_ID = -1
 
 NOT_IN_MY_TEAM_CLUB_ID = 0
 
+
 class ScrappingError(Exception):
     """Exception for scrapping"""
 
@@ -127,11 +128,13 @@ class HMAjaxScrapper:
                 }
             except ValueError:
                 return {"points": 0}
-        def get_team_name(team_soup : Tag):
+
+        def get_team_name(team_soup: Tag):
             team_name_element = team_soup.find(attrs={"class": "team-name"})
             if team_name_element is None:
                 raise ScrappingError("Name of team couldn't be found in team object")
             return team_name_element.text
+
         return [
             {
                 "id": team_soup["attr"],

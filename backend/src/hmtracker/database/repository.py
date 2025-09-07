@@ -103,7 +103,8 @@ class RepositorySession:
     ) -> list[models.Team]:
         manager_id = manager if isinstance(manager, int) else manager.id
         if season is None:
-            return ( self.session.query(models.Team)
+            return (
+                self.session.query(models.Team)
                 .filter(
                     models.Team.manager_id == manager_id,
                 )
@@ -126,7 +127,6 @@ class RepositorySession:
             .one_or_none()
         )
 
-
     def get_player_stats(self, player_ids: list[int], season_id: int | None = None):
         season = (
             self.get_current_season()
@@ -135,8 +135,8 @@ class RepositorySession:
         )
         if season is None:
             return None
-        
-        query =  (
+
+        query = (
             self.session.query(models.HockeyPlayerStats)
             .filter(
                 models.HockeyPlayerStats.validity_date.between(
@@ -144,13 +144,17 @@ class RepositorySession:
                 ),
                 models.HockeyPlayerStats.player_id.in_(player_ids),
             )
-            .order_by(models.HockeyPlayerStats.player_id,models.HockeyPlayerStats.validity_date.desc())
-            
+            .order_by(
+                models.HockeyPlayerStats.player_id,
+                models.HockeyPlayerStats.validity_date.desc(),
+            )
         )
-        
+
         return query.all()
-    
-    def get_current_player_stats(self, player_ids: list[int], season_id: int | None = None):
+
+    def get_current_player_stats(
+        self, player_ids: list[int], season_id: int | None = None
+    ):
         season = (
             self.get_current_season()
             if season_id is None
@@ -158,13 +162,13 @@ class RepositorySession:
         )
         if season is None:
             return None
-        
+
         from sqlalchemy import func
-        
+
         subquery = (
             self.session.query(
                 models.HockeyPlayerStats.player_id,
-                func.max(models.HockeyPlayerStats.validity_date).label('max_date')
+                func.max(models.HockeyPlayerStats.validity_date).label("max_date"),
             )
             .filter(
                 models.HockeyPlayerStats.validity_date.between(
@@ -175,17 +179,15 @@ class RepositorySession:
             .group_by(models.HockeyPlayerStats.player_id)
             .subquery()
         )
-        
+
         query = (
             self.session.query(models.HockeyPlayerStats)
             .join(
                 subquery,
-                (models.HockeyPlayerStats.player_id == subquery.c.player_id) &
-                (models.HockeyPlayerStats.validity_date == subquery.c.max_date)
+                (models.HockeyPlayerStats.player_id == subquery.c.player_id)
+                & (models.HockeyPlayerStats.validity_date == subquery.c.max_date),
             )
             .order_by(models.HockeyPlayerStats.player_id)
         )
-        
+
         return query.all()
-
-

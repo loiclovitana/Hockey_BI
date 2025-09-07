@@ -29,7 +29,7 @@ def team_players_ajax_loader(user: str, password: str) -> Callable:
                         player["id"] for player in parser.get_current_team()
                     ]
                 except Exception:
-                    pass # Team is possibly not created
+                    pass  # Team is possibly not created
 
         finally:
             parser.close_session()

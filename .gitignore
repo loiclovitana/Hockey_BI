@@ -20,3 +20,4 @@ tools/API/
 .admins
 
 node_modules
+frontend/.env.production
