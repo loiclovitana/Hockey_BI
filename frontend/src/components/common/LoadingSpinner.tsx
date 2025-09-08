@@ -5,18 +5,18 @@ interface LoadingSpinnerProps {
   message?: string;
 }
 
-export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
-  message = "Loading..." 
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  message = "Loading...",
 }) => {
   return (
-    <Box 
-      sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100%', 
-        flexDirection: 'column',
-        gap: 2 
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100%",
+        flexDirection: "column",
+        gap: 2,
       }}
     >
       <CircularProgress size={60} />

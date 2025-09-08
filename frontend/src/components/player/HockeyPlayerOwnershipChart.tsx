@@ -7,7 +7,9 @@ interface HockeyPlayerOwnershipChartProps {
   playerStats: HockeyPlayerStats[] | null;
 }
 
-export const HockeyPlayerOwnershipChart: React.FC<HockeyPlayerOwnershipChartProps> = ({ playerStats }) => {
+export const HockeyPlayerOwnershipChart: React.FC<
+  HockeyPlayerOwnershipChartProps
+> = ({ playerStats }) => {
   if (!playerStats || playerStats.length === 0) {
     return (
       <Box sx={{ p: 2, textAlign: "center" }}>
@@ -19,11 +21,15 @@ export const HockeyPlayerOwnershipChart: React.FC<HockeyPlayerOwnershipChartProp
   }
 
   const ownershipData = playerStats
-    .filter(stat => stat.ownership !== null && stat.ownership !== undefined)
-    .sort((a, b) => new Date(a.validity_date).getTime() - new Date(b.validity_date).getTime())
-    .map(stat => ({
+    .filter((stat) => stat.ownership !== null && stat.ownership !== undefined)
+    .sort(
+      (a, b) =>
+        new Date(a.validity_date).getTime() -
+        new Date(b.validity_date).getTime(),
+    )
+    .map((stat) => ({
       date: new Date(stat.validity_date),
-      ownership: stat.ownership as number
+      ownership: stat.ownership as number,
     }));
 
   if (ownershipData.length === 0) {
@@ -46,22 +52,26 @@ export const HockeyPlayerOwnershipChart: React.FC<HockeyPlayerOwnershipChartProp
         height={400}
         series={[
           {
-            data: ownershipData.map(d => d.ownership),
+            data: ownershipData.map((d) => d.ownership),
             label: "Ownership %",
-            color: "#1976d2"
-          }
+            color: "#1976d2",
+          },
         ]}
-        xAxis={[{
-          data: ownershipData.map(d => d.date),
-          label: "Date",
-          scaleType: "time",
-          valueFormatter: (date) => date.toLocaleDateString()
-        }]}
-        yAxis={[{
-          label: "Ownership (%)",
-          min: 0,
-          max: 100
-        }]}
+        xAxis={[
+          {
+            data: ownershipData.map((d) => d.date),
+            label: "Date",
+            scaleType: "time",
+            valueFormatter: (date) => date.toLocaleDateString(),
+          },
+        ]}
+        yAxis={[
+          {
+            label: "Ownership (%)",
+            min: 0,
+            max: 100,
+          },
+        ]}
         margin={{ left: 60, right: 30, top: 30, bottom: 60 }}
         grid={{ vertical: true, horizontal: true }}
       />

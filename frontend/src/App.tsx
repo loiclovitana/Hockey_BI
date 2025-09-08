@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import {
   ThemeProvider,
@@ -6,90 +6,64 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  IconButton,
   Box,
 } from "@mui/material";
-import { Menu as MenuIcon } from "@mui/icons-material";
 import { theme } from "./theme";
-import { Sidebar } from "./components/common/Sidebar";
+import { BottomBar } from "./components/common/BottomBar";
 import { Dashboard } from "./pages/Dashboard";
 import { Players } from "./pages/Players";
 import { PlayerStatsProvider } from "./context/PlayerStatsProvider";
 
-import { client } from './client/client.gen';
+import { client } from "./client/client.gen";
 
 const backend_url = import.meta.env.VITE_BACKEND_URL;
 
 client.setConfig({
-  baseUrl: backend_url? backend_url:'http://localhost:8000/',
+  baseUrl: backend_url ? backend_url : "http://localhost:8000/",
 });
 
-const SIDEBAR_WIDTH = "240px";
-
 function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  const handleSidebarToggle = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <PlayerStatsProvider>
         <Router>
-        <Box sx={{ display: "flex", height: "100vh" }}>
-          <AppBar
-            position="fixed"
+          <Box
             sx={{
-              zIndex: (theme) => theme.zIndex.drawer + 1,
+              display: "flex",
+              flexDirection: "column",
+              height: "100dvh",
+              width: "100vw",
             }}
           >
-            <Toolbar>
-              <IconButton
-                color="inherit"
-                aria-label="toggle sidebar"
-                edge="start"
-                onClick={handleSidebarToggle}
-                sx={{ mr: 2 }}
-              >
-                <MenuIcon />
-              </IconButton>
-              <img 
-                src="/ico.svg" 
-                alt="Hockey BI Logo" 
-                style={{ height: '46px', marginRight: '12px' }}
-              />
-              <Typography variant="h6" noWrap component="div">
-                Hockey BI
-              </Typography>
-            </Toolbar>
-          </AppBar>
-
-          <Box sx={{ display: "flex",  flex: 1,
-            maxHeight:"100vh"
-            , pt: (theme) => `${theme.mixins.toolbar.minHeight}px` }}>
-            <Sidebar open={sidebarOpen} width={SIDEBAR_WIDTH}/>
+            <AppBar position="fixed">
+              <Toolbar>
+                <img
+                  src="/ico.svg"
+                  alt="Hockey BI Logo"
+                  style={{ height: "46px", marginRight: "12px" }}
+                />
+                <Typography variant="h6" noWrap component="div">
+                  Hockey BI
+                </Typography>
+              </Toolbar>
+            </AppBar>
 
             <Box
               component="main"
               sx={{
-                 marginLeft: sidebarOpen ? 0 : "-"+SIDEBAR_WIDTH,
-                 flex: 1,
-                transition: (theme) =>
-                  theme.transitions.create("margin-left", {
-                    easing: theme.transitions.easing.easeInOut,
-                    duration: theme.transitions.duration.short,
-                  }),
+                flex: 1,
+                overflow: "auto",
+                py: "64px",
               }}
             >
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/players" element={<Players />} />
-            </Routes>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/players" element={<Players />} />
+              </Routes>
+            </Box>
+            <BottomBar />
           </Box>
-        </Box>
-        </Box>
         </Router>
       </PlayerStatsProvider>
     </ThemeProvider>

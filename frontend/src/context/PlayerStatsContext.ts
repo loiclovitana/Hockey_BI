@@ -1,5 +1,5 @@
-import { createContext } from 'react';
-import type { LastPlayerStats } from '../client/';
+import { createContext } from "react";
+import type { LastPlayerStats } from "../client/";
 
 export interface PlayerStatsContextType {
   playerStats: LastPlayerStats[] | null;
@@ -8,4 +8,9 @@ export interface PlayerStatsContextType {
   refetch: () => Promise<void>;
 }
 
-export const PlayerStatsContext = createContext<PlayerStatsContextType>({ playerStats: null, loading: false, error: null, refetch: async () => { } });
+export const PlayerStatsContext = createContext<PlayerStatsContextType>({
+  playerStats: null,
+  loading: false,
+  error: null,
+  refetch: async () => {},
+});

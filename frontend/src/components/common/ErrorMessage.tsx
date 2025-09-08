@@ -6,18 +6,18 @@ interface ErrorMessageProps {
   title?: string;
 }
 
-export const ErrorMessage: React.FC<ErrorMessageProps> = ({ 
+export const ErrorMessage: React.FC<ErrorMessageProps> = ({
   error,
-  title = "Error Loading Data"
+  title = "Error Loading Data",
 }) => {
   return (
-    <Box 
-      sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100%', 
-        p: 2 
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100%",
+        p: 2,
       }}
     >
       <Alert severity="error" sx={{ maxWidth: 500 }}>
@@ -25,7 +25,9 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({
           {title}
         </Typography>
         <Typography variant="body2">
-          {error instanceof Error ? error.message : 'An unexpected error occurred.'}
+          {error instanceof Error
+            ? error.message
+            : "An unexpected error occurred."}
         </Typography>
       </Alert>
     </Box>

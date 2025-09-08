@@ -7,7 +7,9 @@ interface PlayerStatsDataGridProps {
   playerStats: HockeyPlayerStats[] | null;
 }
 
-export const PlayerStatsDataGrid: React.FC<PlayerStatsDataGridProps> = ({ playerStats }) => {
+export const PlayerStatsDataGrid: React.FC<PlayerStatsDataGridProps> = ({
+  playerStats,
+}) => {
   if (!playerStats || playerStats.length === 0) {
     return (
       <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
@@ -17,29 +19,34 @@ export const PlayerStatsDataGrid: React.FC<PlayerStatsDataGridProps> = ({ player
   }
 
   const columns: GridColDef[] = [
-    { 
-      field: 'validity_date', 
-      headerName: 'Date', 
+    {
+      field: "validity_date",
+      headerName: "Date",
       width: 120,
       valueFormatter: (value) => {
-        if (!value) return '-';
-        return new Date(value).toISOString().split('T')[0];
-      }
+        if (!value) return "-";
+        return new Date(value).toISOString().split("T")[0];
+      },
     },
-    { field: 'club', headerName: 'Club', width: 80 },
-    { field: 'price', headerName: 'Price', type: 'number', width: 100 },
-    { field: 'appearances', headerName: 'Appearances', type: 'number', width: 120 },
-    { field: 'goal', headerName: 'Goals', type: 'number', width: 80 },
-    { field: 'assists', headerName: 'Assists', type: 'number', width: 80 },
-    { field: 'penalties', headerName: 'Penalties', type: 'number', width: 100 },
-    { field: 'plus_minus', headerName: '+/-', type: 'number', width: 80 },
-    { field: 'hm_points', headerName: 'HM Points', type: 'number', width: 100 },
-    { 
-      field: 'ownership', 
-      headerName: 'Ownership %', 
-      type: 'number', 
+    { field: "club", headerName: "Club", width: 80 },
+    { field: "price", headerName: "Price", type: "number", width: 100 },
+    {
+      field: "appearances",
+      headerName: "Appearances",
+      type: "number",
       width: 120,
-      valueFormatter: (value) => value ? `${value}%` : '-'
+    },
+    { field: "goal", headerName: "Goals", type: "number", width: 80 },
+    { field: "assists", headerName: "Assists", type: "number", width: 80 },
+    { field: "penalties", headerName: "Penalties", type: "number", width: 100 },
+    { field: "plus_minus", headerName: "+/-", type: "number", width: 80 },
+    { field: "hm_points", headerName: "HM Points", type: "number", width: 100 },
+    {
+      field: "ownership",
+      headerName: "Ownership %",
+      type: "number",
+      width: 120,
+      valueFormatter: (value) => (value ? `${value}%` : "-"),
     },
   ];
 
@@ -58,7 +65,7 @@ export const PlayerStatsDataGrid: React.FC<PlayerStatsDataGridProps> = ({ player
   }));
 
   return (
-    <Box sx={{ height: 400, width: '100%', mt: 2 }}>
+    <Box sx={{ height: 400, width: "100%", mt: 2 }}>
       <DataGrid
         rows={rows}
         columns={columns}
@@ -69,7 +76,7 @@ export const PlayerStatsDataGrid: React.FC<PlayerStatsDataGridProps> = ({ player
             },
           },
           sorting: {
-            sortModel: [{ field: 'validity_date', sort: 'desc' }],
+            sortModel: [{ field: "validity_date", sort: "desc" }],
           },
         }}
         pageSizeOptions={[5, 10, 25]}

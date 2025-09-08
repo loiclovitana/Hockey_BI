@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -11,8 +11,8 @@ import {
   Checkbox,
   Typography,
   Box,
-} from '@mui/material';
-import { type LastPlayerStats } from '../client/';
+} from "@mui/material";
+import { type LastPlayerStats } from "../client/";
 
 interface PlayerStatsTableProps {
   data: LastPlayerStats[];
@@ -63,7 +63,9 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -79,7 +81,7 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({
   );
 
   return (
-    <Paper sx={{ width: '100%', mb: 2 }}>
+    <Paper sx={{ width: "100%", mb: 2 }}>
       <TableContainer>
         <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
           <TableHead>
@@ -87,11 +89,13 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({
               <TableCell padding="checkbox">
                 <Checkbox
                   color="primary"
-                  indeterminate={selected.length > 0 && selected.length < data.length}
+                  indeterminate={
+                    selected.length > 0 && selected.length < data.length
+                  }
                   checked={data.length > 0 && selected.length === data.length}
                   onChange={handleSelectAllClick}
                   inputProps={{
-                    'aria-label': 'select all players',
+                    "aria-label": "select all players",
                   }}
                 />
               </TableCell>
@@ -120,54 +124,68 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({
                   tabIndex={-1}
                   key={row.player_info.id}
                   selected={isItemSelected}
-                  sx={{ cursor: 'pointer' }}
+                  sx={{ cursor: "pointer" }}
                 >
                   <TableCell padding="checkbox">
                     <Checkbox
                       color="primary"
                       checked={isItemSelected}
                       inputProps={{
-                        'aria-labelledby': labelId,
+                        "aria-labelledby": labelId,
                       }}
                     />
                   </TableCell>
-                  <TableCell component="th" id={labelId} scope="row" padding="none">
+                  <TableCell
+                    component="th"
+                    id={labelId}
+                    scope="row"
+                    padding="none"
+                  >
                     <Typography variant="body2" fontWeight="medium">
                       {row.player_info.name}
                     </Typography>
                   </TableCell>
                   <TableCell>{row.player_info.role}</TableCell>
-                  <TableCell>{row.player_stats?.club || '-'}</TableCell>
-                  
+                  <TableCell>{row.player_stats?.club || "-"}</TableCell>
+
                   <TableCell align="right">
-                    {row.player_stats?.hm_points || '-'}
+                    {row.player_stats?.hm_points || "-"}
                   </TableCell>
                   <TableCell align="right">
-                    {row.player_stats?.goal || '-'}
+                    {row.player_stats?.goal || "-"}
                   </TableCell>
                   <TableCell align="right">
-                    {row.player_stats?.assists || '-'}
+                    {row.player_stats?.assists || "-"}
                   </TableCell>
                   <TableCell align="right">
-                    {row.player_stats?.appearances || '-'}
+                    {row.player_stats?.appearances || "-"}
                   </TableCell>
                   <TableCell align="right">
-                    {row.player_stats?.price || '-'} 
+                    {row.player_stats?.price || "-"}
                   </TableCell>
                   <TableCell align="right">
                     {(() => {
-                      if(!row.player_stats){return '-';}
+                      if (!row.player_stats) {
+                        return "-";
+                      }
                       const price = row.player_stats.price;
-                      const estimatedValue = row.player_stats.estimated_value || price;
-                      
+                      const estimatedValue =
+                        row.player_stats.estimated_value || price;
+
                       const difference = estimatedValue - price;
-                      const sign = difference > 0 ? '+' : '';
-                      const color = difference > 0 ? 'success.main' :difference < 0 ?  'error.main':"primary.main";
+                      const sign = difference > 0 ? "+" : "";
+                      const color =
+                        difference > 0
+                          ? "success.main"
+                          : difference < 0
+                            ? "error.main"
+                            : "primary.main";
                       return (
                         <Box component="span">
-                          {estimatedValue.toFixed(1)}{' '}
+                          {estimatedValue.toFixed(1)}{" "}
                           <Box component="span" sx={{ color }}>
-                            ({sign}{difference.toFixed(1)})
+                            ({sign}
+                            {difference.toFixed(1)})
                           </Box>
                         </Box>
                       );

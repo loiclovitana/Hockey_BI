@@ -7,33 +7,38 @@ interface MyTeamDashboardProps {
   dashboardData: DashBoardData;
 }
 
-export const MyTeamDashboard: React.FC<MyTeamDashboardProps> = ({ dashboardData }) => {
-
+export const MyTeamDashboard: React.FC<MyTeamDashboardProps> = ({
+  dashboardData,
+}) => {
   const [team, setTeam] = useState(0);
 
-  const numberOfTeam = dashboardData.my_teams.length
-  if(numberOfTeam==0){
-    return (<Box sx={{p: 3}}>
-      <Typography variant="h4" gutterBottom>
-        Welcome {dashboardData.manager.email}
-      </Typography>
-      <Typography variant="body2">
-        You haven't created any team yet
-      </Typography>
-    </Box>)
+  const numberOfTeam = dashboardData.my_teams.length;
+  if (numberOfTeam == 0) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h4" gutterBottom>
+          Welcome {dashboardData.manager.email}
+        </Typography>
+        <Typography variant="body2">
+          You haven't created any team yet
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    <Box sx={{p: 3}}>
+    <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
         Welcome {dashboardData.manager.email}
       </Typography>
-      
+
       <Select
         value={team}
         size="medium"
-        onChange={(e) => {setTeam(e.target.value)}}
-        sx={{mt:2,ml:2,p:0.5}}
+        onChange={(e) => {
+          setTeam(e.target.value);
+        }}
+        sx={{ mt: 2, ml: 2, p: 0.5 }}
       >
         {dashboardData.my_teams.map((_, index) => (
           <MenuItem key={index} value={index}>
@@ -41,8 +46,7 @@ export const MyTeamDashboard: React.FC<MyTeamDashboardProps> = ({ dashboardData 
           </MenuItem>
         ))}
       </Select>
-      <TransferSuggestion team={dashboardData.my_teams[team]}/>
-
+      <TransferSuggestion team={dashboardData.my_teams[team]} />
     </Box>
   );
 };

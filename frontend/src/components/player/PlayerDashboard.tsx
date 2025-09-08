@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
-import { type HockeyPlayerStats, getPlayerStatsPlayersStatsIdPlayerIdGet, type LastPlayerStats } from "../../client";
+import {
+  type HockeyPlayerStats,
+  getPlayerStatsPlayersStatsIdPlayerIdGet,
+  type LastPlayerStats,
+} from "../../client";
 import { PlayerStatsDataGrid } from "./PlayerStatsDataGrid";
 import { HockeyPlayerOwnershipChart } from "./HockeyPlayerOwnershipChart";
 
@@ -8,26 +12,29 @@ interface PlayerDashboardProps {
   selectedPlayer: LastPlayerStats | null;
 }
 
-export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({ selectedPlayer }) => {
+export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({
+  selectedPlayer,
+}) => {
+  const [playerStats, setPlayerStats] = useState<HockeyPlayerStats[] | null>(
+    null,
+  );
 
-  const [playerStats,setPlayerStats] = useState<HockeyPlayerStats[]| null>(null);
-
-  useEffect(()=>{
-    if(!selectedPlayer){
+  useEffect(() => {
+    if (!selectedPlayer) {
       setPlayerStats(null);
-      return
+      return;
     }
-    getPlayerStatsPlayersStatsIdPlayerIdGet({path:{player_id:selectedPlayer?.player_info.id}}).then(
-      res => {
-        if(res.data){
-          setPlayerStats(res.data)
-        }
+    getPlayerStatsPlayersStatsIdPlayerIdGet({
+      path: { player_id: selectedPlayer?.player_info.id },
+    }).then((res) => {
+      if (res.data) {
+        setPlayerStats(res.data);
       }
-    )
-  },[selectedPlayer])
+    });
+  }, [selectedPlayer]);
 
   return (
-    <Box sx={{ p: 3, height: '100%' }}>
+    <Box sx={{ p: 3, height: "100%" }}>
       {selectedPlayer ? (
         <>
           <Typography variant="h4" gutterBottom>
@@ -41,7 +48,6 @@ export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({ selectedPlayer
           </Typography>
           <PlayerStatsDataGrid playerStats={playerStats} />
           <HockeyPlayerOwnershipChart playerStats={playerStats} />
-
         </>
       ) : (
         <Typography variant="h6" color="text.secondary">
