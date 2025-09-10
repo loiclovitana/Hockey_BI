@@ -8,9 +8,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          mui: ["@mui/material", "@mui/icons-material"],
+          mui: ["@mui/material", "@mui/icons-material","@emotion/react", "@emotion/styled"],
           "mui-x": ["@mui/x-charts", "@mui/x-data-grid"],
-          emotion: ["@emotion/react", "@emotion/styled"],
         },
       },
     },

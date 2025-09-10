@@ -1,13 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import {
-  ThemeProvider,
-  CssBaseline,
   AppBar,
   Toolbar,
   Typography,
   Box,
 } from "@mui/material";
-import { theme } from "./theme";
 import { BottomBar } from "./components/common/BottomBar";
 import { Dashboard } from "./pages/Dashboard";
 import { Players } from "./pages/Players";
@@ -24,9 +21,7 @@ client.setConfig({
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <PlayerStatsProvider>
+    <PlayerStatsProvider>
         <Router>
           <Box
             sx={{
@@ -67,7 +62,6 @@ function App() {
           </Box>
         </Router>
       </PlayerStatsProvider>
-    </ThemeProvider>
   );
 }
 
