@@ -62,7 +62,7 @@ export const TransferSuggestion: React.FC<TransferSuggestionProps> = ({
     .sort((a, b) => get_value_difference(b) - get_value_difference(a));
 
   return (
-    <Box flex={1} sx={{ m: 2 }}>
+    <Box flex={1} sx={{ py: 2 }}>
       <Typography variant="h5">You should sell</Typography>
       <PlayerStatsTable data={myTeamStats} />
       <Typography variant="h5">You should buy</Typography>

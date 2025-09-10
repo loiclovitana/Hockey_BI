@@ -81,7 +81,7 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({
   );
 
   return (
-    <Paper sx={{ width: "100%", mb: 2 }}>
+    <Paper sx={{ width: "100%", pb: 2 }}>
       <TableContainer>
         <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
           <TableHead>

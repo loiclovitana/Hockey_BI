@@ -27,7 +27,7 @@ export const MyTeamDashboard: React.FC<MyTeamDashboardProps> = ({
   }
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ py: 3 }}>
       <Typography variant="h4" gutterBottom>
         Welcome {dashboardData.manager.email}
       </Typography>

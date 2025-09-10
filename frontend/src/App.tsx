@@ -1,10 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Box,
-} from "@mui/material";
+import { AppBar, Toolbar, Typography, Box } from "@mui/material";
 import { BottomBar } from "./components/common/BottomBar";
 import { Dashboard } from "./pages/Dashboard";
 import { Players } from "./pages/Players";
@@ -22,46 +17,46 @@ client.setConfig({
 function App() {
   return (
     <PlayerStatsProvider>
-        <Router>
+      <Router>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100dvh",
+            width: "100vw",
+          }}
+        >
+          <AppBar position="fixed">
+            <Toolbar>
+              <img
+                src="/ico.svg"
+                alt="Hockey BI Logo"
+                style={{ height: "46px", marginRight: "12px" }}
+              />
+              <Typography variant="h6" noWrap component="div">
+                Hockey BI
+              </Typography>
+            </Toolbar>
+          </AppBar>
+
           <Box
+            component="main"
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              height: "100dvh",
-              width: "100vw",
+              flex: 1,
+              overflow: "auto",
+              py: "64px",
             }}
           >
-            <AppBar position="fixed">
-              <Toolbar>
-                <img
-                  src="/ico.svg"
-                  alt="Hockey BI Logo"
-                  style={{ height: "46px", marginRight: "12px" }}
-                />
-                <Typography variant="h6" noWrap component="div">
-                  Hockey BI
-                </Typography>
-              </Toolbar>
-            </AppBar>
-
-            <Box
-              component="main"
-              sx={{
-                flex: 1,
-                overflow: "auto",
-                py: "64px",
-              }}
-            >
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/players" element={<Players />} />
-                <Route path="/admin" element={<Admin />} />
-              </Routes>
-            </Box>
-            <BottomBar />
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/players" element={<Players />} />
+              <Route path="/admin" element={<Admin />} />
+            </Routes>
           </Box>
-        </Router>
-      </PlayerStatsProvider>
+          <BottomBar />
+        </Box>
+      </Router>
+    </PlayerStatsProvider>
   );
 }
 
