@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
 import { LoginForm, type LoginFormField } from "../common/LoginForm";
 import { loadMyteamLoadPost, type DashBoardData } from "../../client";
-import logoLottie from "../../../public/logo-lottie.json";
-import { Container, Typography } from "@mui/material";
+import logoLottie from "../../assets/logo-lottie.json";
+import { Container } from "@mui/material";
 
 interface TeamLoginFormProps {
   onSuccess: (data: DashBoardData) => void;
@@ -20,6 +21,19 @@ const teamLoginFields: LoginFormField[] = [
 ];
 
 export const TeamLoginForm: React.FC<TeamLoginFormProps> = ({ onSuccess }) => {
+  const [clickCount, setClickCount] = useState(0);
+  const navigate = useNavigate();
+
+  const handleLottieClick = () => {
+    setClickCount((prev) => prev + 1);
+  };
+
+  useEffect(() => {
+    if (clickCount == 5) {
+      navigate("/admin");
+    }
+  }, [clickCount]);
+
   const handleSubmit = async (formData: TeamLoginData) => {
     const response = await loadMyteamLoadPost({
       query: {
@@ -45,22 +59,19 @@ export const TeamLoginForm: React.FC<TeamLoginFormProps> = ({ onSuccess }) => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        pt: 4,
+        pt: 2,
       }}
     >
-      <Typography variant="h2" gutterBottom align="center">
-        Start now
-      </Typography>
+      <Lottie
+        animationData={logoLottie}
+        loop={false}
+        onClick={handleLottieClick}
+      />
       <LoginForm<TeamLoginData>
         fields={teamLoginFields}
         buttonText="Load my HM data"
         loadingText="Loading..."
         onSubmit={handleSubmit}
-      />
-      <Lottie
-        animationData={logoLottie}
-        loop={false}
-        //style={{ width: "50%" }}
       />
     </Container>
   );
