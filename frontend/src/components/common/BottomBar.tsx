@@ -26,7 +26,7 @@ export const BottomBar: React.FC = () => {
   return (
     <BottomNavigation
       value={currentIndex}
-      onChange={(event, newValue) => {
+      onChange={(_event, newValue) => {
         if (newValue >= 0 && newValue < menuItems.length) {
           handleNavigation(menuItems[newValue].path);
         }
