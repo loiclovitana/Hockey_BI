@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 
 class Season(BaseModel):
@@ -34,6 +34,7 @@ class HockeyPlayerStats(BaseModel):
     penalties: Optional[int] = None
     plus_minus: Optional[int] = None
 
+    @computed_field
     @property
     def estimated_value(self) -> Optional[float]:
         if self.appearances is None or self.hm_points is None:

@@ -1,102 +1,67 @@
-import React, { useState } from "react";
-import { Box, Typography, TextField, Button, Container } from "@mui/material";
+import React from "react";
+import Lottie from "lottie-react";
+import { LoginForm, type LoginFormField } from "../common/LoginForm";
 import { loadMyteamLoadPost, type DashBoardData } from "../../client";
+import logoLottie from "../../../public/logo-lottie.json";
+import { Container, Typography } from "@mui/material";
 
 interface TeamLoginFormProps {
   onSuccess: (data: DashBoardData) => void;
 }
 
+interface TeamLoginData extends Record<string, string> {
+  hmUser: string;
+  hmPassword: string;
+}
+
+const teamLoginFields: LoginFormField[] = [
+  { key: "hmUser", label: "HM Username" },
+  { key: "hmPassword", label: "HM Password", type: "password" },
+];
+
 export const TeamLoginForm: React.FC<TeamLoginFormProps> = ({ onSuccess }) => {
-  const [hmUser, setHmUser] = useState("");
-  const [hmPassword, setHmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const handleSubmit = async (formData: TeamLoginData) => {
+    const response = await loadMyteamLoadPost({
+      query: {
+        hm_user: formData.hmUser,
+        hm_password: formData.hmPassword,
+      },
+    });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!hmUser.trim() || !hmPassword.trim()) {
-      setError("Please enter both username and password");
-      return;
+    if (response.data) {
+      onSuccess(response.data);
     }
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await loadMyteamLoadPost({
-        query: {
-          hm_user: hmUser,
-          hm_password: hmPassword,
-        },
-      });
-
-      if (response.data) {
-        onSuccess(response.data);
-      }
-
-      if (response.error) {
-        setError("Failed to load team data");
-        console.error(response.error);
-      }
-    } catch (error) {
-      setError("An error occurred while loading team data");
-      console.error("Failed to load team:", error);
-    } finally {
-      setLoading(false);
+    if (response.error) {
+      console.error(response.error);
+      throw new Error("Failed to load team data");
     }
   };
 
   return (
     <Container
       sx={{
-        mt: 8,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        pt: 4,
       }}
     >
       <Typography variant="h2" gutterBottom align="center">
         Start now
       </Typography>
-
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-        <TextField
-          fullWidth
-          label="HM Username"
-          variant="outlined"
-          value={hmUser}
-          onChange={(e) => setHmUser(e.target.value)}
-          sx={{ mb: 2 }}
-        />
-
-        <TextField
-          fullWidth
-          label="HM Password"
-          type="password"
-          variant="outlined"
-          value={hmPassword}
-          onChange={(e) => setHmPassword(e.target.value)}
-          sx={{ mb: 2 }}
-        />
-
-        {error && (
-          <Typography color="error" variant="body2" sx={{ mb: 2 }}>
-            {error}
-          </Typography>
-        )}
-
-        <Button
-          fullWidth
-          type="submit"
-          variant="contained"
-          disabled={loading || !hmUser.trim() || !hmPassword.trim()}
-          sx={{ mt: 2 }}
-        >
-          {loading ? "Loading..." : "Load my HM data"}
-        </Button>
-      </Box>
+      <LoginForm<TeamLoginData>
+        fields={teamLoginFields}
+        buttonText="Load my HM data"
+        loadingText="Loading..."
+        onSubmit={handleSubmit}
+      />
+      <Lottie
+        animationData={logoLottie}
+        loop={false}
+        //style={{ width: "50%" }}
+      />
     </Container>
   );
 };

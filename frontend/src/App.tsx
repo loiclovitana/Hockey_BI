@@ -11,6 +11,7 @@ import { theme } from "./theme";
 import { BottomBar } from "./components/common/BottomBar";
 import { Dashboard } from "./pages/Dashboard";
 import { Players } from "./pages/Players";
+import { Admin } from "./pages/Admin";
 import { PlayerStatsProvider } from "./context/PlayerStatsProvider";
 
 import { client } from "./client/client.gen";
@@ -59,6 +60,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/players" element={<Players />} />
+                <Route path="/admin" element={<Admin />} />
               </Routes>
             </Box>
             <BottomBar />
