@@ -34,7 +34,7 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({
 
     if (response.error) {
       console.error(response.error);
-      throw new Error("Failed to login");
+      throw new Error(`Failed to login: ${response.error.detail}`);
     }
   };
 

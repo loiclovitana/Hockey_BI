@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends
 from fastapi import HTTPException, status
 from hmtracker import admin
 from hmtracker.api.admin_login import admin_login_scheme, decode_token
+from pydantic import BaseModel
 
 router = APIRouter(
     prefix="/admin", tags=["admin"], dependencies=[Depends(admin_login_scheme)]
@@ -14,10 +15,14 @@ def start_loading() -> None:
     admin.start_loading()
 
 
+class AdminUser(BaseModel):
+    username:str
+
+
 @router.get("/user")
-def get_admin_user(token: Annotated[str, Depends(admin_login_scheme)]):
+def get_admin_user(token: Annotated[str, Depends(admin_login_scheme)]) ->AdminUser:
     username = decode_token(token)
-    return {"username": username}
+    return AdminUser(username=username)
 
 
 @router.get("/operation")

@@ -37,7 +37,7 @@ export const TransferSuggestion: React.FC<TransferSuggestionProps> = ({
     if (!a.player_stats) {
       return 0;
     }
-    if(a.player_stats.estimated_value ===null){
+    if (a.player_stats.estimated_value === null) {
       return 0;
     }
     return a.player_stats.estimated_value - a.player_stats.price;
