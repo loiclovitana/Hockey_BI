@@ -8,7 +8,6 @@ import {
   TablePagination,
   TableRow,
   Paper,
-  Checkbox,
   Typography,
   Box,
 } from "@mui/material";
@@ -16,47 +15,14 @@ import { type LastPlayerStats } from "../client/";
 
 interface PlayerStatsTableProps {
   data: LastPlayerStats[];
-  onSelectionChange?: (selectedIds: number[]) => void;
 }
 
-export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({
-  data,
-  onSelectionChange,
-}) => {
-  const [selected, setSelected] = useState<number[]>([]);
+export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
-      const newSelected = data.map((item) => item.player_info.id);
-      setSelected(newSelected);
-      onSelectionChange?.(newSelected);
-      return;
-    }
-    setSelected([]);
-    onSelectionChange?.([]);
-  };
-
-  const handleClick = (id: number) => {
-    const selectedIndex = selected.indexOf(id);
-    let newSelected: number[] = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-
-    setSelected(newSelected);
-    onSelectionChange?.(newSelected);
+  const formatValue = (value: number | null | undefined): string => {
+    return value === null || value === undefined ? "-" : value.toString();
   };
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -70,8 +36,6 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({
     setPage(0);
   };
 
-  const isSelected = (id: number) => selected.indexOf(id) !== -1;
-
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
 
@@ -81,24 +45,11 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({
   );
 
   return (
-    <Paper sx={{ width: "100%", pb: 2 }}>
+    <Paper sx={{ width: "100%", p: 1 }}>
       <TableContainer>
-        <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
+        <Table aria-labelledby="tableTitle">
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  color="primary"
-                  indeterminate={
-                    selected.length > 0 && selected.length < data.length
-                  }
-                  checked={data.length > 0 && selected.length === data.length}
-                  onChange={handleSelectAllClick}
-                  inputProps={{
-                    "aria-label": "select all players",
-                  }}
-                />
-              </TableCell>
               <TableCell>Player Name</TableCell>
               <TableCell>Role</TableCell>
               <TableCell>Club</TableCell>
@@ -112,56 +63,34 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({
           </TableHead>
           <TableBody>
             {visibleRows.map((row) => {
-              const isItemSelected = isSelected(row.player_info.id);
-              const labelId = `enhanced-table-checkbox-${row.player_info.id}`;
-
               return (
                 <TableRow
-                  hover
-                  onClick={() => handleClick(row.player_info.id)}
                   role="checkbox"
-                  aria-checked={isItemSelected}
                   tabIndex={-1}
                   key={row.player_info.id}
-                  selected={isItemSelected}
-                  sx={{ cursor: "pointer" }}
                 >
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      color="primary"
-                      checked={isItemSelected}
-                      inputProps={{
-                        "aria-labelledby": labelId,
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell
-                    component="th"
-                    id={labelId}
-                    scope="row"
-                    padding="none"
-                  >
+                  <TableCell component="th" scope="row">
                     <Typography variant="body2" fontWeight="medium">
                       {row.player_info.name}
                     </Typography>
                   </TableCell>
                   <TableCell>{row.player_info.role}</TableCell>
-                  <TableCell>{row.player_stats?.club || "-"}</TableCell>
+                  <TableCell>{row.player_stats?.club ?? "-"}</TableCell>
 
                   <TableCell align="right">
-                    {row.player_stats?.hm_points || "-"}
+                    {formatValue(row.player_stats?.hm_points)}
                   </TableCell>
                   <TableCell align="right">
-                    {row.player_stats?.goal || "-"}
+                    {formatValue(row.player_stats?.goal)}
                   </TableCell>
                   <TableCell align="right">
-                    {row.player_stats?.assists || "-"}
+                    {formatValue(row.player_stats?.assists)}
                   </TableCell>
                   <TableCell align="right">
-                    {row.player_stats?.appearances || "-"}
+                    {formatValue(row.player_stats?.appearances)}
                   </TableCell>
                   <TableCell align="right">
-                    {row.player_stats?.price || "-"}
+                    {formatValue(row.player_stats?.price)}
                   </TableCell>
                   <TableCell align="right">
                     {(() => {
@@ -170,7 +99,7 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({
                       }
                       const price = row.player_stats.price;
                       const estimatedValue =
-                        row.player_stats.estimated_value || price;
+                        row.player_stats.estimated_value ?? price;
 
                       const difference = estimatedValue - price;
                       const sign = difference > 0 ? "+" : "";
