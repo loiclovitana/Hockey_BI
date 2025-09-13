@@ -45,9 +45,9 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
   );
 
   return (
-    <Paper sx={{ width: "100%", p: 1 }}>
+    <Paper sx={{ width: "100%", py: 1 }}>
       <TableContainer>
-        <Table aria-labelledby="tableTitle">
+        <Table aria-labelledby="tableTitle" size="small">
           <TableHead>
             <TableRow>
               <TableCell>Player Name</TableCell>
@@ -56,7 +56,7 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
               <TableCell align="right">HM Points</TableCell>
               <TableCell align="right">Goals</TableCell>
               <TableCell align="right">Assists</TableCell>
-              <TableCell align="right">Appearances</TableCell>
+              <TableCell align="right">Matchs</TableCell>
               <TableCell align="right">Price</TableCell>
               <TableCell align="right">Estimated Value</TableCell>
             </TableRow>
@@ -75,7 +75,21 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
                     </Typography>
                   </TableCell>
                   <TableCell>{row.player_info.role}</TableCell>
-                  <TableCell>{row.player_stats?.club ?? "-"}</TableCell>
+                  <TableCell>
+                    {row.player_stats?.club ? (
+                      <Box
+                        component="img"
+                        src={`/club/${row.player_stats.club}.webp`}
+                        alt={row.player_stats.club}
+                        sx={{
+                          width: 32,
+                          objectFit: "contain",
+                        }}
+                      />
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
 
                   <TableCell align="right">
                     {formatValue(row.player_stats?.hm_points)}

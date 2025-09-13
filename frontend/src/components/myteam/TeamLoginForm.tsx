@@ -32,7 +32,7 @@ export const TeamLoginForm: React.FC<TeamLoginFormProps> = ({ onSuccess }) => {
     if (clickCount == 5) {
       navigate("/admin");
     }
-  }, [clickCount,navigate]);
+  }, [clickCount, navigate]);
 
   const handleSubmit = async (formData: TeamLoginData) => {
     const response = await loadMyteamLoadPost({
