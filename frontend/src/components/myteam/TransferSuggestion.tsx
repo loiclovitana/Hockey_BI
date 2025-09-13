@@ -30,8 +30,8 @@ export const TransferSuggestion: React.FC<TransferSuggestionProps> = ({
       />
     );
   }
-
-  const myTeamId = team.map((t) => t.player_id);
+  console.log(playerStats);
+  const myTeamId = team.filter((t) => !t.to_datetime).map((t) => t.player_id);
 
   const get_value_difference = (a: LastPlayerStats) => {
     if (!a.player_stats) {
@@ -51,6 +51,7 @@ export const TransferSuggestion: React.FC<TransferSuggestionProps> = ({
       );
     })
     .sort((a, b) => get_value_difference(a) - get_value_difference(b));
+  console.log(myTeamStats);
 
   const otherPlayersStats = playerStats
     .filter((player) => {
