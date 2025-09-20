@@ -4,7 +4,8 @@ import { PlayerStatsContext } from "../../context/PlayerStatsContext";
 import { ErrorMessage } from "../common/ErrorMessage";
 import { LoadingSpinner } from "../common/LoadingSpinner";
 import { EmptyState } from "../common/EmptyState";
-import { Box, Typography } from "@mui/material";
+import { SectionHeader } from "../common/SectionHeader";
+import { Box } from "@mui/material";
 import { PlayerStatsTable } from "../PlayerStatsTable";
 
 interface TransferSuggestionProps {
@@ -62,10 +63,13 @@ export const TransferSuggestion: React.FC<TransferSuggestionProps> = ({
 
   return (
     <Box flex={1} sx={{ py: 2 }}>
-      <Typography variant="h5">You should sell</Typography>
+      <SectionHeader title="Sell Recommendations" />
       <PlayerStatsTable data={myTeamStats} />
-      <Typography variant="h5">You should buy</Typography>
-      <PlayerStatsTable data={otherPlayersStats} />
+
+      <Box sx={{ pt: 3 }}>
+        <SectionHeader title="Buy Recommendations" />
+        <PlayerStatsTable data={otherPlayersStats} />
+      </Box>
     </Box>
   );
 };

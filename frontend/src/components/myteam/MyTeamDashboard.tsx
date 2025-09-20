@@ -31,7 +31,7 @@ export const MyTeamDashboard: React.FC<MyTeamDashboardProps> = ({
         </Typography>
       ) : (
         <>
-          <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
             <ButtonGroup variant="contained" sx={{ minWidth: "300px" }}>
               <Button
                 variant={team === 0 ? "contained" : "outlined"}
