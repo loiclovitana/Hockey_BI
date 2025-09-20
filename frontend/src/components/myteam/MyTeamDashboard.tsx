@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Typography, Select, MenuItem } from "@mui/material";
+import { Box, Typography, Button, ButtonGroup } from "@mui/material";
 import { type DashBoardData } from "../../client";
 import { TransferSuggestion } from "./TransferSuggestion";
 
@@ -31,20 +31,25 @@ export const MyTeamDashboard: React.FC<MyTeamDashboardProps> = ({
         </Typography>
       ) : (
         <>
-          <Select
-            value={team}
-            size="medium"
-            onChange={(e) => {
-              setTeam(e.target.value);
-            }}
-            sx={{ mt: 2, ml: 2, p: 0.5 }}
-          >
-            {dashboardData.my_teams.map((_, index) => (
-              <MenuItem key={index} value={index}>
-                Team {index + 1}
-              </MenuItem>
-            ))}
-          </Select>
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            <ButtonGroup variant="contained" sx={{ minWidth: "300px" }}>
+              <Button
+                variant={team === 0 ? "contained" : "outlined"}
+                onClick={() => setTeam(0)}
+                sx={{ flex: 1 }}
+              >
+                Team 1
+              </Button>
+              <Button
+                variant={team === 1 ? "contained" : "outlined"}
+                onClick={() => setTeam(1)}
+                disabled={numberOfTeam < 2}
+                sx={{ flex: 1 }}
+              >
+                Team 2
+              </Button>
+            </ButtonGroup>
+          </Box>
           <TransferSuggestion team={dashboardData.my_teams[team]} />
         </>
       )}
