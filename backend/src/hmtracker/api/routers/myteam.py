@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from os import getenv
 from hmtracker.constants import HM_DATABASE_URL_ENV_NAME
 from hmtracker.database import repository as repo
@@ -34,7 +34,7 @@ class DashBoardData(BaseModel):
 _CACHE_S = 600
 
 @router.post("/load")
-async def load(hm_user: str, hm_password: str, force_team_reload:bool, session: SessionDep) -> DashBoardData:
+async def load(hm_user: str, hm_password: str, session: SessionDep, force_team_reload: bool = False) -> DashBoardData:
     
 
     manager = session.get_manager_by_email(hm_user)
