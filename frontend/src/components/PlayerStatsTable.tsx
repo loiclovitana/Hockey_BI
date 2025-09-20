@@ -54,9 +54,24 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
               <TableCell>Role</TableCell>
               <TableCell>Club</TableCell>
               <TableCell align="right">HM Points</TableCell>
-              <TableCell align="right" sx={{ display: { xs: 'none', md: 'table-cell' } }}>Goals</TableCell>
-              <TableCell align="right" sx={{ display: { xs: 'none', md: 'table-cell' } }}>Assists</TableCell>
-              <TableCell align="right" sx={{ display: { xs: 'none', md: 'table-cell' } }}>Matchs</TableCell>
+              <TableCell
+                align="right"
+                sx={{ display: { xs: "none", md: "table-cell" } }}
+              >
+                Goals
+              </TableCell>
+              <TableCell
+                align="right"
+                sx={{ display: { xs: "none", md: "table-cell" } }}
+              >
+                Assists
+              </TableCell>
+              <TableCell
+                align="right"
+                sx={{ display: { xs: "none", md: "table-cell" } }}
+              >
+                Matchs
+              </TableCell>
               <TableCell align="right">Price</TableCell>
               <TableCell align="right">Estimated Value</TableCell>
             </TableRow>
@@ -94,13 +109,22 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
                   <TableCell align="right">
                     {formatValue(row.player_stats?.hm_points)}
                   </TableCell>
-                  <TableCell align="right" sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                  <TableCell
+                    align="right"
+                    sx={{ display: { xs: "none", md: "table-cell" } }}
+                  >
                     {formatValue(row.player_stats?.goal)}
                   </TableCell>
-                  <TableCell align="right" sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                  <TableCell
+                    align="right"
+                    sx={{ display: { xs: "none", md: "table-cell" } }}
+                  >
                     {formatValue(row.player_stats?.assists)}
                   </TableCell>
-                  <TableCell align="right" sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                  <TableCell
+                    align="right"
+                    sx={{ display: { xs: "none", md: "table-cell" } }}
+                  >
                     {formatValue(row.player_stats?.appearances)}
                   </TableCell>
                   <TableCell align="right">

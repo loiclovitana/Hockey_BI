@@ -13,40 +13,41 @@ export const MyTeamDashboard: React.FC<MyTeamDashboardProps> = ({
   const [team, setTeam] = useState(0);
 
   const numberOfTeam = dashboardData.my_teams.length;
-  if (numberOfTeam == 0) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Welcome {dashboardData.manager.email}
-        </Typography>
-        <Typography variant="body2">
-          You haven't created any team yet
-        </Typography>
-      </Box>
-    );
-  }
 
   return (
     <Box sx={{ py: 3 }}>
-      <Typography variant="h4" gutterBottom>
+      <Typography
+        variant="h6"
+        textAlign={"center"}
+        gutterBottom
+        sx={{ wordBreak: "break-word", pb: 2 }}
+      >
         Welcome {dashboardData.manager.email}
       </Typography>
 
-      <Select
-        value={team}
-        size="medium"
-        onChange={(e) => {
-          setTeam(e.target.value);
-        }}
-        sx={{ mt: 2, ml: 2, p: 0.5 }}
-      >
-        {dashboardData.my_teams.map((_, index) => (
-          <MenuItem key={index} value={index}>
-            Team {index + 1}
-          </MenuItem>
-        ))}
-      </Select>
-      <TransferSuggestion team={dashboardData.my_teams[team]} />
+      {numberOfTeam === 0 ? (
+        <Typography variant="body2">
+          You haven't created any team yet
+        </Typography>
+      ) : (
+        <>
+          <Select
+            value={team}
+            size="medium"
+            onChange={(e) => {
+              setTeam(e.target.value);
+            }}
+            sx={{ mt: 2, ml: 2, p: 0.5 }}
+          >
+            {dashboardData.my_teams.map((_, index) => (
+              <MenuItem key={index} value={index}>
+                Team {index + 1}
+              </MenuItem>
+            ))}
+          </Select>
+          <TransferSuggestion team={dashboardData.my_teams[team]} />
+        </>
+      )}
     </Box>
   );
 };
