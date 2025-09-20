@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -7,6 +8,7 @@ from hmtracker.database import repository as repo
 from hmtracker.api import models as api_models
 from hmtracker.loader.main import import_teamplayers_from_loader
 from hmtracker.loader.teamplayers.source.website import team_players_ajax_loader
+from hmtracker.services.check_user import connect_to_hm
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/myteam", tags=["myteam"])
@@ -29,11 +31,19 @@ class DashBoardData(BaseModel):
     manager: api_models.Manager
     my_teams: list[list[api_models.Team]]
 
+_CACHE_S = 600
 
 @router.post("/load")
-async def load(hm_user: str, hm_password: str, session: SessionDep) -> DashBoardData:
-    loader = team_players_ajax_loader(hm_user, hm_password)
-    import_teamplayers_from_loader(loader, hm_user, session)
+async def load(hm_user: str, hm_password: str, force_team_reload:bool, session: SessionDep) -> DashBoardData:
+    
+
+    manager = session.get_manager_by_email(hm_user)
+    if manager is None or manager.last_import is None or (datetime.now() -manager.last_import  ).total_seconds() > _CACHE_S or force_team_reload:
+        loader = team_players_ajax_loader(hm_user, hm_password)
+        import_teamplayers_from_loader(loader, hm_user, session)
+    else:
+        connect_to_hm(hm_user,password=hm_password)
+    
     manager = session.get_manager_by_email(hm_user)
     if manager is None:
         raise HTTPException(status_code=500, detail="Manager wasn't saved correctly")

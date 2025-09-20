@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi import HTTPException, status
-from hmtracker import admin
+from hmtracker.services import admin
 from hmtracker.api.admin_login import admin_login_scheme, decode_token
 from pydantic import BaseModel
 

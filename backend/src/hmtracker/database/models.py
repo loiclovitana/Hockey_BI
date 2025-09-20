@@ -88,6 +88,7 @@ class Manager(HMDatabaseObject):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str | None] = mapped_column(String, unique=True)
     last_import: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    encrypted_password:Mapped[str|None] = mapped_column(String,nullable=True)
 
 
 class Team(HMDatabaseObject):

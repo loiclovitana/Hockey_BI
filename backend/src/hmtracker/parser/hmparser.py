@@ -144,6 +144,15 @@ class HMAjaxScrapper:
             for team_soup in teams_soups
         ]
 
+    def auto_lineup(self):
+        session = self._get_open_session()
+        query_data = f"randomNumber={_random_number()}"
+        response = session.post(
+            AJAX_URL + "roster-auto-lineup", query_data, headers=AJAX_REQUEST_HEADER
+        )
+        if not response.text == "1":
+            raise ConnectionError("Couldn't auto line up")
+
     def select_team(self, team_id):
         session = self._get_open_session()
         query_data = f"randomNumber={_random_number()}&myteam={team_id}"

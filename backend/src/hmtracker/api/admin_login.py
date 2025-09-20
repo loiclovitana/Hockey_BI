@@ -6,7 +6,7 @@ from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
 
-from hmtracker import admin
+from hmtracker.services import admin
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 SECRET_KEY = getenv("HMTRACKER_SECRET_KEY")

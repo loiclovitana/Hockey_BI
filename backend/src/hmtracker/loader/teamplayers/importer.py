@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from hmtracker.database import models
 from hmtracker.database.repository import RepositorySession
 
@@ -58,5 +58,7 @@ def import_team(
         if player_id not in current_players
     ]
     repository_session.session.add_all(new_team_player)
+
+    manager.last_import=datetime.now()
 
     repository_session.session.commit()
