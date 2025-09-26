@@ -1,6 +1,8 @@
 import logging
 from threading import Thread
 from os import getenv
+from datetime import datetime
+import traceback
 
 from hmtracker.common.exceptions import NoDatabaseError, NoEncryptionError
 from hmtracker.common.constants import (
@@ -9,6 +11,7 @@ from hmtracker.common.constants import (
     HM_PASSWORD_ENV_NAME,
 )
 import hmtracker.loader.main as loader
+from hmtracker.database import repository, models
 from hashlib import sha256
 
 _current_operation: Thread | None = None
@@ -65,12 +68,45 @@ def get_current_operation() -> str | None:
     return _current_operation.name
 
 
+def registerTask(task: models.Task):
+    database_url = getenv(HM_DATABASE_URL_ENV_NAME)
+    if database_url:
+        session = repository.create_repository_session_maker(database_url)()
+        try:
+            session.add_task(task)
+        finally:
+            session.end_session()
+
+
 def _Operation(name: str):
     def decorator(method):
         def wrapper():
             global _current_operation
             check_operation()
-            thread = Thread(target=method, name=name)
+
+            def task_wrapper():
+                start_time = datetime.now()
+
+                try:
+                    method()
+
+                    end_time = datetime.now()
+                    registerTask(models.Task(name=name, start=start_time, end=end_time))
+
+                except Exception as e:
+                    error_msg = str(e)
+                    stack_trace = traceback.format_exc()
+                    registerTask(
+                        models.Task(
+                            name=name,
+                            start=start_time,
+                            end=datetime.now(),
+                            error=error_msg,
+                            stacktrace=stack_trace,
+                        )
+                    )
+
+            thread = Thread(target=task_wrapper, name=name)
             _current_operation = thread
             thread.start()
 

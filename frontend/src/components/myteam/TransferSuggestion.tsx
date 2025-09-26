@@ -63,11 +63,11 @@ export const TransferSuggestion: React.FC<TransferSuggestionProps> = ({
 
   return (
     <Box flex={1} sx={{ py: 2 }}>
-      <SectionHeader title="Sell Recommendations" />
+      <SectionHeader title="Sell" />
       <PlayerStatsTable data={myTeamStats} />
 
       <Box sx={{ pt: 3 }}>
-        <SectionHeader title="Buy Recommendations" />
+        <SectionHeader title="Buy" />
         <PlayerStatsTable data={otherPlayersStats} />
       </Box>
     </Box>

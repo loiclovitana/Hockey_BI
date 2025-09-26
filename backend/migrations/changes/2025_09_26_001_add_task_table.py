@@ -18,12 +18,13 @@ class AddTaskTableMigration(Migration):
     def up(self, session: Session) -> None:
         session.execute(
             text("""
-            CREATE TABLE Task (
+            CREATE TABLE TASK (
                 id INTEGER PRIMARY KEY,
                 name VARCHAR NOT NULL DEFAULT 'Unknown',
                 start DATETIME NOT NULL,
                 end_ DATETIME NOT NULL,
-                error VARCHAR NULL
+                error VARCHAR NULL,
+                stacktrace VARCHAR NULL
             )
         """)
         )
@@ -32,6 +33,6 @@ class AddTaskTableMigration(Migration):
         """Remove the Task table."""
         session.execute(
             text("""
-            DROP TABLE Task
+            DROP TABLE TASK
         """)
         )

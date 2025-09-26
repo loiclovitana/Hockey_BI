@@ -191,3 +191,8 @@ class RepositorySession:
         )
 
         return query.all()
+
+    def add_task(self, task: models.Task) -> models.Task:
+        self.session.add(task)
+        self.session.flush()
+        return task
