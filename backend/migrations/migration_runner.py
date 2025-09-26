@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, text, MetaData, Table, Column, String, Dat
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import ProgrammingError
 
-from hmtracker.database.migration import Migration
+from hmtracker.database.base import Migration
 
 
 class MigrationRunner:

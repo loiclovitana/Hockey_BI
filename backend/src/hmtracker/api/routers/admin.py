@@ -14,6 +14,9 @@ router = APIRouter(
 def start_loading() -> None:
     admin.start_loading()
 
+@router.post("/autoteam/start")
+def start_team_alignement() -> None:
+    admin.start_team_alignement()
 
 class AdminUser(BaseModel):
     username:str
