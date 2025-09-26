@@ -5,7 +5,7 @@ from importlib import resources
 
 from hmtracker.database.creation import initialize_database
 from hmtracker.database.repository import create_repository_session_maker
-from hmtracker.constants import HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
+from hmtracker.common.constants import HM_USER_ENV_NAME, HM_PASSWORD_ENV_NAME
 from hmtracker.loader.main import (
     import_playerstats_from_csv,
     import_playerstats_from_loader,

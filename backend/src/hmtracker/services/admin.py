@@ -3,13 +3,12 @@ from threading import Thread
 from os import getenv
 
 from hmtracker.common.exceptions import NoDatabaseError, NoEncryptionError
-from hmtracker.constants import (
+from hmtracker.common.constants import (
     HM_DATABASE_URL_ENV_NAME,
     HM_USER_ENV_NAME,
     HM_PASSWORD_ENV_NAME,
 )
 import hmtracker.loader.main as loader
-from hmtracker.database import repository
 from hashlib import sha256
 
 _current_operation: Thread | None = None
@@ -93,8 +92,6 @@ def start_loading():
     loader.import_playerstats_from_ajax(database_url, hm_user, hm_password)
 
 
-
-
 @_Operation("Align Team")
 def start_team_alignement():
     if __ENCRYYPTION_PASSWORD is None:
@@ -102,8 +99,5 @@ def start_team_alignement():
     database_url = getenv(HM_DATABASE_URL_ENV_NAME)
     if not database_url:
         raise NoDatabaseError()
-    connection = repository.create_repository_session_maker(database_url)()
+    # connection = repository.create_repository_session_maker(database_url)()
     # TODO
-
-
-    

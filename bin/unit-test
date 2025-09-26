@@ -1,0 +1,28 @@
+#!/bin/bash
+dir_script=$(dirname $(realpath "$0"))
+test_dir=$dir_script/../backend/src/tests
+
+cd $dir_script/../backend/
+
+# Parse command line options
+interactive=false
+while getopts "i" opt; do
+case $opt in
+    i)
+    interactive=true
+    ;;
+    \?)
+    echo "Invalid option: -$OPTARG" >&2
+    exit 1
+    ;;
+esac
+done
+
+uv run python -m unittest discover -s $test_dir/hockeymanagerbi/ -p "*Utest.py"
+
+# Echo "end" if interactive mode is enabled
+if [ "$interactive" = true ]; then
+    rm -r tmp 
+    uv run python -m unittest discover -s $test_dir/integration/ -p "*Itest.py"
+fi
+

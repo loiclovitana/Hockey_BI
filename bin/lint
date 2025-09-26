@@ -1,0 +1,22 @@
+#!/bin/bash
+dir_script=$(dirname $(realpath "$0"))
+
+cd "$dir_script/../backend/"
+echo "========== RUFF FORMAT =========="
+uv run ruff format
+echo ""
+
+echo "========== RUFF CHECK =========="
+uv run ruff check --fix
+echo ""
+
+echo "========== MYPY =========="
+uv run mypy src
+echo ""
+
+cd "$dir_script/../frontend/"
+echo "========== PRETTIER FORMAT =========="
+npm run --silent format
+echo ""
+echo "========== ESLINT  =========="
+npm run --silent lint

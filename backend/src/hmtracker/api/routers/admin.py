@@ -14,16 +14,18 @@ router = APIRouter(
 def start_loading() -> None:
     admin.start_loading()
 
+
 @router.post("/autoteam/start")
 def start_team_alignement() -> None:
     admin.start_team_alignement()
 
+
 class AdminUser(BaseModel):
-    username:str
+    username: str
 
 
 @router.get("/user")
-def get_admin_user(token: Annotated[str, Depends(admin_login_scheme)]) ->AdminUser:
+def get_admin_user(token: Annotated[str, Depends(admin_login_scheme)]) -> AdminUser:
     username = decode_token(token)
     return AdminUser(username=username)
 

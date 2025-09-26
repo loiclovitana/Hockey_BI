@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from os import getenv
-from hmtracker.constants import HM_DATABASE_URL_ENV_NAME
+from hmtracker.common.constants import HM_DATABASE_URL_ENV_NAME
 from hmtracker.database import repository as repo
 from hmtracker.api import models as api_models
 from pydantic import BaseModel

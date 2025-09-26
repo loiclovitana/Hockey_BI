@@ -6,7 +6,7 @@ import requests
 from bs4 import BeautifulSoup, Tag
 from requests import Session
 
-from hmtracker.constants import HM_URL
+from hmtracker.common.constants import HM_URL
 
 AJAX_URL = HM_URL + "ajaxrequest/"
 

@@ -91,7 +91,7 @@ export const HockeyPlayerSearch: React.FC<HockeyPlayerSearchProps> = ({
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        p: 1
+        p: 1,
       }}
     >
       <TextField

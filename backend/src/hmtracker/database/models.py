@@ -82,26 +82,22 @@ class StatImport(HMDatabaseObject):
 
     stats = relationship("HockeyPlayerStats", back_populates="importation")
 
+
 class Task(HMDatabaseObject):
     __tablename__ = "Task"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name:Mapped[str] = mapped_column(String, server_default="Unknown", nullable=False)
-    start: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False
-    )
-    end: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False
-    )
-    error: Mapped[str | None] = mapped_column(
-        String, nullable=True
-    )
+    name: Mapped[str] = mapped_column(String, server_default="Unknown", nullable=False)
+    start: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    end: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    error: Mapped[str | None] = mapped_column(String, nullable=True)
+
 
 class Manager(HMDatabaseObject):
     __tablename__ = "MANAGER"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str | None] = mapped_column(String, unique=True)
     last_import: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    encrypted_password:Mapped[str|None] = mapped_column(String,nullable=True)
+    encrypted_password: Mapped[str | None] = mapped_column(String, nullable=True)
     autolineup: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
 

@@ -14,10 +14,9 @@ import os
 from typing import Optional
 
 # Add the parent directory to the path so we can import from src
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from migrations.migration_runner import MigrationRunner
-
 
 
 def main():
@@ -27,22 +26,22 @@ def main():
         sys.exit(1)
 
     command = sys.argv[1]
-    database_url = os.getenv('HM_DATABASE_URL', '')
+    database_url = os.getenv("HM_DATABASE_URL", "")
 
     if not database_url:
-        print("No database set",file=sys.stderr)
+        print("No database set", file=sys.stderr)
         sys.exit(-1)
 
     runner = MigrationRunner(database_url)
 
-    if command == 'migrate':
+    if command == "migrate":
         runner.migrate()
-    elif command == 'rollback':
+    elif command == "rollback":
         target_version: Optional[str] = None
         if len(sys.argv) > 2:
             target_version = sys.argv[2]
         runner.rollback(target_version)
-    elif command == 'status':
+    elif command == "status":
         runner.status()
     else:
         print(f"Unknown command: {command}")
@@ -50,5 +49,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -19,7 +19,7 @@ export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({
     null,
   );
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   useEffect(() => {
     if (!selectedPlayer) {
@@ -62,7 +62,9 @@ export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({
           }}
         >
           <Typography variant="h6" color="text.secondary">
-            {isMobile ? "Tap menu to select a player" : "Select a player to view details"}
+            {isMobile
+              ? "Tap menu to select a player"
+              : "Select a player to view details"}
           </Typography>
         </Box>
       )}

@@ -11,7 +11,7 @@ export const HockeyPlayerOwnershipChart: React.FC<
   HockeyPlayerOwnershipChartProps
 > = ({ playerStats }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   if (!playerStats || playerStats.length === 0) {
     return (
       <Box sx={{ p: 2, textAlign: "center" }}>
@@ -44,13 +44,12 @@ export const HockeyPlayerOwnershipChart: React.FC<
     );
   }
 
-
   return (
-    <Box sx={{ pt:3, width: "100%", overflow: "hidden" }}>
+    <Box sx={{ pt: 3, width: "100%", overflow: "hidden" }}>
       <Typography variant={isMobile ? "body1" : "h6"} gutterBottom>
         Ownership Over Time
       </Typography>
-      <Box sx={{ width: "100%", overflowX: "auto" }}  >
+      <Box sx={{ width: "100%", overflowX: "auto" }}>
         <LineChart
           series={[
             {
@@ -62,9 +61,13 @@ export const HockeyPlayerOwnershipChart: React.FC<
             {
               data: ownershipData.map((d) => d.date),
               scaleType: "time",
-              valueFormatter: (date) => isMobile
-                ? date.toLocaleDateString('de', { month: 'short', day: 'numeric' })
-                : date.toLocaleDateString(),
+              valueFormatter: (date) =>
+                isMobile
+                  ? date.toLocaleDateString("de", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : date.toLocaleDateString(),
               ...(!isMobile && { label: "Date" }),
             },
           ]}
@@ -74,7 +77,7 @@ export const HockeyPlayerOwnershipChart: React.FC<
             },
           ]}
           hideLegend
-          sx={{pl:0}}
+          sx={{ pl: 0 }}
           grid={{ vertical: true, horizontal: true }}
         />
       </Box>

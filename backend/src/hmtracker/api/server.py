@@ -27,12 +27,14 @@ async def ping_server():
 
 
 class AuthTokenResponse(BaseModel):
-    type:Literal["bearer"] = "bearer"
-    access_token:str
-    
+    type: Literal["bearer"] = "bearer"
+    access_token: str
+
 
 @api.post("/admin/login")
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> AuthTokenResponse:
+async def login(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+) -> AuthTokenResponse:
     access_token = create_access_token(
         username=form_data.username, password=form_data.password
     )

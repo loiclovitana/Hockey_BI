@@ -7,7 +7,7 @@ import {
   IconButton,
   Typography,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { type LastPlayerStats } from "../client";
@@ -25,7 +25,7 @@ export const Players: React.FC = () => {
   );
   const [drawerOpen, setDrawerOpen] = useState(false);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   if (loading) {
     return <LoadingSpinner message="Loading player statistics..." />;
@@ -47,7 +47,13 @@ export const Players: React.FC = () => {
   const drawerWidth = 300;
 
   return (
-    <Box sx={{ display: "flex", height: "100%", flexDirection: isMobile ? "column" : "row" }}>
+    <Box
+      sx={{
+        display: "flex",
+        height: "100%",
+        flexDirection: isMobile ? "column" : "row",
+      }}
+    >
       {!isMobile ? (
         <Paper
           elevation={2}
@@ -90,10 +96,17 @@ export const Players: React.FC = () => {
               },
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", p: 2, borderBottom: 1, borderColor: "divider" }}>
-              <Typography variant="h6">
-                Select Player
-              </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                p: 2,
+                borderBottom: 1,
+                borderColor: "divider",
+              }}
+            >
+              <Typography variant="h6">Select Player</Typography>
               <IconButton onClick={() => setDrawerOpen(false)}>
                 <CloseIcon />
               </IconButton>

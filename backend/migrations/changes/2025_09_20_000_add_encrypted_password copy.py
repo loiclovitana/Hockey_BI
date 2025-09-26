@@ -17,14 +17,18 @@ class AddEncryptedPasswordMigration(Migration):
 
     def up(self, session: Session) -> None:
         """Add the encrypted_password column."""
-        session.execute(text("""
+        session.execute(
+            text("""
             ALTER TABLE MANAGER
             ADD COLUMN encrypted_password VARCHAR(255) NULL
-        """))
+        """)
+        )
 
     def down(self, session: Session) -> None:
         """Remove the encrypted_password column."""
-        session.execute(text("""
+        session.execute(
+            text("""
             ALTER TABLE MANAGER
             DROP COLUMN encrypted_password
-        """))
+        """)
+        )

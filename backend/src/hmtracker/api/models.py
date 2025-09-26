@@ -35,7 +35,6 @@ class HockeyPlayerStats(BaseModel):
     plus_minus: Optional[int] = None
 
     @computed_field
-    @property
     def estimated_value(self) -> Optional[float]:
         if self.appearances is None or self.hm_points is None:
             return None

@@ -1,8 +1,7 @@
-
 from hmtracker.parser.hmparser import HMAjaxScrapper
 
 
-def autolineup(user_email:str,password:str):
+def autolineup(user_email: str, password: str):
     parser = HMAjaxScrapper()
     try:
         parser.connect_to_hm(user_email, password)
