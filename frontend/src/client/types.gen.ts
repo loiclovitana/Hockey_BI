@@ -11,6 +11,20 @@ export type AdminUser = {
 };
 
 /**
+ * AuthRequest
+ */
+export type AuthRequest = {
+    /**
+     * Hm User
+     */
+    hm_user: string;
+    /**
+     * Hm Password
+     */
+    hm_password: string;
+};
+
+/**
  * AuthTokenResponse
  */
 export type AuthTokenResponse = {
@@ -169,6 +183,24 @@ export type HockeyPlayerStats = {
 export type LastPlayerStats = {
     player_info: HockeyPlayer;
     player_stats: HockeyPlayerStats | null;
+};
+
+/**
+ * LoadRequest
+ */
+export type LoadRequest = {
+    /**
+     * Hm User
+     */
+    hm_user: string;
+    /**
+     * Hm Password
+     */
+    hm_password: string;
+    /**
+     * Force Team Reload
+     */
+    force_team_reload?: boolean;
 };
 
 /**
@@ -465,22 +497,9 @@ export type GetLatestPlayerStatsPlayersLatestGetResponses = {
 export type GetLatestPlayerStatsPlayersLatestGetResponse = GetLatestPlayerStatsPlayersLatestGetResponses[keyof GetLatestPlayerStatsPlayersLatestGetResponses];
 
 export type LoadMyteamLoadPostData = {
-    body?: never;
+    body: LoadRequest;
     path?: never;
-    query: {
-        /**
-         * Hm User
-         */
-        hm_user: string;
-        /**
-         * Hm Password
-         */
-        hm_password: string;
-        /**
-         * Force Team Reload
-         */
-        force_team_reload?: boolean;
-    };
+    query?: never;
     url: '/myteam/load';
 };
 
@@ -503,18 +522,9 @@ export type LoadMyteamLoadPostResponses = {
 export type LoadMyteamLoadPostResponse = LoadMyteamLoadPostResponses[keyof LoadMyteamLoadPostResponses];
 
 export type RegisterForAutolinupMyteamAutolineupRegisterPostData = {
-    body?: never;
+    body: AuthRequest;
     path?: never;
-    query: {
-        /**
-         * Hm User
-         */
-        hm_user: string;
-        /**
-         * Hm Password
-         */
-        hm_password: string;
-    };
+    query?: never;
     url: '/myteam/autolineup/register';
 };
 
@@ -535,18 +545,9 @@ export type RegisterForAutolinupMyteamAutolineupRegisterPostResponses = {
 };
 
 export type UnregisterForAutolinupMyteamAutolineupUnregisterPostData = {
-    body?: never;
+    body: AuthRequest;
     path?: never;
-    query: {
-        /**
-         * Hm User
-         */
-        hm_user: string;
-        /**
-         * Hm Password
-         */
-        hm_password: string;
-    };
+    query?: never;
     url: '/myteam/autolineup/unregister';
 };
 

@@ -50,13 +50,13 @@ export const AutolineupStatus: React.FC<AutolineupStatusProps> = ({
 
     const { error } = isRegistering
       ? await registerForAutolinupMyteamAutolineupRegisterPost({
-          query: {
+          body: {
             hm_user: manager.email,
             hm_password: formData.hmPassword,
           },
         })
       : await unregisterForAutolinupMyteamAutolineupUnregisterPost({
-          query: {
+          body: {
             hm_user: manager.email,
             hm_password: formData.hmPassword,
           },

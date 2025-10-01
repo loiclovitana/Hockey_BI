@@ -10,7 +10,7 @@ from hmtracker.loader.main import import_teamplayers_from_loader
 from hmtracker.loader.teamplayers.source.website import team_players_ajax_loader
 from hmtracker.services.check_user import connect_to_hm
 from hmtracker.services.encryption import encrypt
-from pydantic import BaseModel
+from pydantic import BaseModel, SecretStr
 
 router = APIRouter(prefix="/myteam", tags=["myteam"])
 
@@ -28,6 +28,15 @@ def get_session():
 SessionDep = Annotated[repo.RepositorySession, Depends(get_session)]
 
 
+class AuthRequest(BaseModel):
+    hm_user: str
+    hm_password: SecretStr
+
+
+class LoadRequest(AuthRequest):
+    force_team_reload: bool = False
+
+
 class DashBoardData(BaseModel):
     manager: api_models.Manager
     my_teams: list[list[api_models.Team]]
@@ -37,22 +46,20 @@ _CACHE_S = 600
 
 
 @router.post("/load")
-async def load(
-    hm_user: str, hm_password: str, session: SessionDep, force_team_reload: bool = False
-) -> DashBoardData:
-    manager = session.get_manager_by_email(hm_user)
+async def load(request: LoadRequest, session: SessionDep) -> DashBoardData:
+    manager = session.get_manager_by_email(request.hm_user)
     if (
         manager is None
         or manager.last_import is None
         or (datetime.now() - manager.last_import).total_seconds() > _CACHE_S
-        or force_team_reload
+        or request.force_team_reload
     ):
-        loader = team_players_ajax_loader(hm_user, hm_password)
-        import_teamplayers_from_loader(loader, hm_user, session)
+        loader = team_players_ajax_loader(request.hm_user, request.hm_password.get_secret_value())
+        import_teamplayers_from_loader(loader, request.hm_user, session)
     else:
-        connect_to_hm(hm_user, password=hm_password)
+        connect_to_hm(request.hm_user, password=request.hm_password.get_secret_value())
 
-    manager = session.get_manager_by_email(hm_user)
+    manager = session.get_manager_by_email(request.hm_user)
     if manager is None:
         raise HTTPException(status_code=500, detail="Manager wasn't saved correctly")
     teams = [
@@ -78,23 +85,23 @@ async def load(
 
 
 @router.post("/autolineup/register")
-async def register_for_autolinup(hm_user: str, hm_password: str, session: SessionDep):
-    manager = session.get_manager_by_email(hm_user)
+async def register_for_autolinup(request: AuthRequest, session: SessionDep):
+    manager = session.get_manager_by_email(request.hm_user)
     if manager is None:
         raise HTTPException(status_code=500, detail="Manager wasn't saved correctly")
-    connect_to_hm(hm_user, password=hm_password)
+    connect_to_hm(request.hm_user, password=request.hm_password.get_secret_value())
 
-    manager.encrypted_password = encrypt(hm_password)
+    manager.encrypted_password = encrypt(request.hm_password.get_secret_value())
     manager.autolineup = True
     session.session.commit()
 
 
 @router.post("/autolineup/unregister")
-async def unregister_for_autolinup(hm_user: str, hm_password: str, session: SessionDep):
-    manager = session.get_manager_by_email(hm_user)
+async def unregister_for_autolinup(request: AuthRequest, session: SessionDep):
+    manager = session.get_manager_by_email(request.hm_user)
     if manager is None:
         raise HTTPException(status_code=500, detail="Manager wasn't saved correctly")
-    connect_to_hm(hm_user, password=hm_password)
+    connect_to_hm(request.hm_user, password=request.hm_password.get_secret_value())
     manager.encrypted_password = None
     manager.autolineup = False
     session.session.commit()

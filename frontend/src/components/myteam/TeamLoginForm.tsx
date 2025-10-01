@@ -36,7 +36,7 @@ export const TeamLoginForm: React.FC<TeamLoginFormProps> = ({ onSuccess }) => {
 
   const handleSubmit = async (formData: TeamLoginData) => {
     const response = await loadMyteamLoadPost({
-      query: {
+      body: {
         hm_user: formData.hmUser,
         hm_password: formData.hmPassword,
       },

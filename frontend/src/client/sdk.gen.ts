@@ -147,7 +147,11 @@ export const getLatestPlayerStatsPlayersLatestGet = <ThrowOnError extends boolea
 export const loadMyteamLoadPost = <ThrowOnError extends boolean = false>(options: Options<LoadMyteamLoadPostData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<LoadMyteamLoadPostResponses, LoadMyteamLoadPostErrors, ThrowOnError>({
         url: '/myteam/load',
-        ...options
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
     });
 };
 
@@ -157,7 +161,11 @@ export const loadMyteamLoadPost = <ThrowOnError extends boolean = false>(options
 export const registerForAutolinupMyteamAutolineupRegisterPost = <ThrowOnError extends boolean = false>(options: Options<RegisterForAutolinupMyteamAutolineupRegisterPostData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<RegisterForAutolinupMyteamAutolineupRegisterPostResponses, RegisterForAutolinupMyteamAutolineupRegisterPostErrors, ThrowOnError>({
         url: '/myteam/autolineup/register',
-        ...options
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
     });
 };
 
@@ -167,7 +175,11 @@ export const registerForAutolinupMyteamAutolineupRegisterPost = <ThrowOnError ex
 export const unregisterForAutolinupMyteamAutolineupUnregisterPost = <ThrowOnError extends boolean = false>(options: Options<UnregisterForAutolinupMyteamAutolineupUnregisterPostData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<UnregisterForAutolinupMyteamAutolineupUnregisterPostResponses, UnregisterForAutolinupMyteamAutolineupUnregisterPostErrors, ThrowOnError>({
         url: '/myteam/autolineup/unregister',
-        ...options
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
     });
 };
 
