@@ -1,8 +1,9 @@
 import React from "react";
-import { Container, Typography, Grid, Paper } from "@mui/material";
+import { Container, Typography, Grid, Paper, Box } from "@mui/material";
 import { StartLoadingComponent } from "./StartLoadingComponent";
 import { GetAdminUserComponent } from "./GetAdminUserComponent";
 import { GetOperationComponent } from "./GetOperationComponent";
+import { GetTasksComponent } from "./GetTasksComponent";
 
 interface AdminDashboardProps {
   token: string;
@@ -34,6 +35,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ token }) => {
           </Paper>
         </Grid>
       </Grid>
+      <Box sx={{ pt: 2 }}>
+        <Paper sx={{ p: 2 }}>
+          <GetTasksComponent token={token} />
+        </Paper>
+      </Box>
     </Container>
   );
 };
