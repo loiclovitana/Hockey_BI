@@ -62,3 +62,12 @@ class Team(BaseModel):
     season_id: int
     from_datetime: Optional[datetime] = None
     to_datetime: Optional[datetime] = None
+
+
+class Task(BaseModel):
+    id: int
+    name: str
+    start_at: datetime
+    end_at: datetime
+    error: Optional[str] = None
+    stacktrace: Optional[str] = None

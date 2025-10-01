@@ -87,8 +87,8 @@ class Task(HMDatabaseObject):
     __tablename__ = "TASK"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, server_default="Unknown", nullable=False)
-    start: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    end: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    start_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    end_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     error: Mapped[str | None] = mapped_column(String, nullable=True)
     stacktrace: Mapped[str | None] = mapped_column(String, nullable=True)
 

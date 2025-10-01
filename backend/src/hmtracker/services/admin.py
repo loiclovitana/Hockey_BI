@@ -91,7 +91,9 @@ def _Operation(name: str):
                     method()
 
                     end_time = datetime.now()
-                    registerTask(models.Task(name=name, start=start_time, end=end_time))
+                    registerTask(
+                        models.Task(name=name, start_at=start_time, end_at=end_time)
+                    )
 
                 except Exception as e:
                     error_msg = str(e)
@@ -99,8 +101,8 @@ def _Operation(name: str):
                     registerTask(
                         models.Task(
                             name=name,
-                            start=start_time,
-                            end=datetime.now(),
+                            start_at=start_time,
+                            end_at=datetime.now(),
                             error=error_msg,
                             stacktrace=stack_trace,
                         )

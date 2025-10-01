@@ -21,8 +21,8 @@ class AddTaskTableMigration(Migration):
             CREATE TABLE TASK (
                 id INTEGER PRIMARY KEY,
                 name VARCHAR NOT NULL DEFAULT 'Unknown',
-                start DATETIME NOT NULL,
-                end_ DATETIME NOT NULL,
+                start_at DATETIME NOT NULL,
+                end_at DATETIME NOT NULL,
                 error VARCHAR NULL,
                 stacktrace VARCHAR NULL
             )
