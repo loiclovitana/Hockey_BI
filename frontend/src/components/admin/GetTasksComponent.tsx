@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Button,
   Typography,
   Alert,
   CircularProgress,
@@ -9,7 +8,10 @@ import {
   Card,
   CardContent,
   Divider,
+  Pagination,
+  IconButton,
 } from "@mui/material";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { getTasksAdminTasksGet } from "../../client/sdk.gen";
 import type { Task } from "../../client/types.gen";
 import { TaskDetailsDialog } from "./TaskDetailsDialog";
@@ -18,6 +20,8 @@ interface GetTasksComponentProps {
   token: string;
 }
 
+const ITEMS_PER_PAGE = 5;
+
 export const GetTasksComponent: React.FC<GetTasksComponentProps> = ({
   token,
 }) => {
@@ -25,20 +29,32 @@ export const GetTasksComponent: React.FC<GetTasksComponentProps> = ({
   const [tasks, setTasks] = useState<Task[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalTasks, setTotalTasks] = useState(0);
 
-  const handleGetTasks = async () => {
+  const handleGetTasks = async (currentPage: number) => {
     setLoading(true);
     setError(null);
-    setTasks(null);
 
     try {
       const response = await getTasksAdminTasksGet({
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        query:{
+          limit: ITEMS_PER_PAGE,
+          offset: (currentPage - 1) * ITEMS_PER_PAGE
+        }
       });
       if (response.data) {
         setTasks(response.data);
+        // Note: You may need to update this if the API returns total count
+        // For now, assuming if we get less than ITEMS_PER_PAGE, it's the last page
+        if (response.data.length < ITEMS_PER_PAGE) {
+          setTotalTasks((currentPage - 1) * ITEMS_PER_PAGE + response.data.length);
+        } else {
+          setTotalTasks(currentPage * ITEMS_PER_PAGE + 1); // At least one more page
+        }
       }
       if (response.error) {
         setError(`Couldn't get tasks ${response.error}`);
@@ -48,6 +64,14 @@ export const GetTasksComponent: React.FC<GetTasksComponentProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    handleGetTasks(page);
+  }, [page, token]);
+
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
   };
 
   const handleTaskClick = (task: Task) => {
@@ -85,18 +109,24 @@ export const GetTasksComponent: React.FC<GetTasksComponentProps> = ({
 
   return (
     <>
-      <Typography variant="h6" gutterBottom>
-        Task History
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+        <Typography variant="h6">
+          Task History
+        </Typography>
+        <IconButton
+          size="small"
+          onClick={() => handleGetTasks(page)}
+          disabled={loading}
+        >
+          <RefreshIcon fontSize="small" />
+        </IconButton>
+      </Box>
 
-      <Button
-        variant="contained"
-        onClick={handleGetTasks}
-        disabled={loading}
-        fullWidth
-      >
-        {loading ? <CircularProgress size={24} /> : "Get Tasks"}
-      </Button>
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          <CircularProgress />
+        </Box>
+      )}
 
       {error && (
         <Alert severity="error" sx={{ mt: 2 }}>
@@ -104,13 +134,13 @@ export const GetTasksComponent: React.FC<GetTasksComponentProps> = ({
         </Alert>
       )}
 
-      {tasks && tasks.length === 0 && (
+      {!loading && tasks && tasks.length === 0 && (
         <Alert severity="info" sx={{ mt: 2 }}>
           No tasks found
         </Alert>
       )}
 
-      {tasks && tasks.length > 0 && (
+      {!loading && tasks && tasks.length > 0 && (
         <Box sx={{ pt: 2 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {tasks.map((task) => (
@@ -157,6 +187,17 @@ export const GetTasksComponent: React.FC<GetTasksComponentProps> = ({
               </Card>
             ))}
           </Box>
+
+          {totalTasks > ITEMS_PER_PAGE && (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+              <Pagination
+                count={Math.ceil(totalTasks / ITEMS_PER_PAGE)}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+              />
+            </Box>
+          )}
         </Box>
       )}
 
