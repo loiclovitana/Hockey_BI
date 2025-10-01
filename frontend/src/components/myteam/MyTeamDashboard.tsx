@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Box, Typography, Button, ButtonGroup } from "@mui/material";
-import { type DashBoardData } from "../../client";
+import { type DashBoardData, type Manager } from "../../client";
 import { TransferSuggestion } from "./TransferSuggestion";
 import { AutolineupStatus } from "./AutolineupStatus";
 
 interface MyTeamDashboardProps {
   dashboardData: DashBoardData;
+  onManagerUpdate: (manager: Manager) => void;
 }
 
 export const MyTeamDashboard: React.FC<MyTeamDashboardProps> = ({
   dashboardData,
+  onManagerUpdate,
 }) => {
   const [team, setTeam] = useState(0);
 
@@ -27,7 +29,10 @@ export const MyTeamDashboard: React.FC<MyTeamDashboardProps> = ({
       </Typography>
 
       <Box sx={{ display: "flex", justifyContent: "center", pb: 3 }}>
-        <AutolineupStatus manager={dashboardData.manager} />
+        <AutolineupStatus
+          manager={dashboardData.manager}
+          onUpdate={onManagerUpdate}
+        />
       </Box>
 
       {numberOfTeam === 0 ? (

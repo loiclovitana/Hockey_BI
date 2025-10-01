@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { type DashBoardData } from "../client";
+import { type DashBoardData, type Manager } from "../client";
 import { TeamLoginForm } from "../components/myteam/TeamLoginForm";
 import { MyTeamDashboard } from "../components/myteam/MyTeamDashboard";
 
@@ -8,8 +8,17 @@ export const Dashboard: React.FC = () => {
     null,
   );
 
+  const updateManager = (manager: Manager) => {
+    setDashboardData((prev) => (prev ? { ...prev, manager } : null));
+  };
+
   if (dashboardData) {
-    return <MyTeamDashboard dashboardData={dashboardData}></MyTeamDashboard>;
+    return (
+      <MyTeamDashboard
+        dashboardData={dashboardData}
+        onManagerUpdate={updateManager}
+      ></MyTeamDashboard>
+    );
   }
 
   return <TeamLoginForm onSuccess={setDashboardData} />;

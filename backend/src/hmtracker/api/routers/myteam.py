@@ -54,7 +54,9 @@ async def load(request: LoadRequest, session: SessionDep) -> DashBoardData:
         or (datetime.now() - manager.last_import).total_seconds() > _CACHE_S
         or request.force_team_reload
     ):
-        loader = team_players_ajax_loader(request.hm_user, request.hm_password.get_secret_value())
+        loader = team_players_ajax_loader(
+            request.hm_user, request.hm_password.get_secret_value()
+        )
         import_teamplayers_from_loader(loader, request.hm_user, session)
     else:
         connect_to_hm(request.hm_user, password=request.hm_password.get_secret_value())
@@ -85,7 +87,9 @@ async def load(request: LoadRequest, session: SessionDep) -> DashBoardData:
 
 
 @router.post("/autolineup/register")
-async def register_for_autolinup(request: AuthRequest, session: SessionDep):
+async def register_for_autolinup(
+    request: AuthRequest, session: SessionDep
+) -> api_models.Manager:
     manager = session.get_manager_by_email(request.hm_user)
     if manager is None:
         raise HTTPException(status_code=500, detail="Manager wasn't saved correctly")
@@ -93,15 +97,21 @@ async def register_for_autolinup(request: AuthRequest, session: SessionDep):
 
     manager.encrypted_password = encrypt(request.hm_password.get_secret_value())
     manager.autolineup = True
+    response = api_models.Manager.model_validate(manager.__dict__)
     session.session.commit()
+    return response
 
 
 @router.post("/autolineup/unregister")
-async def unregister_for_autolinup(request: AuthRequest, session: SessionDep):
+async def unregister_for_autolinup(
+    request: AuthRequest, session: SessionDep
+) -> api_models.Manager:
     manager = session.get_manager_by_email(request.hm_user)
     if manager is None:
         raise HTTPException(status_code=500, detail="Manager wasn't saved correctly")
     connect_to_hm(request.hm_user, password=request.hm_password.get_secret_value())
     manager.encrypted_password = None
     manager.autolineup = False
+    response = api_models.Manager.model_validate(manager.__dict__)
     session.session.commit()
+    return response

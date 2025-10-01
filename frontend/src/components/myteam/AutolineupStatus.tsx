@@ -15,6 +15,7 @@ import {
 
 interface AutolineupStatusProps {
   manager: Manager;
+  onUpdate: (manager: Manager) => void;
 }
 
 interface TeamLoginData extends Record<string, string> {
@@ -27,6 +28,7 @@ const teamLoginFields: LoginFormField[] = [
 
 export const AutolineupStatus: React.FC<AutolineupStatusProps> = ({
   manager,
+  onUpdate,
 }) => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
@@ -48,7 +50,7 @@ export const AutolineupStatus: React.FC<AutolineupStatusProps> = ({
       return;
     }
 
-    const { error } = isRegistering
+    const { error, data } = isRegistering
       ? await registerForAutolinupMyteamAutolineupRegisterPost({
           body: {
             hm_user: manager.email,
@@ -61,6 +63,9 @@ export const AutolineupStatus: React.FC<AutolineupStatusProps> = ({
             hm_password: formData.hmPassword,
           },
         });
+    if (data) {
+      onUpdate(data);
+    }
     if (error) {
       setError(
         error.detail?.toString() || "An error occurred. Please try again.",

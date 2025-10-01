@@ -541,8 +541,10 @@ export type RegisterForAutolinupMyteamAutolineupRegisterPostResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: Manager;
 };
+
+export type RegisterForAutolinupMyteamAutolineupRegisterPostResponse = RegisterForAutolinupMyteamAutolineupRegisterPostResponses[keyof RegisterForAutolinupMyteamAutolineupRegisterPostResponses];
 
 export type UnregisterForAutolinupMyteamAutolineupUnregisterPostData = {
     body: AuthRequest;
@@ -564,8 +566,10 @@ export type UnregisterForAutolinupMyteamAutolineupUnregisterPostResponses = {
     /**
      * Successful Response
      */
-    200: unknown;
+    200: Manager;
 };
+
+export type UnregisterForAutolinupMyteamAutolineupUnregisterPostResponse = UnregisterForAutolinupMyteamAutolineupUnregisterPostResponses[keyof UnregisterForAutolinupMyteamAutolineupUnregisterPostResponses];
 
 export type PingServerPingGetData = {
     body?: never;
