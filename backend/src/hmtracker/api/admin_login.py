@@ -7,9 +7,10 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
 
 from hmtracker.services import admin
+from hmtracker.common.constants import HM_SECRET_KEY_ENV_NAME
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
-SECRET_KEY = getenv("HMTRACKER_SECRET_KEY")
+SECRET_KEY = getenv(HM_SECRET_KEY_ENV_NAME)
 ENCRYPTION_ALGORITHM = "HS256"
 
 admin_login_scheme = OAuth2PasswordBearer(tokenUrl="admin/login")
@@ -39,6 +40,12 @@ def create_access_token(username: str, password: str) -> str:
 
 
 def decode_token(token):
+    if SECRET_KEY is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     try:
         decoded_token = jwt.decode(token, SECRET_KEY, algorithms=[ENCRYPTION_ALGORITHM])
         username = decoded_token.get("username")

@@ -1,5 +1,6 @@
 import os
 import base64
+from hmtracker.common.constants import HM_SECRET_KEY_ENV_NAME
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -7,9 +8,9 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 def _get_fernet_key() -> Fernet:
     """Get or derive Fernet encryption key from environment variable."""
-    secret_key = os.getenv("HM_SECRET_KEY")
+    secret_key = os.getenv(HM_SECRET_KEY_ENV_NAME)
     if not secret_key:
-        raise ValueError("HM_SECRET_KEY environment variable not set")
+        raise ValueError(f"{HM_SECRET_KEY_ENV_NAME} environment variable not set")
 
     # Derive a consistent key from the secret
     kdf = PBKDF2HMAC(
