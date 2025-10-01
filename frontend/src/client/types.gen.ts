@@ -187,6 +187,10 @@ export type Manager = {
      * Last Import
      */
     last_import?: string | null;
+    /**
+     * Autolineup
+     */
+    autolineup?: boolean;
 };
 
 /**
@@ -497,6 +501,70 @@ export type LoadMyteamLoadPostResponses = {
 };
 
 export type LoadMyteamLoadPostResponse = LoadMyteamLoadPostResponses[keyof LoadMyteamLoadPostResponses];
+
+export type RegisterForAutolinupMyteamAutolineupRegisterPostData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Hm User
+         */
+        hm_user: string;
+        /**
+         * Hm Password
+         */
+        hm_password: string;
+    };
+    url: '/myteam/autolineup/register';
+};
+
+export type RegisterForAutolinupMyteamAutolineupRegisterPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RegisterForAutolinupMyteamAutolineupRegisterPostError = RegisterForAutolinupMyteamAutolineupRegisterPostErrors[keyof RegisterForAutolinupMyteamAutolineupRegisterPostErrors];
+
+export type RegisterForAutolinupMyteamAutolineupRegisterPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type UnregisterForAutolinupMyteamAutolineupUnregisterPostData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Hm User
+         */
+        hm_user: string;
+        /**
+         * Hm Password
+         */
+        hm_password: string;
+    };
+    url: '/myteam/autolineup/unregister';
+};
+
+export type UnregisterForAutolinupMyteamAutolineupUnregisterPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UnregisterForAutolinupMyteamAutolineupUnregisterPostError = UnregisterForAutolinupMyteamAutolineupUnregisterPostErrors[keyof UnregisterForAutolinupMyteamAutolineupUnregisterPostErrors];
+
+export type UnregisterForAutolinupMyteamAutolineupUnregisterPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type PingServerPingGetData = {
     body?: never;

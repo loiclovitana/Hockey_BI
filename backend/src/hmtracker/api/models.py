@@ -52,6 +52,7 @@ class Manager(BaseModel):
     id: int
     email: Optional[str] = None
     last_import: Optional[datetime] = None
+    autolineup: bool = False
 
 
 class Team(BaseModel):
