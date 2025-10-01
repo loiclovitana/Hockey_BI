@@ -12,6 +12,7 @@ dependencies = [
     "charset-normalizer==3.4.0",
     "click==8.1.8",
     "colorama==0.4.6",
+    "cryptography>=46.0.2",
     "dnspython==2.7.0",
     "email-validator==2.2.0",
     "exceptiongroup==1.2.2",

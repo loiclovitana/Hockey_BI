@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Typography,
   Alert,
@@ -32,45 +32,53 @@ export const GetTasksComponent: React.FC<GetTasksComponentProps> = ({
   const [page, setPage] = useState(1);
   const [totalTasks, setTotalTasks] = useState(0);
 
-  const handleGetTasks = async (currentPage: number) => {
-    setLoading(true);
-    setError(null);
+  const handleGetTasks = useCallback(
+    async (currentPage: number) => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const response = await getTasksAdminTasksGet({
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        query:{
-          limit: ITEMS_PER_PAGE,
-          offset: (currentPage - 1) * ITEMS_PER_PAGE
+      try {
+        const response = await getTasksAdminTasksGet({
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          query: {
+            limit: ITEMS_PER_PAGE,
+            offset: (currentPage - 1) * ITEMS_PER_PAGE,
+          },
+        });
+        if (response.data) {
+          setTasks(response.data);
+          // Note: You may need to update this if the API returns total count
+          // For now, assuming if we get less than ITEMS_PER_PAGE, it's the last page
+          if (response.data.length < ITEMS_PER_PAGE) {
+            setTotalTasks(
+              (currentPage - 1) * ITEMS_PER_PAGE + response.data.length,
+            );
+          } else {
+            setTotalTasks(currentPage * ITEMS_PER_PAGE + 1); // At least one more page
+          }
         }
-      });
-      if (response.data) {
-        setTasks(response.data);
-        // Note: You may need to update this if the API returns total count
-        // For now, assuming if we get less than ITEMS_PER_PAGE, it's the last page
-        if (response.data.length < ITEMS_PER_PAGE) {
-          setTotalTasks((currentPage - 1) * ITEMS_PER_PAGE + response.data.length);
-        } else {
-          setTotalTasks(currentPage * ITEMS_PER_PAGE + 1); // At least one more page
+        if (response.error) {
+          setError(`Couldn't get tasks ${response.error}`);
         }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
       }
-      if (response.error) {
-        setError(`Couldn't get tasks ${response.error}`);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [token],
+  );
 
   useEffect(() => {
     handleGetTasks(page);
-  }, [page, token]);
+  }, [page, handleGetTasks]);
 
-  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (
+    _event: React.ChangeEvent<unknown>,
+    value: number,
+  ) => {
     setPage(value);
   };
 
@@ -109,10 +117,15 @@ export const GetTasksComponent: React.FC<GetTasksComponentProps> = ({
 
   return (
     <>
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-        <Typography variant="h6">
-          Task History
-        </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 2,
+        }}
+      >
+        <Typography variant="h6">Task History</Typography>
         <IconButton
           size="small"
           onClick={() => handleGetTasks(page)}

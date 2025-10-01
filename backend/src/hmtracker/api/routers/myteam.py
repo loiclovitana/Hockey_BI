@@ -9,6 +9,7 @@ from hmtracker.api import models as api_models
 from hmtracker.loader.main import import_teamplayers_from_loader
 from hmtracker.loader.teamplayers.source.website import team_players_ajax_loader
 from hmtracker.services.check_user import connect_to_hm
+from hmtracker.services.encryption import encrypt
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/myteam", tags=["myteam"])
@@ -74,3 +75,26 @@ async def load(
         manager=api_models.Manager.model_validate(manager.__dict__),
         my_teams=sorted_team_groups,
     )
+
+
+@router.post("/autolineup/register")
+async def register_for_autolinup(hm_user: str, hm_password: str, session: SessionDep):
+    manager = session.get_manager_by_email(hm_user)
+    if manager is None:
+        raise HTTPException(status_code=500, detail="Manager wasn't saved correctly")
+    connect_to_hm(hm_user, password=hm_password)
+
+    manager.encrypted_password = encrypt(hm_password)
+    manager.autolineup = True
+    session.session.commit()
+
+
+@router.post("/autolineup/unregister")
+async def unregister_for_autolinup(hm_user: str, hm_password: str, session: SessionDep):
+    manager = session.get_manager_by_email(hm_user)
+    if manager is None:
+        raise HTTPException(status_code=500, detail="Manager wasn't saved correctly")
+    connect_to_hm(hm_user, password=hm_password)
+    manager.encrypted_password = None
+    manager.autolineup = False
+    session.session.commit()
