@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from typing import Optional
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, computed_field, field_validator
 
 
 class Season(BaseModel):
@@ -53,6 +53,13 @@ class Manager(BaseModel):
     email: Optional[str] = None
     last_import: Optional[datetime] = None
     autolineup: bool = False
+
+    @field_validator("autolineup", mode="before")
+    @classmethod
+    def convert_none_to_default(cls, autolineup):
+        if autolineup is None:
+            return False
+        return autolineup
 
 
 class Team(BaseModel):
