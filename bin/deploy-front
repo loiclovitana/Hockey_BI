@@ -16,29 +16,28 @@ TARGET_DIR=${1:-$DEFAULT_TARGET_DIR}
 # SSH connection details
 SSH_TARGET="aml"
 
-echo "=� Starting deployment..."
-echo "=� Target directory: $TARGET_DIR"
+echo "Starting deployment..."
+echo "Target directory: $TARGET_DIR"
 
 
 
 # Navigate to frontend directory
-if [ ! -d "$dir_script/frontend" ]; then
+if [ ! -d "$dir_script/../frontend" ]; then
     echo "L Frontend directory not found!"
     exit 1
 fi
 
-cd "$dir_script/frontend"
+cd "$dir_script/../frontend"
 
-echo "=� Installing dependencies..."
+echo "Installing dependencies..."
 npm install
 
-echo "<�  Building frontend for production env"
+echo "Building frontend for production env"
 
 npm run build -- --mode production 
 
-echo "=� Copying build to remote server..."
+echo "Copying build to remote server..."
 scp -r dist/* $SSH_TARGET:$TARGET_DIR/
 
 
-echo " Deployment completed successfully!"
-echo "< Frontend deployed to $SSH_TARGET:$TARGET_DIR"
+echo "Frontend deployed to $SSH_TARGET:$TARGET_DIR"

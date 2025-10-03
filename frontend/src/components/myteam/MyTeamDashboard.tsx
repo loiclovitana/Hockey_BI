@@ -1,52 +1,68 @@
 import React, { useState } from "react";
-import { Box, Typography, Select, MenuItem } from "@mui/material";
-import { type DashBoardData } from "../../client";
+import { Box, Typography, Button, ButtonGroup } from "@mui/material";
+import { type DashBoardData, type Manager } from "../../client";
 import { TransferSuggestion } from "./TransferSuggestion";
+import { AutolineupStatus } from "./AutolineupStatus";
 
 interface MyTeamDashboardProps {
   dashboardData: DashBoardData;
+  onManagerUpdate: (manager: Manager) => void;
 }
 
 export const MyTeamDashboard: React.FC<MyTeamDashboardProps> = ({
   dashboardData,
+  onManagerUpdate,
 }) => {
   const [team, setTeam] = useState(0);
 
   const numberOfTeam = dashboardData.my_teams.length;
-  if (numberOfTeam == 0) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          Welcome {dashboardData.manager.email}
-        </Typography>
-        <Typography variant="body2">
-          You haven't created any team yet
-        </Typography>
-      </Box>
-    );
-  }
 
   return (
     <Box sx={{ py: 3 }}>
-      <Typography variant="h4" gutterBottom>
+      <Typography
+        variant="h6"
+        textAlign={"center"}
+        gutterBottom
+        sx={{ wordBreak: "break-word", pb: 1 }}
+      >
         Welcome {dashboardData.manager.email}
       </Typography>
 
-      <Select
-        value={team}
-        size="medium"
-        onChange={(e) => {
-          setTeam(e.target.value);
-        }}
-        sx={{ mt: 2, ml: 2, p: 0.5 }}
-      >
-        {dashboardData.my_teams.map((_, index) => (
-          <MenuItem key={index} value={index}>
-            Team {index + 1}
-          </MenuItem>
-        ))}
-      </Select>
-      <TransferSuggestion team={dashboardData.my_teams[team]} />
+      <Box sx={{ display: "flex", justifyContent: "center", pb: 3 }}>
+        <AutolineupStatus
+          manager={dashboardData.manager}
+          onUpdate={onManagerUpdate}
+        />
+      </Box>
+
+      {numberOfTeam === 0 ? (
+        <Typography variant="body2">
+          You haven't created any team yet
+        </Typography>
+      ) : (
+        <>
+          <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
+            <ButtonGroup variant="contained" sx={{ minWidth: "300px" }}>
+              <Button
+                variant={team === 0 ? "contained" : "outlined"}
+                onClick={() => setTeam(0)}
+                sx={{ flex: 1 }}
+              >
+                Team 1
+              </Button>
+              <Button
+                variant={team === 1 ? "contained" : "outlined"}
+                onClick={() => setTeam(1)}
+                disabled={numberOfTeam < 2}
+                sx={{ flex: 1 }}
+              >
+                Team 2
+              </Button>
+            </ButtonGroup>
+          </Box>
+          <TransferSuggestion team={dashboardData.my_teams[team]} />
+        </>
+      )}
     </Box>
   );
 };

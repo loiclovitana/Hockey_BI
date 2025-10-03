@@ -1,6 +1,6 @@
 import React from "react";
 import { LineChart } from "@mui/x-charts/LineChart";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
 import { type HockeyPlayerStats } from "../../client";
 
 interface HockeyPlayerOwnershipChartProps {
@@ -10,6 +10,8 @@ interface HockeyPlayerOwnershipChartProps {
 export const HockeyPlayerOwnershipChart: React.FC<
   HockeyPlayerOwnershipChartProps
 > = ({ playerStats }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   if (!playerStats || playerStats.length === 0) {
     return (
       <Box sx={{ p: 2, textAlign: "center" }}>
@@ -43,38 +45,42 @@ export const HockeyPlayerOwnershipChart: React.FC<
   }
 
   return (
-    <Box sx={{ mt: 3 }}>
-      <Typography variant="h6" gutterBottom>
+    <Box sx={{ pt: 3, width: "100%", overflow: "hidden" }}>
+      <Typography variant={isMobile ? "body1" : "h6"} gutterBottom>
         Ownership Over Time
       </Typography>
-      <LineChart
-        width={800}
-        height={400}
-        series={[
-          {
-            data: ownershipData.map((d) => d.ownership),
-            label: "Ownership %",
-            color: "#1976d2",
-          },
-        ]}
-        xAxis={[
-          {
-            data: ownershipData.map((d) => d.date),
-            label: "Date",
-            scaleType: "time",
-            valueFormatter: (date) => date.toLocaleDateString(),
-          },
-        ]}
-        yAxis={[
-          {
-            label: "Ownership (%)",
-            min: 0,
-            max: 100,
-          },
-        ]}
-        margin={{ left: 60, right: 30, top: 30, bottom: 60 }}
-        grid={{ vertical: true, horizontal: true }}
-      />
+      <Box sx={{ width: "100%", overflowX: "auto" }}>
+        <LineChart
+          series={[
+            {
+              data: ownershipData.map((d) => d.ownership),
+              label: "Ownership %",
+            },
+          ]}
+          xAxis={[
+            {
+              data: ownershipData.map((d) => d.date),
+              scaleType: "time",
+              valueFormatter: (date) =>
+                isMobile
+                  ? date.toLocaleDateString("de", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : date.toLocaleDateString(),
+              ...(!isMobile && { label: "Date" }),
+            },
+          ]}
+          yAxis={[
+            {
+              ...(!isMobile && { label: "Ownership (%)" }),
+            },
+          ]}
+          hideLegend
+          sx={{ pl: 0 }}
+          grid={{ vertical: true, horizontal: true }}
+        />
+      </Box>
     </Box>
   );
 };

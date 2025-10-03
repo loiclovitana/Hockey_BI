@@ -191,3 +191,17 @@ class RepositorySession:
         )
 
         return query.all()
+
+    def add_task(self, task: models.Task) -> models.Task:
+        self.session.add(task)
+        self.session.flush()
+        return task
+
+    def get_tasks(self, limit: int = 50, offset: int = 0) -> list[models.Task]:
+        return (
+            self.session.query(models.Task)
+            .order_by(models.Task.start_at.desc())
+            .limit(limit)
+            .offset(offset)
+            .all()
+        )

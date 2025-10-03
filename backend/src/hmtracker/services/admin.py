@@ -1,23 +1,30 @@
 import logging
 from threading import Thread
 from os import getenv
+from datetime import datetime
+import traceback
 
-from hmtracker.constants import (
+from hmtracker.common.exceptions import NoDatabaseError, NoEncryptionError
+from hmtracker.common.constants import (
     HM_DATABASE_URL_ENV_NAME,
     HM_USER_ENV_NAME,
     HM_PASSWORD_ENV_NAME,
 )
 import hmtracker.loader.main as loader
+from hmtracker.database import repository, models
 from hashlib import sha256
 
 _current_operation: Thread | None = None
 
 HMTRACKER_ADMIN_USER_ENV = "HMTRACKER_ADMIN_USER"
 HMTRACKER_ADMIN_PASSWORD_ENV = "HMTRACKER_ADMIN_PASSWORD"
+HMTRACKER_ENCRYPTION_PASSWORD_ENV = "HMTRACKER_ENCRYPTION_PASSWORD"
 __PASSWORD_ENCODING = "UTF-8"
 __ADMIN_USER = getenv(HMTRACKER_ADMIN_USER_ENV)
 __ADMIN_PASSWORD = getenv(HMTRACKER_ADMIN_PASSWORD_ENV)
 __ADMIN_HASH_PASSWORD: bytes | None = None
+__ENCRYYPTION_PASSWORD = getenv(HMTRACKER_ENCRYPTION_PASSWORD_ENV)
+
 if __ADMIN_PASSWORD is not None:
     __ADMIN_HASH_PASSWORD = sha256(
         __ADMIN_PASSWORD.encode(__PASSWORD_ENCODING)
@@ -61,12 +68,47 @@ def get_current_operation() -> str | None:
     return _current_operation.name
 
 
+def registerTask(task: models.Task):
+    database_url = getenv(HM_DATABASE_URL_ENV_NAME)
+    if database_url:
+        session = repository.create_repository_session_maker(database_url)()
+        try:
+            session.add_task(task)
+        finally:
+            session.end_session()
+
+
 def _Operation(name: str):
     def decorator(method):
         def wrapper():
             global _current_operation
             check_operation()
-            thread = Thread(target=method, name=name)
+
+            def task_wrapper():
+                start_time = datetime.now()
+
+                try:
+                    method()
+
+                    end_time = datetime.now()
+                    registerTask(
+                        models.Task(name=name, start_at=start_time, end_at=end_time)
+                    )
+
+                except Exception as e:
+                    error_msg = str(e)
+                    stack_trace = traceback.format_exc()
+                    registerTask(
+                        models.Task(
+                            name=name,
+                            start_at=start_time,
+                            end_at=datetime.now(),
+                            error=error_msg,
+                            stacktrace=stack_trace,
+                        )
+                    )
+
+            thread = Thread(target=task_wrapper, name=name)
             _current_operation = thread
             thread.start()
 
@@ -86,3 +128,14 @@ def start_loading():
         )
         return
     loader.import_playerstats_from_ajax(database_url, hm_user, hm_password)
+
+
+@_Operation("Align Team")
+def start_team_alignement():
+    if __ENCRYYPTION_PASSWORD is None:
+        raise NoEncryptionError("We need encryption to decrypt password")
+    database_url = getenv(HM_DATABASE_URL_ENV_NAME)
+    if not database_url:
+        raise NoDatabaseError()
+    # connection = repository.create_repository_session_maker(database_url)()
+    # TODO

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
 import {
   type HockeyPlayerStats,
   getPlayerStatsPlayersStatsIdPlayerIdGet,
@@ -18,6 +18,8 @@ export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({
   const [playerStats, setPlayerStats] = useState<HockeyPlayerStats[] | null>(
     null,
   );
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   useEffect(() => {
     if (!selectedPlayer) {
@@ -34,25 +36,37 @@ export const PlayerDashboard: React.FC<PlayerDashboardProps> = ({
   }, [selectedPlayer]);
 
   return (
-    <Box sx={{ p: 3, height: "100%" }}>
+    <Box sx={{ p: isMobile ? 1 : 3, height: "100%", overflow: "auto" }}>
       {selectedPlayer ? (
         <>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
             {selectedPlayer.player_info.name}
           </Typography>
-          <Typography variant="body1" sx={{ mt: 2 }}>
+          <Typography variant="body2" sx={{ mt: 1 }}>
             {selectedPlayer.player_info.role}
           </Typography>
-          <Typography variant="body1">
+          <Typography variant="body2" sx={{ mb: 2 }}>
             {selectedPlayer.player_info.foreigner ? "Foreigner" : "Local"}
           </Typography>
           <PlayerStatsDataGrid playerStats={playerStats} />
           <HockeyPlayerOwnershipChart playerStats={playerStats} />
         </>
       ) : (
-        <Typography variant="h6" color="text.secondary">
-          Select a player to view details
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="h6" color="text.secondary">
+            {isMobile
+              ? "Tap menu to select a player"
+              : "Select a player to view details"}
+          </Typography>
+        </Box>
       )}
     </Box>
   );

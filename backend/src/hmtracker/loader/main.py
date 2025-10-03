@@ -11,7 +11,7 @@ from hmtracker.database.repository import (
     create_repository_session_maker,
 )
 from hmtracker.database import models
-from hmtracker.constants import (
+from hmtracker.common.constants import (
     HM_DATABASE_URL_ENV_NAME,
     HM_USER_ENV_NAME,
     HM_PASSWORD_ENV_NAME,

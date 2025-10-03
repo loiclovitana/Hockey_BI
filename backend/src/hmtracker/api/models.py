@@ -35,7 +35,6 @@ class HockeyPlayerStats(BaseModel):
     plus_minus: Optional[int] = None
 
     @computed_field
-    @property
     def estimated_value(self) -> Optional[float]:
         if self.appearances is None or self.hm_points is None:
             return None
@@ -53,6 +52,7 @@ class Manager(BaseModel):
     id: int
     email: Optional[str] = None
     last_import: Optional[datetime] = None
+    autolineup: bool = False
 
 
 class Team(BaseModel):
@@ -63,3 +63,12 @@ class Team(BaseModel):
     season_id: int
     from_datetime: Optional[datetime] = None
     to_datetime: Optional[datetime] = None
+
+
+class Task(BaseModel):
+    id: int
+    name: str
+    start_at: datetime
+    end_at: datetime
+    error: Optional[str] = None
+    stacktrace: Optional[str] = None

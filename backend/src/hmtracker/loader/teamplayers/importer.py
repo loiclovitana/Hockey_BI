@@ -59,4 +59,6 @@ def import_team(
     ]
     repository_session.session.add_all(new_team_player)
 
+    manager.last_import = datetime.now()
+
     repository_session.session.commit()

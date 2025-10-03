@@ -87,7 +87,12 @@ export const HockeyPlayerSearch: React.FC<HockeyPlayerSearchProps> = ({
 
   return (
     <Box
-      sx={{ flex: 1, height: "100%", display: "flex", flexDirection: "column" }}
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        p: 1,
+      }}
     >
       <TextField
         fullWidth
@@ -100,12 +105,10 @@ export const HockeyPlayerSearch: React.FC<HockeyPlayerSearchProps> = ({
           setPage(1);
         }}
         sx={{
-          backgroundColor: "background.paper",
-          boxShadow: 1,
-          mt: 2,
+          mb: 1,
         }}
       />
-      <List sx={{ flex: 1, overflow: "auto", pt: 1 }}>
+      <List sx={{ flex: 1, overflow: "auto" }}>
         {paginatedPlayers.map((player) => (
           <HockeyPlayerItem
             key={player.player_info.id}
@@ -118,7 +121,7 @@ export const HockeyPlayerSearch: React.FC<HockeyPlayerSearchProps> = ({
         ))}
       </List>
       {totalPages > 1 && (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
           <Pagination
             count={totalPages}
             page={page}

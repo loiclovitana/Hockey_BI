@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -e
+
+API_BASE_URL="${API_BASE_URL:-http://localhost:8000}"
+ADMIN_USERNAME="${HMTRACKER_ADMIN_USER:-admin}"
+ADMIN_PASSWORD="${HMTRACKER_ADMIN_PASSWORD}"
+
+if [ -z "$ADMIN_PASSWORD" ]; then
+    echo "Error: ADMIN_PASSWORD environment variable is required"
+    exit 1
+fi
+
+echo "Authenticating as admin user..."
+AUTH_RESPONSE=$(curl -s -X POST "$API_BASE_URL/admin/login" \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "username=$ADMIN_USERNAME&password=$ADMIN_PASSWORD")
+
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to authenticate"
+    exit 1
+fi
+
+ACCESS_TOKEN=$(echo "$AUTH_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin)['access_token'])")
+
+if [ -z "$ACCESS_TOKEN" ]; then
+    echo "Error: Failed to extract access token from response"
+    exit 1
+fi
+
+echo "Starting data load operation..."
+curl -X POST "$API_BASE_URL/admin/load/start" \
+    -H "Authorization: Bearer $ACCESS_TOKEN" \
+    -H "Content-Type: application/json"
+
+echo "Load operation started successfully"
