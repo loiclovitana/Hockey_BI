@@ -12,6 +12,7 @@ import {
   Box,
 } from "@mui/material";
 import { type LastPlayerStats } from "../client/";
+import { ValueWithDifference } from "./common/ValueWithDifference";
 
 interface PlayerStatsTableProps {
   data: LastPlayerStats[];
@@ -131,32 +132,17 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
                     {formatValue(row.player_stats?.price)}
                   </TableCell>
                   <TableCell align="right">
-                    {(() => {
-                      if (!row.player_stats) {
-                        return "-";
-                      }
-                      const price = row.player_stats.price;
-                      const estimatedValue =
-                        row.player_stats.estimated_value ?? price;
-
-                      const difference = estimatedValue - price;
-                      const sign = difference > 0 ? "+" : "";
-                      const color =
-                        difference > 0
-                          ? "success.main"
-                          : difference < 0
-                            ? "error.main"
-                            : "primary.main";
-                      return (
-                        <Box component="span">
-                          {estimatedValue.toFixed(1)}{" "}
-                          <Box component="span" sx={{ color }}>
-                            ({sign}
-                            {difference.toFixed(1)})
-                          </Box>
-                        </Box>
-                      );
-                    })()}
+                    {!row.player_stats ? (
+                      "-"
+                    ) : (
+                      <ValueWithDifference
+                        value={
+                          row.player_stats.estimated_value ??
+                          row.player_stats.price
+                        }
+                        baseValue={row.player_stats.price}
+                      />
+                    )}
                   </TableCell>
                 </TableRow>
               );

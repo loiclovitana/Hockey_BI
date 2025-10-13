@@ -13,11 +13,13 @@ interface UploadMatchesCsvComponentProps {
   token: string;
 }
 
-export const UploadMatchesCsvComponent: React.FC<UploadMatchesCsvComponentProps> = ({
-  token,
-}) => {
+export const UploadMatchesCsvComponent: React.FC<
+  UploadMatchesCsvComponentProps
+> = ({ token }) => {
   const [loading, setLoading] = useState(false);
-  const [uploadResult, setUploadResult] = useState<MatchImportResponse | null>(null);
+  const [uploadResult, setUploadResult] = useState<MatchImportResponse | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -69,18 +71,9 @@ export const UploadMatchesCsvComponent: React.FC<UploadMatchesCsvComponentProps>
       </Typography>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Button
-          variant="outlined"
-          component="label"
-          fullWidth
-        >
+        <Button variant="outlined" component="label" fullWidth>
           {selectedFile ? selectedFile.name : "Select CSV File"}
-          <input
-            type="file"
-            accept=".csv"
-            hidden
-            onChange={handleFileChange}
-          />
+          <input type="file" accept=".csv" hidden onChange={handleFileChange} />
         </Button>
 
         <Button
@@ -101,9 +94,7 @@ export const UploadMatchesCsvComponent: React.FC<UploadMatchesCsvComponentProps>
 
       {uploadResult && (
         <Box sx={{ mt: 2 }}>
-          <Alert severity="success">
-            {uploadResult.message}
-          </Alert>
+          <Alert severity="success">{uploadResult.message}</Alert>
         </Box>
       )}
     </>

@@ -3,6 +3,7 @@ import { Box, Typography, Button, ButtonGroup } from "@mui/material";
 import { type DashBoardData, type Manager } from "../../client";
 import { TransferSuggestion } from "./TransferSuggestion";
 import { AutolineupStatus } from "./AutolineupStatus";
+import { TeamValue } from "./TeamValue";
 
 interface MyTeamDashboardProps {
   dashboardData: DashBoardData;
@@ -41,7 +42,7 @@ export const MyTeamDashboard: React.FC<MyTeamDashboardProps> = ({
         </Typography>
       ) : (
         <>
-          <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
+          <Box sx={{ display: "flex", justifyContent: "center", pb: 2 }}>
             <ButtonGroup variant="contained" sx={{ minWidth: "300px" }}>
               <Button
                 variant={team === 0 ? "contained" : "outlined"}
@@ -60,6 +61,7 @@ export const MyTeamDashboard: React.FC<MyTeamDashboardProps> = ({
               </Button>
             </ButtonGroup>
           </Box>
+          <TeamValue team={dashboardData.my_teams[team]} />
           <TransferSuggestion team={dashboardData.my_teams[team]} />
         </>
       )}
