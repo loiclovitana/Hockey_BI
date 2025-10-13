@@ -120,3 +120,11 @@ class Team(HMDatabaseObject):
     to_datetime: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     manager = relationship("Manager")
+
+
+class Match(HMDatabaseObject):
+    __tablename__ = "MATCHES"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    home_club: Mapped[str] = mapped_column(String, nullable=False)
+    away_club: Mapped[str] = mapped_column(String, nullable=False)
+    match_datetime: Mapped[datetime] = mapped_column(DateTime, nullable=False)
