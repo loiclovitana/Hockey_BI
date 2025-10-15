@@ -4,7 +4,7 @@ from os import getenv
 from datetime import datetime
 import traceback
 
-from hmtracker.common.exceptions import NoDatabaseError, NoEncryptionError
+from hmtracker.common.exceptions import NoDatabaseError
 from hmtracker.common.constants import (
     HM_DATABASE_URL_ENV_NAME,
     HM_USER_ENV_NAME,
@@ -132,10 +132,38 @@ def start_loading():
 
 @_Operation("Align Team")
 def start_team_alignement():
-    if __ENCRYYPTION_PASSWORD is None:
-        raise NoEncryptionError("We need encryption to decrypt password")
     database_url = getenv(HM_DATABASE_URL_ENV_NAME)
     if not database_url:
         raise NoDatabaseError()
-    # connection = repository.create_repository_session_maker(database_url)()
-    # TODO
+
+    from hmtracker.services import encryption, autolineup
+
+    connection = repository.create_repository_session_maker(database_url)()
+    try:
+        managers = connection.get_managers_with_autolineup()
+        success_count = 0
+        fail_count = 0
+
+        for manager in managers:
+            if not manager.email or not manager.encrypted_password:
+                logging.warning(
+                    f"Skipping manager {manager.id}: missing email or password"
+                )
+                fail_count += 1
+                continue
+
+            try:
+                decrypted_password = encryption.decrypt(manager.encrypted_password)
+                autolineup.autolineup(manager.email, decrypted_password)
+                success_count += 1
+            except Exception as e:
+                logging.error(
+                    f"Failed to align teams for manager {manager.email}: {str(e)}\n{traceback.format_exc()}"
+                )
+                fail_count += 1
+
+        logging.info(
+            f"Team alignment completed: {success_count} successful, {fail_count} failed"
+        )
+    finally:
+        connection.end_session()

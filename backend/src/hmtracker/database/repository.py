@@ -127,6 +127,17 @@ class RepositorySession:
             .one_or_none()
         )
 
+    def get_managers_with_autolineup(
+        self, limit: int = 50, offset: int = 0
+    ) -> list[models.Manager]:
+        return (
+            self.session.query(models.Manager)
+            .filter(models.Manager.autolineup.is_(True))
+            .limit(limit)
+            .offset(offset)
+            .all()
+        )
+
     def get_player_stats(self, player_ids: list[int], season_id: int | None = None):
         season = (
             self.get_current_season()

@@ -100,6 +100,7 @@ class Manager(HMDatabaseObject):
     last_import: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     encrypted_password: Mapped[str | None] = mapped_column(String, nullable=True)
     autolineup: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    last_autolineup: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
 class Team(HMDatabaseObject):

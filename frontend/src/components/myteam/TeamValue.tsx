@@ -57,10 +57,7 @@ export const TeamValue: React.FC<TeamValueProps> = ({ team }) => {
           Estimated Value
         </Typography>
         <Typography variant="h6" fontWeight="bold">
-          <ValueWithDifference
-            value={estimatedValue}
-            baseValue={totalValue}
-          />
+          <ValueWithDifference value={estimatedValue} baseValue={totalValue} />
         </Typography>
       </Box>
     </Paper>
