@@ -23,7 +23,6 @@ __PASSWORD_ENCODING = "UTF-8"
 __ADMIN_USER = getenv(HMTRACKER_ADMIN_USER_ENV)
 __ADMIN_PASSWORD = getenv(HMTRACKER_ADMIN_PASSWORD_ENV)
 __ADMIN_HASH_PASSWORD: bytes | None = None
-__ENCRYYPTION_PASSWORD = getenv(HMTRACKER_ENCRYPTION_PASSWORD_ENV)
 
 if __ADMIN_PASSWORD is not None:
     __ADMIN_HASH_PASSWORD = sha256(
@@ -136,34 +135,20 @@ def start_team_alignement():
     if not database_url:
         raise NoDatabaseError()
 
-    from hmtracker.services import encryption, autolineup
+    from hmtracker.services import autolineup
 
     connection = repository.create_repository_session_maker(database_url)()
     try:
-        managers = connection.get_managers_with_autolineup()
-        success_count = 0
-        fail_count = 0
-
-        for manager in managers:
-            if not manager.email or not manager.encrypted_password:
-                logging.warning(
-                    f"Skipping manager {manager.id}: missing email or password"
-                )
-                fail_count += 1
-                continue
-
-            try:
-                decrypted_password = encryption.decrypt(manager.encrypted_password)
-                autolineup.autolineup(manager.email, decrypted_password)
-                success_count += 1
-            except Exception as e:
-                logging.error(
-                    f"Failed to align teams for manager {manager.email}: {str(e)}\n{traceback.format_exc()}"
-                )
-                fail_count += 1
-
-        logging.info(
-            f"Team alignment completed: {success_count} successful, {fail_count} failed"
-        )
+        last_match = connection.get_last_played_match()
+        if last_match:
+            # Set cutoff to end of day (23:59:59) of the last match
+            cutoff_time = last_match.match_datetime.replace(
+                hour=23, minute=59, second=59, microsecond=999999
+            )
+            logging.info(f"Using end of day for last match as cutoff: {cutoff_time}")
+        else:
+            cutoff_time = None
+            logging.warning("No matches found, processing all managers")
     finally:
         connection.end_session()
+    autolineup.process_all_managers_autolineup(database_url, cutoff_time)
