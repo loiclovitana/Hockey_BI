@@ -69,6 +69,16 @@ export type BodyLoginAdminLoginPost = {
 };
 
 /**
+ * Body_upload_matches_csv_admin_matches_upload_post
+ */
+export type BodyUploadMatchesCsvAdminMatchesUploadPost = {
+    /**
+     * File
+     */
+    file: Blob | File;
+};
+
+/**
  * DashBoardData
  */
 export type DashBoardData = {
@@ -223,6 +233,24 @@ export type Manager = {
      * Autolineup
      */
     autolineup?: boolean;
+};
+
+/**
+ * MatchImportResponse
+ */
+export type MatchImportResponse = {
+    /**
+     * New Matches
+     */
+    new_matches: number;
+    /**
+     * Updated Matches
+     */
+    updated_matches: number;
+    /**
+     * Message
+     */
+    message: string;
 };
 
 /**
@@ -402,6 +430,31 @@ export type GetTasksAdminTasksGetResponses = {
 };
 
 export type GetTasksAdminTasksGetResponse = GetTasksAdminTasksGetResponses[keyof GetTasksAdminTasksGetResponses];
+
+export type UploadMatchesCsvAdminMatchesUploadPostData = {
+    body: BodyUploadMatchesCsvAdminMatchesUploadPost;
+    path?: never;
+    query?: never;
+    url: '/admin/matches/upload';
+};
+
+export type UploadMatchesCsvAdminMatchesUploadPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UploadMatchesCsvAdminMatchesUploadPostError = UploadMatchesCsvAdminMatchesUploadPostErrors[keyof UploadMatchesCsvAdminMatchesUploadPostErrors];
+
+export type UploadMatchesCsvAdminMatchesUploadPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: MatchImportResponse;
+};
+
+export type UploadMatchesCsvAdminMatchesUploadPostResponse = UploadMatchesCsvAdminMatchesUploadPostResponses[keyof UploadMatchesCsvAdminMatchesUploadPostResponses];
 
 export type GetPlayersPlayersGetData = {
     body?: never;

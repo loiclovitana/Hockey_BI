@@ -22,6 +22,8 @@ from hmtracker.loader.playerstats.source.file import __ENCODING, playerstats_csv
 from hmtracker.loader.playerstats.source.website import playerstats_ajax_loader
 from hmtracker.loader.teamplayers.importer import import_team, import_manager
 from hmtracker.loader.teamplayers.source.website import team_players_ajax_loader
+from hmtracker.loader.matches.importer import import_matches
+from hmtracker.loader.matches.mapper import parse_match_csv
 
 
 def __connect_session(
@@ -100,6 +102,33 @@ def import_teamplayers_from_loader(
         database_session.end_session()
 
 
+def import_matches_from_csv(
+    csv_file_path: str, db_access: Session | str | RepositorySession
+):
+    """
+    Import matches from a CSV file into the database.
+    Updates existing matches by ID, inserts new ones.
+
+    :param csv_file_path: Path to the CSV file
+    :param db_access: url of database or opened session
+    :return: Tuple of (new_count, updated_count)
+    """
+    with open(csv_file_path, "r", encoding="utf-8-sig") as f:
+        csv_content = f.read()
+
+    matches = parse_match_csv(csv_content)
+
+    database_session: RepositorySession = __connect_session(db_access)
+    new_count, updated_count = import_matches(database_session, matches)
+
+    if isinstance(db_access, RepositorySession):
+        database_session.session.commit()
+    else:
+        database_session.end_session()
+
+    return new_count, updated_count
+
+
 if __name__ == "__main__":
     argument_parser = argparse.ArgumentParser(
         description="Load data from hockey manager using ajax queries into a database"
@@ -139,6 +168,13 @@ if __name__ == "__main__":
         help="""If present, import the team of the user instead of the hockey player stats""",
     )
 
+    argument_parser.add_argument(
+        "-m",
+        "--matches",
+        action="store_true",
+        help="""If present, import matches from CSV file""",
+    )
+
     def check_exists(argument, name):
         if argument is None:
             logging.error(f"Error: Missing argument {name}.")
@@ -147,6 +183,20 @@ if __name__ == "__main__":
 
     arguments = argument_parser.parse_args()
     check_exists(arguments.database_url, "database-url")
+
+    if arguments.matches:
+        if arguments.source_csv is None:
+            logging.error("Error: --source-csv is required for matches import")
+            argument_parser.print_help()
+            sys.exit(1)
+        new_count, updated_count = import_matches_from_csv(
+            arguments.source_csv, arguments.database_url
+        )
+        logging.info(
+            f"Matches import completed: {new_count} new, {updated_count} updated"
+        )
+        exit(0)
+
     if arguments.teams:
         if arguments.source_csv is not None:
             raise NotImplementedError(

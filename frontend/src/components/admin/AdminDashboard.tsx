@@ -3,6 +3,7 @@ import { Container, Typography, Paper, Box } from "@mui/material";
 import { StartLoadingComponent } from "./StartLoadingComponent";
 import { GetAdminUserComponent } from "./GetAdminUserComponent";
 import { GetOperationComponent } from "./GetOperationComponent";
+import { UploadMatchesCsvComponent } from "./UploadMatchesCsvComponent";
 import { GetTasksComponent } from "./GetTasksComponent";
 
 interface AdminDashboardProps {
@@ -24,6 +25,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ token }) => {
         </Paper>
         <Paper sx={{ p: 2 }}>
           <StartLoadingComponent token={token} />
+        </Paper>
+        <Paper sx={{ p: 2 }}>
+          <UploadMatchesCsvComponent token={token} />
         </Paper>
         <Paper sx={{ p: 2 }}>
           <GetTasksComponent token={token} />

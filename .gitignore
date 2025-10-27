@@ -4,6 +4,7 @@
 **.egg-info
 data/
 data_jeannie/
+backend/notebook
 
 .venv
 .env

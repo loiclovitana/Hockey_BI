@@ -4,7 +4,7 @@ from os import getenv
 from datetime import datetime
 import traceback
 
-from hmtracker.common.exceptions import NoDatabaseError, NoEncryptionError
+from hmtracker.common.exceptions import NoDatabaseError
 from hmtracker.common.constants import (
     HM_DATABASE_URL_ENV_NAME,
     HM_USER_ENV_NAME,
@@ -23,7 +23,6 @@ __PASSWORD_ENCODING = "UTF-8"
 __ADMIN_USER = getenv(HMTRACKER_ADMIN_USER_ENV)
 __ADMIN_PASSWORD = getenv(HMTRACKER_ADMIN_PASSWORD_ENV)
 __ADMIN_HASH_PASSWORD: bytes | None = None
-__ENCRYYPTION_PASSWORD = getenv(HMTRACKER_ENCRYPTION_PASSWORD_ENV)
 
 if __ADMIN_PASSWORD is not None:
     __ADMIN_HASH_PASSWORD = sha256(
@@ -132,10 +131,24 @@ def start_loading():
 
 @_Operation("Align Team")
 def start_team_alignement():
-    if __ENCRYYPTION_PASSWORD is None:
-        raise NoEncryptionError("We need encryption to decrypt password")
     database_url = getenv(HM_DATABASE_URL_ENV_NAME)
     if not database_url:
         raise NoDatabaseError()
-    # connection = repository.create_repository_session_maker(database_url)()
-    # TODO
+
+    from hmtracker.services import autolineup
+
+    connection = repository.create_repository_session_maker(database_url)()
+    try:
+        last_match = connection.get_last_played_match()
+        if last_match:
+            # Set cutoff to end of day (23:59:59) of the last match
+            cutoff_time = last_match.match_datetime.replace(
+                hour=23, minute=59, second=59, microsecond=999999
+            )
+            logging.info(f"Using end of day for last match as cutoff: {cutoff_time}")
+        else:
+            cutoff_time = None
+            logging.warning("No matches found, processing all managers")
+    finally:
+        connection.end_session()
+    autolineup.process_all_managers_autolineup(database_url, cutoff_time)

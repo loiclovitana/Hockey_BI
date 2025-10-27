@@ -7,4 +7,4 @@ class NoEncryptionError(HMTrackerError):
 
 
 class NoDatabaseError(HMTrackerError):
-    """No private key set for encryption"""
+    """No database set in backend"""

@@ -127,6 +127,24 @@ class RepositorySession:
             .one_or_none()
         )
 
+    def get_managers_with_autolineup(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        last_autolineup_before: datetime.datetime | None = None,
+    ) -> list[models.Manager]:
+        query = self.session.query(models.Manager).filter(
+            models.Manager.autolineup.is_(True)
+        )
+
+        if last_autolineup_before is not None:
+            query = query.filter(
+                (models.Manager.last_autolineup < last_autolineup_before)
+                | (models.Manager.last_autolineup.is_(None))
+            )
+
+        return query.limit(limit).offset(offset).all()
+
     def get_player_stats(self, player_ids: list[int], season_id: int | None = None):
         season = (
             self.get_current_season()
@@ -204,4 +222,12 @@ class RepositorySession:
             .limit(limit)
             .offset(offset)
             .all()
+        )
+
+    def get_last_played_match(self) -> models.Match | None:
+        return (
+            self.session.query(models.Match)
+            .filter(models.Match.match_datetime <= datetime.datetime.now())
+            .order_by(models.Match.match_datetime.desc())
+            .first()
         )

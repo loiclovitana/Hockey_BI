@@ -100,6 +100,7 @@ class Manager(HMDatabaseObject):
     last_import: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     encrypted_password: Mapped[str | None] = mapped_column(String, nullable=True)
     autolineup: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    last_autolineup: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
 class Team(HMDatabaseObject):
@@ -120,3 +121,11 @@ class Team(HMDatabaseObject):
     to_datetime: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     manager = relationship("Manager")
+
+
+class Match(HMDatabaseObject):
+    __tablename__ = "MATCHES"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    home_club: Mapped[str] = mapped_column(String, nullable=False)
+    away_club: Mapped[str] = mapped_column(String, nullable=False)
+    match_datetime: Mapped[datetime] = mapped_column(DateTime, nullable=False)
