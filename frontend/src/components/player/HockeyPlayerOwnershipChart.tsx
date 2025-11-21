@@ -49,7 +49,14 @@ export const HockeyPlayerOwnershipChart: React.FC<
       <Typography variant={isMobile ? "body1" : "h6"} gutterBottom>
         Ownership Over Time
       </Typography>
-      <Box sx={{ width: "100%", overflowX: "auto", height:"50vh",maxHeight:500 }}>
+      <Box
+        sx={{
+          width: "100%",
+          overflowX: "auto",
+          height: "50vh",
+          maxHeight: 500,
+        }}
+      >
         <LineChart
           series={[
             {

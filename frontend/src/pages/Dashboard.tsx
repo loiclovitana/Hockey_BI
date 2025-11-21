@@ -1,16 +1,10 @@
-import React, { useState } from "react";
-import { type DashBoardData, type Manager } from "../client";
+import React from "react";
 import { TeamLoginForm } from "../components/myteam/TeamLoginForm";
 import { MyTeamDashboard } from "../components/myteam/MyTeamDashboard";
+import { useDashboard } from "../hooks/useDashboard";
 
 export const Dashboard: React.FC = () => {
-  const [dashboardData, setDashboardData] = useState<DashBoardData | null>(
-    null,
-  );
-
-  const updateManager = (manager: Manager) => {
-    setDashboardData((prev) => (prev ? { ...prev, manager } : null));
-  };
+  const { dashboardData, setDashboardData, updateManager } = useDashboard();
 
   if (dashboardData) {
     return (
