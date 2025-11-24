@@ -19,7 +19,6 @@ client.setConfig({
 
 function App() {
   return (
-
     <PlayerStatsProvider>
       <DashboardProvider>
         <Router>
@@ -57,7 +56,10 @@ function App() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/players" element={<Players />} />
                 <Route path="/admin" element={<Admin />} />
-                <Route path="/transfer-analytics" element={<TransferAnalytics />} />
+                <Route
+                  path="/transfer-analytics"
+                  element={<TransferAnalytics />}
+                />
               </Routes>
             </Box>
             <BottomBar />
@@ -65,7 +67,6 @@ function App() {
         </Router>
       </DashboardProvider>
     </PlayerStatsProvider>
-
   );
 }
 

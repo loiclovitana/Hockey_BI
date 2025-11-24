@@ -10,7 +10,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 const menuItems = [
   { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
   { text: "Players", icon: <SportsIcon />, path: "/players" },
-  { text: "Transfer Analytics", icon: <TrendingUpIcon />, path: "/transfer-analytics" },
+  {
+    text: "Transfer Analytics",
+    icon: <TrendingUpIcon />,
+    path: "/transfer-analytics",
+  },
 ];
 
 export const BottomBar: React.FC = () => {

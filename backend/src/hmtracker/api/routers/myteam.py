@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from os import getenv
@@ -10,6 +10,7 @@ from hmtracker.loader.main import import_teamplayers_from_loader
 from hmtracker.loader.teamplayers.source.website import team_players_ajax_loader
 from hmtracker.services.check_user import connect_to_hm
 from hmtracker.services.encryption import encrypt
+from hmtracker.services.team_value import TeamModification, TeamValue
 from pydantic import BaseModel, SecretStr
 
 router = APIRouter(prefix="/myteam", tags=["myteam"])
@@ -115,3 +116,47 @@ async def unregister_for_autolinup(
     response = api_models.Manager.model_validate(manager.__dict__)
     session.session.commit()
     return response
+
+
+class TransfertModifications(BaseModel):
+    modifications: List[TeamModification] = []
+
+
+class TeamValueEvolution(BaseModel):
+    evolution: list[TeamValue]
+
+
+@router.post("/team_value_evolution")
+async def team_value_evolution(
+    request: AuthRequest,
+    session: SessionDep,
+    team_code: str,
+    transfert_modification: TransfertModifications = TransfertModifications(),
+) -> TeamValueEvolution:
+    # Get the manager from the email
+    manager = session.get_manager_by_email(request.hm_user)
+    if manager is None:
+        raise HTTPException(status_code=404, detail="Manager not found")
+
+    # Verify credentials
+    connect_to_hm(request.hm_user, password=request.hm_password.get_secret_value())
+
+    # Get current season
+    current_season = session.get_current_season()
+    if current_season is None:
+        raise HTTPException(status_code=404, detail="No current season found")
+
+    # Import compute_team_value and compute the evolution
+    from hmtracker.services.team_value import compute_team_value
+
+    evolution = compute_team_value(
+        repository=session,
+        manager_id=manager.id,
+        season_id=current_season.id,
+        team_code=team_code,
+        modifications=transfert_modification.modifications
+        if transfert_modification.modifications
+        else None,
+    )
+
+    return TeamValueEvolution(evolution=evolution)

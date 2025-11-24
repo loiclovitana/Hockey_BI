@@ -70,6 +70,17 @@ class RepositorySession:
     def get_imported_stats_dates(self):
         return self.session.query(models.StatImport).all()
 
+    def get_stat_imports_for_season(self, season_id: int) -> list[models.StatImport]:
+        season = self.get_season(season_id)
+        if season is None:
+            return []
+        return (
+            self.session.query(models.StatImport)
+            .filter(models.StatImport.import_date.between(season.start, season.end))
+            .order_by(models.StatImport.import_date.asc())
+            .all()
+        )
+
     def find_season(
         self, validity_date: datetime.datetime, arcade: bool = False
     ) -> models.Season:
@@ -231,3 +242,50 @@ class RepositorySession:
             .order_by(models.Match.match_datetime.desc())
             .first()
         )
+
+    def get_matches_for_season(self, season_id: int) -> list[models.Match]:
+        """Get all matches for a season up to the current date, ordered by match date."""
+        season = self.get_season(season_id)
+        if season is None:
+            return []
+        return (
+            self.session.query(models.Match)
+            .filter(
+                models.Match.match_datetime >= season.start,
+                models.Match.match_datetime <= datetime.datetime.now(),
+            )
+            .order_by(models.Match.match_datetime.asc())
+            .all()
+        )
+
+    def get_player_stats_at_date(
+        self, player_ids: list[int], validity_date: datetime.datetime, season_id: int
+    ) -> list[models.HockeyPlayerStats]:
+        """Get the most recent stats for each player up to a specific date."""
+        from sqlalchemy import func
+
+        subquery = (
+            self.session.query(
+                models.HockeyPlayerStats.player_id,
+                func.max(models.HockeyPlayerStats.validity_date).label("max_date"),
+            )
+            .filter(
+                models.HockeyPlayerStats.season_id == season_id,
+                models.HockeyPlayerStats.validity_date <= validity_date,
+                models.HockeyPlayerStats.player_id.in_(player_ids),
+            )
+            .group_by(models.HockeyPlayerStats.player_id)
+            .subquery()
+        )
+
+        query = (
+            self.session.query(models.HockeyPlayerStats)
+            .join(
+                subquery,
+                (models.HockeyPlayerStats.player_id == subquery.c.player_id)
+                & (models.HockeyPlayerStats.validity_date == subquery.c.max_date),
+            )
+            .order_by(models.HockeyPlayerStats.player_id)
+        )
+
+        return query.all()
