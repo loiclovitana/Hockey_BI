@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Box, Typography, Button, ButtonGroup } from "@mui/material";
 import { useDashboard } from "../hooks/useDashboard";
 import { TeamLoginForm } from "../components/myteam/TeamLoginForm";
-import { TransferSuggestion } from "../components/myteam/TransferSuggestion";
+import { Transferts } from "../components/myteam/Transferts";
 
 export const TransferAnalytics: React.FC = () => {
   const { dashboardData, setDashboardData } = useDashboard();
@@ -45,7 +45,7 @@ export const TransferAnalytics: React.FC = () => {
               </Button>
             </ButtonGroup>
           </Box>
-          <TransferSuggestion team={dashboardData.my_teams[team]} />
+          <Transferts team={dashboardData.my_teams[team]} />
         </>
       )}
     </Box>
