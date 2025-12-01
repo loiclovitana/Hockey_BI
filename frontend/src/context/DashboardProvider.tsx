@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { DashboardContext } from "./DashboardContext";
+import { DashboardContext, type Credentials } from "./DashboardContext";
 import { type DashBoardData, type Manager } from "../client";
 
 interface DashboardProviderProps {
@@ -12,6 +12,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   const [dashboardData, setDashboardData] = useState<DashBoardData | null>(
     null,
   );
+  const [credentials, setCredentials] = useState<Credentials | null>(null);
 
   const updateManager = (manager: Manager) => {
     setDashboardData((prev) => (prev ? { ...prev, manager } : null));
@@ -19,7 +20,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
 
   return (
     <DashboardContext.Provider
-      value={{ dashboardData, setDashboardData, updateManager }}
+      value={{ dashboardData, setDashboardData, updateManager, credentials, setCredentials }}
     >
       {children}
     </DashboardContext.Provider>
