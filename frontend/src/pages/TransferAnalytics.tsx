@@ -3,6 +3,7 @@ import { Box, Typography, Button, ButtonGroup } from "@mui/material";
 import { useDashboard } from "../hooks/useDashboard";
 import { TeamLoginForm } from "../components/myteam/TeamLoginForm";
 import { Transferts } from "../components/myteam/Transferts";
+import { TransferListTable } from "../components/myteam/TransferListTable";
 import {
   teamValueEvolutionMyteamTeamValueEvolutionPost,
   type TeamModification,
@@ -155,6 +156,11 @@ export const TransferAnalytics: React.FC = () => {
                adaptedTeamEvolution={adaptedTeamEvolution}
                transfertTimes={transfertTimes}
                onTransfertDayClick={setSelectedTransfertDay}
+               selectedTransfertDate={selectedTransfertDay}
+             />
+             <TransferListTable
+               transfers={dashboardData.my_teams[team] || []}
+               selectedDate={selectedTransfertDay}
              />
             </Box>
           )}
