@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
+import { Box, Typography, useTheme, useMediaQuery, Chip } from "@mui/material";
 import { LineChart, lineElementClasses } from "@mui/x-charts/LineChart";
 import { ChartsReferenceLine } from "@mui/x-charts/ChartsReferenceLine";
 import { type TeamValueEvolution } from "../../client";
@@ -36,23 +36,22 @@ const TransferTimeline: React.FC<TransferTimelineProps> = ({
     return ((transferTime - minTime) / (maxTime - minTime)) * 100;
   };
 
-  if (transferDates.length === 0) {
-    return null;
-  }
-
   return (
     <Box sx={{ px: 2, pl: 8 }}>
-      <Box
-        sx={{
-          position: "relative",
-          width: "100%",
-          height: 40,
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: 1,
-          border: `1px solid ${theme.palette.divider}`,
-          mt: 1,
-        }}
-      >
+      
+
+      {transferDates.length > 0 && (
+        <Box
+          sx={{
+            position: "relative",
+            width: "100%",
+            height: 40,
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: 1,
+            border: `1px solid ${theme.palette.divider}`,
+            mt: 1,
+          }}
+        >
         {transferDates.map((date) => {
           const position = getTransferPosition(date);
           const dateStr = date.toISOString().split("T")[0];
@@ -109,6 +108,24 @@ const TransferTimeline: React.FC<TransferTimelineProps> = ({
             />
           );
         })}
+        </Box>
+      )}
+      {/* Special filter chips */}
+      <Box sx={{ display: "flex", gap: 1, pt: 1 }}>
+        <Chip
+          label="Start"
+          onClick={() => onTransfertDayClick?.("start")}
+          color={selectedTransfertDate === "start" ? "success" : "default"}
+          variant={selectedTransfertDate === "start" ? "filled" : "outlined"}
+          sx={{ cursor: "pointer" }}
+        />
+        <Chip
+          label="Current"
+          onClick={() => onTransfertDayClick?.("current")}
+          color={selectedTransfertDate === "current" ? "success" : "default"}
+          variant={selectedTransfertDate === "current" ? "filled" : "outlined"}
+          sx={{ cursor: "pointer", marginLeft: "auto" }}
+        />
       </Box>
     </Box>
   );

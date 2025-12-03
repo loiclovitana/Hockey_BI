@@ -41,6 +41,16 @@ export const TransferListTable: React.FC<TransferListTableProps> = ({
   const filteredTransfers = useMemo(() => {
     if (!selectedDate) return [];
 
+    // Handle special cases
+    if (selectedDate === "start") {
+      return transfers.filter((transfer) => !transfer.from_datetime);
+    }
+
+    if (selectedDate === "current") {
+      return transfers.filter((transfer) => !transfer.to_datetime);
+    }
+
+    // Handle regular date filtering
     return transfers.filter((transfer) => {
       const fromDate = transfer.from_datetime
         ? new Date(transfer.from_datetime).toISOString().split("T")[0]
@@ -68,11 +78,23 @@ export const TransferListTable: React.FC<TransferListTableProps> = ({
     );
   }
 
+  const getDisplayTitle = () => {
+    if (selectedDate === "start") return "Starting Team";
+    if (selectedDate === "current") return "Current Team";
+    return `Transfers on ${new Date(selectedDate).toLocaleDateString()}`;
+  };
+
+  const getNoDataMessage = () => {
+    if (selectedDate === "start") return "No starting team players found";
+    if (selectedDate === "current") return "No current team players found";
+    return `No transfers found for ${new Date(selectedDate).toLocaleDateString()}`;
+  };
+
   if (filteredTransfers.length === 0) {
     return (
       <Box sx={{ p: 2, textAlign: "center" }}>
         <Typography variant="body2" color="text.secondary">
-          No transfers found for {new Date(selectedDate).toLocaleDateString()}
+          {getNoDataMessage()}
         </Typography>
       </Box>
     );
@@ -82,7 +104,7 @@ export const TransferListTable: React.FC<TransferListTableProps> = ({
     <Paper sx={{ width: "100%", py: 1, mt: 3 }}>
       <Box sx={{ px: 2, py: 1 }}>
         <Typography variant="h6" gutterBottom>
-          Transfers on {new Date(selectedDate).toLocaleDateString()}
+          {getDisplayTitle()}
         </Typography>
       </Box>
 
