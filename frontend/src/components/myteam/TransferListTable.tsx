@@ -1,11 +1,10 @@
-import React, { useState, useMemo, useContext } from "react";
+import React, { useMemo, useContext } from "react";
 import {
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
   Paper,
   Typography,
@@ -17,20 +16,22 @@ import { PlayerStatsContext } from "../../context/PlayerStatsContext";
 interface TransferListTableProps {
   transfers: Team[];
   selectedDate: string | null;
+  selectedPlayerId: number | null;
+  onPlayerSelect: (playerId: number) => void;
 }
 
 export const TransferListTable: React.FC<TransferListTableProps> = ({
   transfers,
-  selectedDate
+  selectedDate,
+  selectedPlayerId: selectedRowId,
+  onPlayerSelect: onRowSelect,
 }) => {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
   const { playerStats } = useContext(PlayerStatsContext);
 
   // Create a map of player_id to player info
   const playerMap = useMemo(() => {
     const map = new Map();
-    playerStats?.forEach(stat => {
+    playerStats?.forEach((stat) => {
       map.set(stat.player_info.id, stat.player_info);
     });
     return map;
@@ -40,12 +41,12 @@ export const TransferListTable: React.FC<TransferListTableProps> = ({
   const filteredTransfers = useMemo(() => {
     if (!selectedDate) return [];
 
-    return transfers.filter(transfer => {
+    return transfers.filter((transfer) => {
       const fromDate = transfer.from_datetime
-        ? new Date(transfer.from_datetime).toISOString().split('T')[0]
+        ? new Date(transfer.from_datetime).toISOString().split("T")[0]
         : null;
       const toDate = transfer.to_datetime
-        ? new Date(transfer.to_datetime).toISOString().split('T')[0]
+        ? new Date(transfer.to_datetime).toISOString().split("T")[0]
         : null;
 
       return fromDate === selectedDate || toDate === selectedDate;
@@ -56,25 +57,6 @@ export const TransferListTable: React.FC<TransferListTableProps> = ({
     if (!dateTime) return "-";
     return new Date(dateTime).toLocaleDateString();
   };
-
-  const handleChangePage = (_event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filteredTransfers.length) : 0;
-
-  const visibleRows = filteredTransfers.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
-  );
 
   if (!selectedDate) {
     return (
@@ -108,58 +90,41 @@ export const TransferListTable: React.FC<TransferListTableProps> = ({
         <Table aria-labelledby="transfersTable" size="small">
           <TableHead>
             <TableRow>
-              <TableCell>Player Name</TableCell>
+              <TableCell>Name</TableCell>
               <TableCell>Role</TableCell>
-              <TableCell>From Date</TableCell>
-              <TableCell>To Date</TableCell>
+              <TableCell>From</TableCell>
+              <TableCell>To</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {visibleRows.map((transfer) => {
+            {filteredTransfers.map((transfer) => {
               const playerInfo = playerMap.get(transfer.player_id);
+              const isSelected = selectedRowId === transfer.id;
               return (
                 <TableRow
                   key={transfer.id}
                   tabIndex={-1}
+                  hover
+                  selected={isSelected}
+                  onClick={() => onRowSelect(transfer.id)}
+                  sx={{ cursor: "pointer" }}
                 >
                   <TableCell component="th" scope="row">
                     <Typography variant="body2" fontWeight="medium">
                       {playerInfo?.name || `Player ${transfer.player_id}`}
                     </Typography>
                   </TableCell>
-                  <TableCell>
-                    {playerInfo?.role || "-"}
-                  </TableCell>
+                  <TableCell>{playerInfo?.role || "-"}</TableCell>
                   <TableCell>
                     {formatDateTime(transfer.from_datetime)}
                   </TableCell>
-                  <TableCell>
-                    {formatDateTime(transfer.to_datetime)}
-                  </TableCell>
+                  <TableCell>{formatDateTime(transfer.to_datetime)}</TableCell>
                 </TableRow>
               );
             })}
-            {emptyRows > 0 && (
-              <TableRow
-                style={{
-                  height: 53 * emptyRows,
-                }}
-              >
-                <TableCell colSpan={4} />
-              </TableRow>
-            )}
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={filteredTransfers.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
     </Paper>
   );
 };

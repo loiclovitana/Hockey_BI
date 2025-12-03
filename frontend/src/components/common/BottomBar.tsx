@@ -11,7 +11,7 @@ const menuItems = [
   { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
   { text: "Players", icon: <SportsIcon />, path: "/players" },
   {
-    text: "Transfer Analytics",
+    text: "History",
     icon: <TrendingUpIcon />,
     path: "/transfer-analytics",
   },

@@ -20,7 +20,13 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
 
   return (
     <DashboardContext.Provider
-      value={{ dashboardData, setDashboardData, updateManager, credentials, setCredentials }}
+      value={{
+        dashboardData,
+        setDashboardData,
+        updateManager,
+        credentials,
+        setCredentials,
+      }}
     >
       {children}
     </DashboardContext.Provider>
