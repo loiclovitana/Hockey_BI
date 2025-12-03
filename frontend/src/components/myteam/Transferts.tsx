@@ -122,6 +122,8 @@ export const Transferts: React.FC<TransfertsProps> = ({ teamEvolution, adaptedTe
             {
               data: dates,
               scaleType: "time",
+              min:dates[0],
+              max:dates[dates.length-1],
               valueFormatter: (date) =>
                 isMobile
                   ? date.toLocaleDateString("en", {
@@ -161,7 +163,7 @@ export const Transferts: React.FC<TransfertsProps> = ({ teamEvolution, adaptedTe
               key={`transfer-${date.toISOString()}`}
               x={date}
               label=""
-              lineStyle={{ stroke: date.toISOString().split('T')[0]===selectedTransfertDate? theme.palette.primary.light:theme.palette.success.main, strokeDasharray: "3 3" }}
+              lineStyle={{ stroke: date.toISOString().split('T')[0]===selectedTransfertDate? theme.palette.success.main:theme.palette.secondary.main, strokeDasharray: "3 3" }}
             />
           ))}
         </LineChart>
@@ -185,6 +187,7 @@ export const Transferts: React.FC<TransfertsProps> = ({ teamEvolution, adaptedTe
               const position = getTransferPosition(date);
               const dateStr = date.toISOString().split('T')[0];
               const isSelected = selectedTransfertDate === dateStr;
+              console.log(dateStr,selectedTransfertDate)
               return (
                 <Box
                   key={`timeline-${date.toISOString()}`}
@@ -195,14 +198,14 @@ export const Transferts: React.FC<TransfertsProps> = ({ teamEvolution, adaptedTe
                     top: 0,
                     bottom: 0,
                     width: isSelected ? 6 : 3,
-                    backgroundColor: isSelected ? theme.palette.primary.light : theme.palette.success.main,
+                    backgroundColor: isSelected ? theme.palette.success.main:theme.palette.secondary.main  ,
                     cursor: "pointer",
                     transform: "translateX(-50%)",
                     transition: "all 0.2s ease",
                     zIndex: isSelected ? 2 : 0,
                     "&:hover": {
                       width: 6,
-                      backgroundColor: isSelected ? theme.palette.primary.dark : theme.palette.success.dark,
+                      backgroundColor: isSelected ? theme.palette.success.dark:theme.palette.primary.dark  ,
                       zIndex: 1,
                     },
                     "&::after": {
@@ -214,14 +217,14 @@ export const Transferts: React.FC<TransfertsProps> = ({ teamEvolution, adaptedTe
                       width: isSelected ? 16 : 12,
                       height: isSelected ? 16 : 12,
                       borderRadius: "50%",
-                      backgroundColor: isSelected ? theme.palette.primary.main : theme.palette.success.main,
+                      backgroundColor: isSelected ? theme.palette.success.main:theme.palette.primary.main ,
                       border: `2px solid ${theme.palette.background.paper}`,
                       transition: "all 0.2s ease",
                     },
                     "&:hover::after": {
                       width: 16,
                       height: 16,
-                      backgroundColor: isSelected ? theme.palette.primary.dark : theme.palette.success.dark,
+                      backgroundColor: isSelected ? theme.palette.success.dark:theme.palette.primary.dark  ,
                     },
                   }}
                   title={date.toLocaleDateString()}
