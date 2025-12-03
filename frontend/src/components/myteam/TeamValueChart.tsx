@@ -4,6 +4,55 @@ import { LineChart, lineElementClasses } from "@mui/x-charts/LineChart";
 import { ChartsReferenceLine } from "@mui/x-charts/ChartsReferenceLine";
 import { type TeamValueEvolution } from "../../client";
 
+interface CustomLegendProps {
+  series: Array<{
+    label: string;
+    color: string;
+    isDashed?: boolean;
+  }>;
+}
+
+const CustomLegend: React.FC<CustomLegendProps> = ({ series }) => {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 2,
+        justifyContent: "center",
+        px: 2,
+        pb: 2,
+      }}
+    >
+      {series.map((item, index) => (
+        <Box
+          key={index}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <svg width="32" height="3" style={{ overflow: "visible" }}>
+            <line
+              x1="0"
+              y1="1.5"
+              x2="32"
+              y2="1.5"
+              stroke={item.color}
+              strokeWidth="2"
+              strokeDasharray={item.isDashed ? "5 3" : "none"}
+            />
+          </svg>
+          <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+            {item.label}
+          </Typography>
+        </Box>
+      ))}
+    </Box>
+  );
+};
+
 interface TeamValueChartProps {
   teamEvolution: TeamValueEvolution | null;
   adaptedTeamEvolution: TeamValueEvolution | null;
@@ -182,39 +231,62 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
 
   // Prepare series data
   const series = [];
+  const legendData: Array<{ label: string; color: string; isDashed?: boolean }> = [];
 
   if (teamEvolution?.evolution && sortedTeamEvolution.length > 0) {
     series.push({
       data: sortedTeamEvolution.map((d) => d.value),
-      label: "Team Value",
+      label: "Actual",
       showMark: false,
       color: theme.palette.primary.main,
       id: "v1",
     });
+    legendData.push({
+      label: "Actual",
+      color: theme.palette.primary.main,
+      isDashed: false,
+    });
+
     series.push({
       data: sortedTeamEvolution.map((d) => d.theorical_value),
-      label: "Team Theoretical Value",
+      label: "Actual (Target)",
       showMark: false,
       color: theme.palette.primary.main,
       id: "vt1",
+    });
+    legendData.push({
+      label: "Actual (Target)",
+      color: theme.palette.primary.main,
+      isDashed: true,
     });
   }
 
   if (adaptedTeamEvolution?.evolution && sortedAdaptedEvolution.length > 0) {
     series.push({
       data: sortedAdaptedEvolution.map((d) => d.value),
-      label: "Adapted Team Value",
+      label: "Alternative",
       showMark: false,
       color: "#ff9800",
       id: "v2",
     });
+    legendData.push({
+      label: "Alternative",
+      color: "#ff9800",
+      isDashed: false,
+    });
+
     series.push({
       data: sortedAdaptedEvolution.map((d) => d.theorical_value),
-      label: "Adapted Team Theoretical Value",
+      label: "Alternative (Target)",
       showMark: false,
       color: "#ff9800",
       strokeDasharray: "5 5",
       id: "vt2",
+    });
+    legendData.push({
+      label: "Alternative (Target)",
+      color: "#ff9800",
+      isDashed: true,
     });
   }
 
@@ -225,6 +297,9 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
 
   return (
     <Box sx={{ pt: 3, width: "100%", overflow: "hidden" }}>
+
+        {/* Custom Legend */}
+        <CustomLegend series={legendData} />
       <Box
         sx={{
           width: "100%",
@@ -256,6 +331,7 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
             },
           ]}
           grid={{ vertical: true, horizontal: true }}
+          hideLegend={true}
           sx={{
             [`.${lineElementClasses.root}[data-series="vt1"]`]: {
               strokeDasharray: "5 5",
@@ -290,6 +366,8 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
           ))}
         </LineChart>
       </Box>
+
+      
 
       {/* Clickable Timeline for Transfer Days */}
       <TransferTimeline
