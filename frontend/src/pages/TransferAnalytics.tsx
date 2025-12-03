@@ -13,6 +13,7 @@ import { TeamLoginForm } from "../components/myteam/TeamLoginForm";
 import { TeamValueChart } from "../components/myteam/TeamValueChart";
 import { TransferListTable } from "../components/myteam/TransferListTable";
 import { HockeyPlayerSearch } from "../components/player/HockeyPlayerSearch";
+import { AdaptationsList } from "../components/myteam/AdaptationsList";
 import { PlayerStatsContext } from "../context/PlayerStatsContext";
 import {
   teamValueEvolutionMyteamTeamValueEvolutionPost,
@@ -57,6 +58,13 @@ export const TransferAnalytics: React.FC = () => {
 
     setTeamModifications((prev) => [...prev, newModification]);
     setSelectedTransfertId(null);
+  };
+
+  /**
+   * Handle removing a modification
+   */
+  const handleRemoveModification = (index: number) => {
+    setTeamModifications((prev) => prev.filter((_, i) => i !== index));
   };
 
   /**
@@ -215,6 +223,14 @@ export const TransferAnalytics: React.FC = () => {
 
           {!loading && !error && teamValueEvolution && (
             <Box sx={{ px: 2 }}>
+              {playerStats && (
+                <AdaptationsList
+                  modifications={teamModifications}
+                  transfers={dashboardData.my_teams[team] || []}
+                  playerStats={playerStats}
+                  onRemoveModification={handleRemoveModification}
+                />
+              )}
               <TeamValueChart
                 teamEvolution={teamValueEvolution}
                 adaptedTeamEvolution={adaptedTeamEvolution}
