@@ -189,7 +189,7 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
       label: "Adapted Team Value",
       showMark: false,
       color: "#ff9800",
-      id: "vt2",
+      id: "v2",
     });
     series.push({
       data: sortedAdaptedEvolution.map((d) => d.theorical_value),
