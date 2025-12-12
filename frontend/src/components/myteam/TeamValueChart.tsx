@@ -103,7 +103,6 @@ const TransferTimeline: React.FC<TransferTimelineProps> = ({
             const position = getTransferPosition(date);
             const dateStr = date.toISOString().split("T")[0];
             const isSelected = selectedTransfertDate === dateStr;
-            console.log(dateStr, selectedTransfertDate);
             return (
               <Box
                 key={`timeline-${date.toISOString()}`}
