@@ -5,6 +5,7 @@ import { LoginForm, type LoginFormField } from "../common/LoginForm";
 import { loadMyteamLoadPost, type DashBoardData } from "../../client";
 import logoLottie from "../../assets/logo-lottie.json";
 import { Container } from "@mui/material";
+import { useDashboard } from "../../hooks/useDashboard";
 
 interface TeamLoginFormProps {
   onSuccess: (data: DashBoardData) => void;
@@ -23,6 +24,7 @@ const teamLoginFields: LoginFormField[] = [
 export const TeamLoginForm: React.FC<TeamLoginFormProps> = ({ onSuccess }) => {
   const [clickCount, setClickCount] = useState(0);
   const navigate = useNavigate();
+  const { setCredentials } = useDashboard();
 
   const handleLottieClick = () => {
     setClickCount((prev) => prev + 1);
@@ -43,6 +45,10 @@ export const TeamLoginForm: React.FC<TeamLoginFormProps> = ({ onSuccess }) => {
     });
 
     if (response.data) {
+      setCredentials({
+        hm_user: formData.hmUser,
+        hm_password: formData.hmPassword,
+      });
       onSuccess(response.data);
     }
 

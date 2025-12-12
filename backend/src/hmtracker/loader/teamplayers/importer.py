@@ -18,10 +18,10 @@ def import_team(
     repository_session: RepositorySession,
     manager: models.Manager,
     team_code: str,
-    players_ids: list[int],
+    current_players_ids: list[int],
     at_datetime: datetime | None = None,
 ):
-    players_ids = [int(player_id) for player_id in players_ids]
+    current_players_ids = [int(player_id) for player_id in current_players_ids]
     if at_datetime is None:
         at_datetime = datetime.now()
 
@@ -30,32 +30,33 @@ def import_team(
     if current_season is None:
         logging.warning("No season are currently opened")
 
-    current_season_team = repository_session.get_team(
-        manager, current_season, team_code
-    )
-    current_players = [
-        current_team_player.player_id for current_team_player in current_season_team
-    ]
-    for current_team_player in current_season_team:
+    season_team = repository_session.get_team(manager, current_season, team_code)
+
+    actual_team = [p for p in season_team if p.to_datetime is None]
+
+    for actual_team_player in actual_team:
         if (
-            current_team_player.from_datetime is not None
-            and current_team_player.from_datetime >= at_datetime
+            actual_team_player.from_datetime is not None
+            and actual_team_player.from_datetime >= at_datetime
         ):
             raise Exception(f"Cannot import team before last import : {at_datetime}")
 
-        if current_team_player.player_id not in players_ids:
-            current_team_player.to_datetime = at_datetime
+        if actual_team_player.player_id not in current_players_ids:
+            actual_team_player.to_datetime = at_datetime
 
+    actual_team_players_id = {
+        current_team_player.player_id for current_team_player in actual_team
+    }
     new_team_player = [
         models.Team(
             team=team_code,
             manager_id=manager.id,
             player_id=player_id,
             season_id=current_season.id,
-            from_datetime=None if len(current_season_team) == 0 else at_datetime,
+            from_datetime=None if len(actual_team) == 0 else at_datetime,
         )
-        for player_id in players_ids
-        if player_id not in current_players
+        for player_id in current_players_ids
+        if player_id not in actual_team_players_id
     ]
     repository_session.session.add_all(new_team_player)
 

@@ -3,12 +3,18 @@ import { BottomNavigation, BottomNavigationAction } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
   Sports as SportsIcon,
+  TrendingUp as TrendingUpIcon,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const menuItems = [
   { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
   { text: "Players", icon: <SportsIcon />, path: "/players" },
+  {
+    text: "History",
+    icon: <TrendingUpIcon />,
+    path: "/transfer-analytics",
+  },
 ];
 
 export const BottomBar: React.FC = () => {

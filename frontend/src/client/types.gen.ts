@@ -69,6 +69,14 @@ export type BodyLoginAdminLoginPost = {
 };
 
 /**
+ * Body_team_value_evolution_myteam_team_value_evolution_post
+ */
+export type BodyTeamValueEvolutionMyteamTeamValueEvolutionPost = {
+    request: AuthRequest;
+    transfert_modification?: TransfertModifications;
+};
+
+/**
  * Body_upload_matches_csv_admin_matches_upload_post
  */
 export type BodyUploadMatchesCsvAdminMatchesUploadPost = {
@@ -315,6 +323,58 @@ export type Team = {
      * To Datetime
      */
     to_datetime?: string | null;
+};
+
+/**
+ * TeamModification
+ */
+export type TeamModification = {
+    /**
+     * Team Id
+     */
+    team_id: number;
+    /**
+     * Replaced Player Id
+     */
+    replaced_player_id: number;
+};
+
+/**
+ * TeamValue
+ */
+export type TeamValue = {
+    /**
+     * At
+     */
+    at: string;
+    /**
+     * Value
+     */
+    value: number;
+    /**
+     * Theorical Value
+     */
+    theorical_value: number;
+};
+
+/**
+ * TeamValueEvolution
+ */
+export type TeamValueEvolution = {
+    /**
+     * Evolution
+     */
+    evolution: Array<TeamValue>;
+};
+
+/**
+ * TransfertModifications
+ */
+export type TransfertModifications = {
+    /**
+     * Modifications
+     */
+    modifications?: Array<TeamModification>;
 };
 
 /**
@@ -623,6 +683,36 @@ export type UnregisterForAutolinupMyteamAutolineupUnregisterPostResponses = {
 };
 
 export type UnregisterForAutolinupMyteamAutolineupUnregisterPostResponse = UnregisterForAutolinupMyteamAutolineupUnregisterPostResponses[keyof UnregisterForAutolinupMyteamAutolineupUnregisterPostResponses];
+
+export type TeamValueEvolutionMyteamTeamValueEvolutionPostData = {
+    body: BodyTeamValueEvolutionMyteamTeamValueEvolutionPost;
+    path?: never;
+    query: {
+        /**
+         * Team Code
+         */
+        team_code: string;
+    };
+    url: '/myteam/team_value_evolution';
+};
+
+export type TeamValueEvolutionMyteamTeamValueEvolutionPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type TeamValueEvolutionMyteamTeamValueEvolutionPostError = TeamValueEvolutionMyteamTeamValueEvolutionPostErrors[keyof TeamValueEvolutionMyteamTeamValueEvolutionPostErrors];
+
+export type TeamValueEvolutionMyteamTeamValueEvolutionPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TeamValueEvolution;
+};
+
+export type TeamValueEvolutionMyteamTeamValueEvolutionPostResponse = TeamValueEvolutionMyteamTeamValueEvolutionPostResponses[keyof TeamValueEvolutionMyteamTeamValueEvolutionPostResponses];
 
 export type PingServerPingGetData = {
     body?: never;
