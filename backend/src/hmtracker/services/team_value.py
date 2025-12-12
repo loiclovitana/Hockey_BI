@@ -61,12 +61,9 @@ def compute_team_value(
     matches = repository.get_matches_for_season(season_id)
 
     # Collect all computation dates: match dates + current date
-    computation_dates = [match.match_datetime for match in matches]
+    computation_dates = set(match.match_datetime for match in matches)
     current_date = datetime.now()
-
-    # Add current date if it's not already in the list
-    if not computation_dates or computation_dates[-1].date() != current_date.date():
-        computation_dates.append(current_date)
+    computation_dates.add(current_date)
 
     results = []
 
