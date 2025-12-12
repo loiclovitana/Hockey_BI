@@ -36,6 +36,7 @@ export const TeamAnalyticsView: React.FC<TeamAnalyticsViewProps> = ({
     TeamModification[]
   >([]);
   const [loading, setLoading] = useState(false);
+  const [adaptedLoading, setAdaptedLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTransfertDay, setSelectedTransfertDay] = useState<
     string | null
@@ -67,10 +68,10 @@ export const TeamAnalyticsView: React.FC<TeamAnalyticsViewProps> = ({
   };
 
   /**
-   * FETCH both team evolutions (with and without modifications)
+   * FETCH base team evolution (without modifications)
    */
   useEffect(() => {
-    const fetchTeamValueEvolutions = async () => {
+    const fetchBaseTeamValue = async () => {
       if (!dashboardData.my_teams[team]) {
         return;
       }
@@ -84,7 +85,6 @@ export const TeamAnalyticsView: React.FC<TeamAnalyticsViewProps> = ({
       setError(null);
 
       try {
-        // Fetch base evolution (without modifications)
         const baseResponse =
           await teamValueEvolutionMyteamTeamValueEvolutionPost({
             query: {
@@ -105,36 +105,6 @@ export const TeamAnalyticsView: React.FC<TeamAnalyticsViewProps> = ({
         }
 
         setTeamValueEvolution(baseResponse.data || null);
-
-        // Fetch evolution with modifications (if any)
-        if (teamModifications && teamModifications.length > 0) {
-          const modifiedResponse =
-            await teamValueEvolutionMyteamTeamValueEvolutionPost({
-              query: {
-                team_code: teamCode,
-              },
-              body: {
-                request: {
-                  hm_user: credentials.hm_user,
-                  hm_password: credentials.hm_password,
-                },
-                transfert_modification: {
-                  modifications: teamModifications,
-                },
-              },
-            });
-
-          if (modifiedResponse.error) {
-            console.error(
-              "Failed to load modified team evolution:",
-              modifiedResponse.error,
-            );
-          } else {
-            setAdaptedTeamEvolution(modifiedResponse.data || null);
-          }
-        } else {
-          setAdaptedTeamEvolution(null);
-        }
       } catch (err) {
         setError("An unexpected error occurred");
         console.error(err);
@@ -143,7 +113,64 @@ export const TeamAnalyticsView: React.FC<TeamAnalyticsViewProps> = ({
       }
     };
 
-    fetchTeamValueEvolutions();
+    fetchBaseTeamValue();
+  }, [team, dashboardData, credentials]);
+
+  /**
+   * FETCH adapted team evolution (with modifications)
+   */
+  useEffect(() => {
+    const fetchAdaptedTeamValue = async () => {
+      if (!dashboardData.my_teams[team]) {
+        return;
+      }
+
+      const teamCode = dashboardData.my_teams[team][0]?.team;
+      if (!teamCode) {
+        return;
+      }
+
+      // Only fetch if there are modifications
+      if (!teamModifications || teamModifications.length === 0) {
+        setAdaptedTeamEvolution(null);
+        return;
+      }
+
+      setAdaptedLoading(true);
+
+      try {
+        const modifiedResponse =
+          await teamValueEvolutionMyteamTeamValueEvolutionPost({
+            query: {
+              team_code: teamCode,
+            },
+            body: {
+              request: {
+                hm_user: credentials.hm_user,
+                hm_password: credentials.hm_password,
+              },
+              transfert_modification: {
+                modifications: teamModifications,
+              },
+            },
+          });
+
+        if (modifiedResponse.error) {
+          console.error(
+            "Failed to load modified team evolution:",
+            modifiedResponse.error,
+          );
+        } else {
+          setAdaptedTeamEvolution(modifiedResponse.data || null);
+        }
+      } catch (err) {
+        console.error("Error fetching adapted team evolution:", err);
+      } finally {
+        setAdaptedLoading(false);
+      }
+    };
+
+    fetchAdaptedTeamValue();
   }, [team, dashboardData, credentials, teamModifications]);
 
   const transfertTimes = useMemo(() => {
@@ -196,6 +223,7 @@ export const TeamAnalyticsView: React.FC<TeamAnalyticsViewProps> = ({
             transfertTimes={transfertTimes}
             onTransfertDayClick={setSelectedTransfertDay}
             selectedTransfertDate={selectedTransfertDay}
+            adaptedLoading={adaptedLoading}
           />
           <TransferListTable
             transfers={dashboardData.my_teams[team] || []}
