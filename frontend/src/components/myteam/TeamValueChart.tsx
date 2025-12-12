@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, useTheme, useMediaQuery, Chip } from "@mui/material";
+import { Box, Typography, useTheme, useMediaQuery, Chip, CircularProgress } from "@mui/material";
 import { LineChart, lineElementClasses } from "@mui/x-charts/LineChart";
 import { ChartsReferenceLine } from "@mui/x-charts/ChartsReferenceLine";
 import { type TeamValueEvolution } from "../../client";
@@ -59,6 +59,7 @@ interface TeamValueChartProps {
   transfertTimes?: Set<string>;
   onTransfertDayClick?: (day: string) => void;
   selectedTransfertDate?: string | null;
+  adaptedLoading?: boolean;
 }
 
 interface TransferTimelineProps {
@@ -103,7 +104,6 @@ const TransferTimeline: React.FC<TransferTimelineProps> = ({
             const position = getTransferPosition(date);
             const dateStr = date.toISOString().split("T")[0];
             const isSelected = selectedTransfertDate === dateStr;
-            console.log(dateStr, selectedTransfertDate);
             return (
               <Box
                 key={`timeline-${date.toISOString()}`}
@@ -184,6 +184,7 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
   transfertTimes,
   onTransfertDayClick,
   selectedTransfertDate,
+  adaptedLoading = false,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -298,7 +299,30 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
     : [];
 
   return (
-    <Box sx={{ pt: 3, width: "100%", overflow: "hidden" }}>
+    <Box sx={{ pt: 3, width: "100%", overflow: "hidden", position: "relative" }}>
+      {/* Loading indicator for adapted evolution */}
+      {adaptedLoading && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            zIndex: 10,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            p: 2,
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: 1,
+            boxShadow: 1,
+          }}
+        >
+          <CircularProgress size={20} />
+          <Typography variant="caption" color="text.secondary">
+            Loading alternative...
+          </Typography>
+        </Box>
+      )}
       {/* Custom Legend */}
       <CustomLegend series={legendData} />
       <Box

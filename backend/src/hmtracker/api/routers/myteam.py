@@ -10,7 +10,11 @@ from hmtracker.loader.main import import_teamplayers_from_loader
 from hmtracker.loader.teamplayers.source.website import team_players_ajax_loader
 from hmtracker.services.check_user import connect_to_hm
 from hmtracker.services.encryption import encrypt
-from hmtracker.services.team_value import TeamModification, TeamValue
+from hmtracker.services.team_value import (
+    TeamModification,
+    TeamValue,
+    compute_team_value_sql,
+)
 from pydantic import BaseModel, SecretStr
 
 router = APIRouter(prefix="/myteam", tags=["myteam"])
@@ -146,10 +150,7 @@ async def team_value_evolution(
     if current_season is None:
         raise HTTPException(status_code=404, detail="No current season found")
 
-    # Import compute_team_value and compute the evolution
-    from hmtracker.services.team_value import compute_team_value
-
-    evolution = compute_team_value(
+    evolution = compute_team_value_sql(
         repository=session,
         manager_id=manager.id,
         season_id=current_season.id,

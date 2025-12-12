@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { DashboardContext, type Credentials } from "./DashboardContext";
 import { type DashBoardData, type Manager } from "../client";
 
@@ -14,20 +14,23 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
   );
   const [credentials, setCredentials] = useState<Credentials | null>(null);
 
-  const updateManager = (manager: Manager) => {
+  const updateManager = useCallback((manager: Manager) => {
     setDashboardData((prev) => (prev ? { ...prev, manager } : null));
-  };
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      dashboardData,
+      setDashboardData,
+      updateManager,
+      credentials,
+      setCredentials,
+    }),
+    [dashboardData, credentials, updateManager],
+  );
 
   return (
-    <DashboardContext.Provider
-      value={{
-        dashboardData,
-        setDashboardData,
-        updateManager,
-        credentials,
-        setCredentials,
-      }}
-    >
+    <DashboardContext.Provider value={value}>
       {children}
     </DashboardContext.Provider>
   );
