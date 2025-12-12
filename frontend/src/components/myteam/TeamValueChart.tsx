@@ -87,8 +87,6 @@ const TransferTimeline: React.FC<TransferTimelineProps> = ({
 
   return (
     <Box sx={{ px: 2, pl: 8 }}>
-      
-
       {transferDates.length > 0 && (
         <Box
           sx={{
@@ -101,62 +99,62 @@ const TransferTimeline: React.FC<TransferTimelineProps> = ({
             mt: 1,
           }}
         >
-        {transferDates.map((date) => {
-          const position = getTransferPosition(date);
-          const dateStr = date.toISOString().split("T")[0];
-          const isSelected = selectedTransfertDate === dateStr;
-          console.log(dateStr, selectedTransfertDate);
-          return (
-            <Box
-              key={`timeline-${date.toISOString()}`}
-              onClick={() => onTransfertDayClick?.(dateStr)}
-              sx={{
-                position: "absolute",
-                left: `${position}%`,
-                top: 0,
-                bottom: 0,
-                width: isSelected ? 6 : 3,
-                backgroundColor: isSelected
-                  ? theme.palette.success.main
-                  : theme.palette.secondary.main,
-                cursor: "pointer",
-                transform: "translateX(-50%)",
-                transition: "all 0.2s ease",
-                zIndex: isSelected ? 2 : 0,
-                "&:hover": {
-                  width: 6,
-                  backgroundColor: isSelected
-                    ? theme.palette.success.dark
-                    : theme.palette.secondary.dark,
-                  zIndex: 1,
-                },
-                "&::after": {
-                  content: '""',
+          {transferDates.map((date) => {
+            const position = getTransferPosition(date);
+            const dateStr = date.toISOString().split("T")[0];
+            const isSelected = selectedTransfertDate === dateStr;
+            console.log(dateStr, selectedTransfertDate);
+            return (
+              <Box
+                key={`timeline-${date.toISOString()}`}
+                onClick={() => onTransfertDayClick?.(dateStr)}
+                sx={{
                   position: "absolute",
-                  left: "50%",
-                  top: "50%",
-                  transform: "translate(-50%, -50%)",
-                  width: isSelected ? 16 : 12,
-                  height: isSelected ? 16 : 12,
-                  borderRadius: "50%",
+                  left: `${position}%`,
+                  top: 0,
+                  bottom: 0,
+                  width: isSelected ? 6 : 3,
                   backgroundColor: isSelected
                     ? theme.palette.success.main
                     : theme.palette.secondary.main,
-                  border: `2px solid ${theme.palette.background.paper}`,
+                  cursor: "pointer",
+                  transform: "translateX(-50%)",
                   transition: "all 0.2s ease",
-                },
-                "&:hover::after": {
-                  width: 16,
-                  height: 16,
-                  backgroundColor: isSelected
-                    ? theme.palette.success.dark
-                    : theme.palette.secondary.dark,
-                },
-              }}
-              title={date.toLocaleDateString()}
-            />
-          );
-        })}
+                  zIndex: isSelected ? 2 : 0,
+                  "&:hover": {
+                    width: 6,
+                    backgroundColor: isSelected
+                      ? theme.palette.success.dark
+                      : theme.palette.secondary.dark,
+                    zIndex: 1,
+                  },
+                  "&::after": {
+                    content: '""',
+                    position: "absolute",
+                    left: "50%",
+                    top: "50%",
+                    transform: "translate(-50%, -50%)",
+                    width: isSelected ? 16 : 12,
+                    height: isSelected ? 16 : 12,
+                    borderRadius: "50%",
+                    backgroundColor: isSelected
+                      ? theme.palette.success.main
+                      : theme.palette.secondary.main,
+                    border: `2px solid ${theme.palette.background.paper}`,
+                    transition: "all 0.2s ease",
+                  },
+                  "&:hover::after": {
+                    width: 16,
+                    height: 16,
+                    backgroundColor: isSelected
+                      ? theme.palette.success.dark
+                      : theme.palette.secondary.dark,
+                  },
+                }}
+                title={date.toLocaleDateString()}
+              />
+            );
+          })}
         </Box>
       )}
       {/* Special filter chips */}
@@ -231,7 +229,11 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
 
   // Prepare series data
   const series = [];
-  const legendData: Array<{ label: string; color: string; isDashed?: boolean }> = [];
+  const legendData: Array<{
+    label: string;
+    color: string;
+    isDashed?: boolean;
+  }> = [];
 
   if (teamEvolution?.evolution && sortedTeamEvolution.length > 0) {
     series.push({
@@ -297,9 +299,8 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
 
   return (
     <Box sx={{ pt: 3, width: "100%", overflow: "hidden" }}>
-
-        {/* Custom Legend */}
-        <CustomLegend series={legendData} />
+      {/* Custom Legend */}
+      <CustomLegend series={legendData} />
       <Box
         sx={{
           width: "100%",
@@ -366,8 +367,6 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
           ))}
         </LineChart>
       </Box>
-
-      
 
       {/* Clickable Timeline for Transfer Days */}
       <TransferTimeline

@@ -12,14 +12,12 @@ import {
   IconButton,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import type { TeamModification } from "../../client";
-import type { PlayerStats } from "../../types/PlayerStats";
-import type { MyteamTeam } from "../../client";
+import type { Team, LastPlayerStats, TeamModification } from "../../client";
 
 interface AdaptationsListProps {
   modifications: TeamModification[];
-  transfers: MyteamTeam[];
-  playerStats: PlayerStats[];
+  transfers: Team[];
+  playerStats: LastPlayerStats[];
   onRemoveModification: (index: number) => void;
 }
 
@@ -35,7 +33,7 @@ export const AdaptationsList: React.FC<AdaptationsListProps> = ({
       const originalPlayer = playerStats.find(
         (p) => p.player_info.id === transfer?.player_id,
       );
-      const replacedPlayer= playerStats.find(
+      const replacedPlayer = playerStats.find(
         (p) => p.player_info.id === mod.replaced_player_id,
       );
 
