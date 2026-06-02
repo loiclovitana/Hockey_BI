@@ -53,16 +53,4 @@ python hmtracker/loader/main.py -d <database-url> -u <hm-useremail> -p <password
 ```
 This script is aimed to be run regularly (every time player change price and performance). So better set a cron job for it.
 
----
-### Roadmap 
-
-#### *In progress* 
-- **Load team informations** : Script to extract private team data for a player.
-- **API** : Backend endpoints to interact with stored data and load private team information.
-
-#### *Planned Features*
-##### Front-end Website 
- - User friendly interface to connect to HM and load teams data.
- - Client-side scraping to ensure user credentials remain private.
- - Interactive visualizations (e.g., best players to buy/sell, performance trends).
 
