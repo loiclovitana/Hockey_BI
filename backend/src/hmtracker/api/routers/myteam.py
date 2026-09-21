@@ -69,9 +69,14 @@ async def load(request: LoadRequest, session: SessionDep) -> DashBoardData:
     manager = session.get_manager_by_email(request.hm_user)
     if manager is None:
         raise HTTPException(status_code=500, detail="Manager wasn't saved correctly")
+
+    current_season = session.get_current_season(arcade=False)
+    if current_season is None:
+        raise HTTPException(status_code=404, detail="No current season found")
+
     teams = [
         api_models.Team.model_validate(team.__dict__)
-        for team in session.get_teams(manager=manager)
+        for team in session.get_teams(manager=manager, season=current_season)
     ]
 
     # Group teams by team attribute and sort
