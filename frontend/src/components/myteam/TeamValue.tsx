@@ -8,7 +8,7 @@ interface TeamValueProps {
   team: Team[];
 }
 
-const INITIAL_VALUE = 150.0;
+const INITIAL_VALUE = 140.0;
 
 export const TeamValue: React.FC<TeamValueProps> = ({ team }) => {
   // For now, set both values to 0
