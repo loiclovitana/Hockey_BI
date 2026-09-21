@@ -76,7 +76,8 @@ export const TransferAnalytics: React.FC = () => {
                   opacity: team === 1 ? 1 : 0,
                   transform: team === 1 ? "translateX(0)" : "translateX(300px)",
                   pointerEvents: team === 1 ? "auto" : "none",
-                  transition: "opacity 0.5s ease-in, transform 0.5s ease-in-out",
+                  transition:
+                    "opacity 0.5s ease-in, transform 0.5s ease-in-out",
                 }}
               >
                 {credentials && (

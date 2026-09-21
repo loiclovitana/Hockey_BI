@@ -1,5 +1,12 @@
 import React from "react";
-import { Box, Typography, useTheme, useMediaQuery, Chip, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Typography,
+  useTheme,
+  useMediaQuery,
+  Chip,
+  CircularProgress,
+} from "@mui/material";
 import { LineChart, lineElementClasses } from "@mui/x-charts/LineChart";
 import { ChartsReferenceLine } from "@mui/x-charts/ChartsReferenceLine";
 import { type TeamValueEvolution } from "../../client";
@@ -299,7 +306,9 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
     : [];
 
   return (
-    <Box sx={{ pt: 3, width: "100%", overflow: "hidden", position: "relative" }}>
+    <Box
+      sx={{ pt: 3, width: "100%", overflow: "hidden", position: "relative" }}
+    >
       {/* Loading indicator for adapted evolution */}
       {adaptedLoading && (
         <Box

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 dir_script=$(dirname $(realpath "$0"))
 test_dir=$dir_script/../backend/src/tests
 
@@ -25,4 +25,3 @@ if [ "$interactive" = true ]; then
     rm -r tmp 
     uv run python -m unittest discover -s $test_dir/integration/ -p "*Itest.py"
 fi
-

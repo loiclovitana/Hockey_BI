@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Deployment script for Hockey BI frontend
 # Usage: ./deploy [TARGET_DIR] [ENV_FILE]
@@ -30,11 +30,11 @@ fi
 cd "$dir_script/../frontend"
 
 echo "Installing dependencies..."
-npm install
+pnpm install --frozen-lockfile
 
 echo "Building frontend for production env"
 
-npm run build -- --mode production 
+pnpm build -- --mode production
 
 echo "Copying build to remote server..."
 scp -r dist/* $SSH_TARGET:$TARGET_DIR/
