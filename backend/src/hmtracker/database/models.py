@@ -1,5 +1,8 @@
 from datetime import date, datetime
+from enum import StrEnum
 from sqlalchemy import (
+    CheckConstraint,
+    Enum,
     ForeignKey,
     Integer,
     String,
@@ -7,6 +10,7 @@ from sqlalchemy import (
     Float,
     Date,
     Boolean,
+    false,
 )
 from sqlalchemy.orm import relationship, mapped_column, Mapped, DeclarativeBase
 from sqlalchemy.sql.functions import func
@@ -129,3 +133,44 @@ class Match(HMDatabaseObject):
     home_club: Mapped[str] = mapped_column(String, nullable=False)
     away_club: Mapped[str] = mapped_column(String, nullable=False)
     match_datetime: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class PlayerInfoType(StrEnum):
+    INJURY = "Injury"
+    SUSPENSION = "Suspension"
+    ABSENCE = "Absence"
+    TRANSFERT = "Transfert"
+    RETURN = "Return"
+
+
+class PlayerNews(HMDatabaseObject):
+    __tablename__ = "PLAYER_NEWS"
+    __table_args__ = (
+        CheckConstraint(
+            "new_team IS NULL OR info_type = 'Transfert'",
+            name="player_news_new_team_transfer_only",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    source: Mapped[str] = mapped_column(String, nullable=False)
+    news_date: Mapped[date] = mapped_column(Date, nullable=False)
+    player_name: Mapped[str] = mapped_column(String, nullable=False)
+    title: Mapped[str] = mapped_column(String, nullable=False)
+    rumor: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
+    info_type: Mapped[PlayerInfoType] = mapped_column(
+        Enum(
+            PlayerInfoType,
+            values_callable=lambda enum: [member.value for member in enum],
+            native_enum=False,
+            create_constraint=True,
+            validate_strings=True,
+            name="player_news_info_type",
+        ),
+        nullable=False,
+    )
+    current_team: Mapped[str | None] = mapped_column(String, nullable=True)
+    new_team: Mapped[str | None] = mapped_column(String, nullable=True)
+    availability_time: Mapped[str] = mapped_column(String, nullable=False)
