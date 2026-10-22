@@ -1,9 +1,11 @@
 import unittest
+from datetime import date
 from unittest.mock import patch
 
 import requests
 
 from hmtracker.parser import shnparser
+from hmtracker.parser.models import ArticleDetails, ArticleSummary
 
 
 NEWS_HTML = """
@@ -64,16 +66,21 @@ class TestSwissHockeyNewsParser(unittest.TestCase):
 
         self.assertEqual(
             [
-                {
-                    "title": "First & latest",
-                    "url": "https://swisshockeynews.ch/en/shn/first",
-                    "date": "2026-10-22",
-                },
-                {
-                    "title": "Second story",
-                    "url": "https://swisshockeynews.ch/en/shn/second",
-                    "date": "2026-10-21",
-                },
+                ArticleSummary(
+                    title="First & latest",
+                    url="/en/shn/first",
+                    date=date(2026, 10, 22),
+                ),
+                ArticleSummary(
+                    title="First & latest",
+                    url="https://swisshockeynews.ch/en/shn/first",
+                    date=date(2026, 10, 22),
+                ),
+                ArticleSummary(
+                    title="Second story",
+                    url="/en/shn/second",
+                    date=date(2026, 10, 21),
+                ),
             ],
             result,
         )
@@ -85,12 +92,12 @@ class TestSwissHockeyNewsParser(unittest.TestCase):
         result = shnparser._scrap_article_details(ARTICLE_HTML)
 
         self.assertEqual(
-            {
-                "date": "2026-10-22",
-                "title": "A player's return & recovery",
-                "description": "A short introduction.",
-                "text": "The player, now healthy, returns.\n\nHe will play on Friday.",
-            },
+            ArticleDetails(
+                date=date(2026, 10, 22),
+                title="A player's return & recovery",
+                description="A short introduction.",
+                text="The player, now healthy, returns.\n\nHe will play on Friday.",
+            ),
             result,
         )
 
@@ -105,7 +112,7 @@ class TestSwissHockeyNewsParser(unittest.TestCase):
             response = get.return_value.__enter__.return_value
             response.text = NEWS_HTML
 
-            self.assertEqual(2, len(parser.list_news()))
+            self.assertEqual(3, len(parser.list_news()))
             get.assert_called_once_with(shnparser.NEWS_URL, timeout=10)
             response.raise_for_status.assert_called_once_with()
 
@@ -113,7 +120,7 @@ class TestSwissHockeyNewsParser(unittest.TestCase):
             response.text = ARTICLE_HTML
 
             self.assertEqual(
-                "2026-10-22", parser.article_details("/en/shn/first")["date"]
+                date(2026, 10, 22), parser.article_details("/en/shn/first").date
             )
             get.assert_called_once_with(
                 "https://swisshockeynews.ch/en/shn/first", timeout=10

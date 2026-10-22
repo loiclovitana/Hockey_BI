@@ -42,6 +42,22 @@ class RepositorySession:
     def get_player(self, player_id: int, season_id: int) -> models.HockeyPlayer | None:
         return self.session.get(models.HockeyPlayer, (player_id, season_id))
 
+    def filter_new_player_news_urls(self, urls: list[str]) -> list[str]:
+        """Return URLs absent from PlayerNews.source, preserving order and duplicates."""
+        if not urls:
+            return []
+
+        existing_urls = {
+            source
+            for (source,) in (
+                self.session.query(models.PlayerNews.source)
+                .filter(models.PlayerNews.source.in_(set(urls)))
+                .distinct()
+                .all()
+            )
+        }
+        return [url for url in urls if url not in existing_urls]
+
     def get_players(
         self, player_ids: list | None = None, season_id: int | Column[int] | None = None
     ) -> list[models.HockeyPlayer]:

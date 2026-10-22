@@ -6,6 +6,8 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup, SoupStrainer, Tag
 
+from hmtracker.parser.models import ArticleDetails, ArticleSummary
+
 SHN_URL = "https://swisshockeynews.ch"
 NEWS_URL = SHN_URL + "/en/national-league"
 
@@ -15,15 +17,15 @@ class SwissHockeyNewsParser:
         self.session = requests.Session()
         self.timeout = timeout
 
-    def list_news(self) -> list[dict[str, str]]:
-        """Return unique front-page articles with title, absolute URL and ISO date.
+    def list_news(self) -> list[ArticleSummary]:
+        """Return unique front-page articles with title, URL and publication date.
 
         Only the National League page is fetched; article pages are not visited.
         """
         return _scrap_news_list(self._get_html(NEWS_URL))
 
-    def article_details(self, url: str) -> dict[str, str]:
-        """Return date (YYYY-MM-DD), title, introduction and plain article text."""
+    def article_details(self, url: str) -> ArticleDetails:
+        """Return publication date, title, introduction and plain article text."""
         return _scrap_article_details(self._get_html(urljoin(SHN_URL, url)))
 
     def close(self) -> None:
@@ -39,7 +41,7 @@ def _text(element: Tag | None) -> str:
     return " ".join(element.get_text().split()) if element else ""
 
 
-def _scrap_news_list(html: str) -> list[dict[str, str]]:
+def _scrap_news_list(html: str) -> list[ArticleSummary]:
     # Avoid building trees for navigation, advertising and unrelated sidebars.
     soup = BeautifulSoup(
         html,
@@ -55,23 +57,21 @@ def _scrap_news_list(html: str) -> list[dict[str, str]]:
         published = article.select_one(".raxo-date")
         if link is None or published is None:
             continue
-        url = str(link["href"])
+        url = str(link["href"]).strip()
         if url in seen:
             continue
         seen.add(url)
         articles.append(
-            {
-                "title": _text(link),
-                "url": url,
-                "date": datetime.strptime(_text(published), "%d.%m.%Y")
-                .date()
-                .isoformat(),
-            }
+            ArticleSummary(
+                title=_text(link),
+                url=url,
+                date=datetime.strptime(_text(published), "%d.%m.%Y").date(),
+            )
         )
     return articles
 
 
-def _scrap_article_details(html: str) -> dict[str, str]:
+def _scrap_article_details(html: str) -> ArticleDetails:
     soup = BeautifulSoup(
         html,
         "html.parser",
@@ -93,11 +93,9 @@ def _scrap_article_details(html: str) -> dict[str, str]:
     text = "\n\n".join(
         " ".join(line.split()) for line in body.get_text().splitlines() if line.strip()
     )
-    return {
-        "date": date.fromisoformat(
-            str(published["datetime"]).split("T")[0]
-        ).isoformat(),
-        "title": _text(title),
-        "description": _text(soup.select_one(".introtext")),
-        "text": text,
-    }
+    return ArticleDetails(
+        date=date.fromisoformat(str(published["datetime"]).split("T")[0]),
+        title=_text(title),
+        description=_text(soup.select_one(".introtext")),
+        text=text,
+    )

@@ -153,7 +153,7 @@ class PlayerNews(HMDatabaseObject):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    source: Mapped[str] = mapped_column(String, nullable=False)
+    source: Mapped[str] = mapped_column(String, nullable=False, index=True)
     news_date: Mapped[date] = mapped_column(Date, nullable=False)
     player_name: Mapped[str] = mapped_column(String, nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=False)
