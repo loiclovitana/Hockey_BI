@@ -30,6 +30,7 @@ dependencies = [
     "mdurl==0.1.2",
     "openai>=2.28.0",
     "pydantic==2.10.6",
+    "pydantic-ai-slim[openai]>=1.60.0",
     "pydantic-core==2.27.2",
     "pygments==2.19.1",
     "pyjwt==2.10.1",

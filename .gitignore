@@ -5,6 +5,7 @@
 data/
 data_jeannie/
 backend/notebook
+backend/src/tests/integration/output/
 
 .venv
 .env
