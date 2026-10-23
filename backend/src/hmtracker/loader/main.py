@@ -24,6 +24,7 @@ from hmtracker.loader.teamplayers.importer import import_team, import_manager
 from hmtracker.loader.teamplayers.source.website import team_players_ajax_loader
 from hmtracker.loader.matches.importer import import_matches
 from hmtracker.loader.matches.mapper import parse_match_csv
+from hmtracker.loader.playernews.importer import import_player_news
 
 
 def __connect_session(
@@ -129,6 +130,21 @@ def import_matches_from_csv(
     return new_count, updated_count
 
 
+def import_playernews_from_shn(
+    db_access: Session | str | RepositorySession,
+) -> int:
+    """Fetch new SHN articles, extract player updates, and persist them."""
+    database_session = __connect_session(db_access)
+    try:
+        return import_player_news(database_session)
+    except Exception:
+        database_session.session.rollback()
+        raise
+    finally:
+        if not isinstance(db_access, RepositorySession):
+            database_session.session.close()
+
+
 if __name__ == "__main__":
     argument_parser = argparse.ArgumentParser(
         description="Load data from hockey manager using ajax queries into a database"
@@ -175,6 +191,12 @@ if __name__ == "__main__":
         help="""If present, import matches from CSV file""",
     )
 
+    argument_parser.add_argument(
+        "--player-news",
+        action="store_true",
+        help="Import player news from Swiss Hockey News using OpenAI",
+    )
+
     def check_exists(argument, name):
         if argument is None:
             logging.error(f"Error: Missing argument {name}.")
@@ -183,6 +205,12 @@ if __name__ == "__main__":
 
     arguments = argument_parser.parse_args()
     check_exists(arguments.database_url, "database-url")
+
+    if arguments.player_news:
+        if arguments.matches or arguments.teams or arguments.source_csv:
+            argument_parser.error("--player-news cannot be combined with other imports")
+        import_playernews_from_shn(arguments.database_url)
+        sys.exit(0)
 
     if arguments.matches:
         if arguments.source_csv is None:
