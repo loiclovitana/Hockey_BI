@@ -1,6 +1,7 @@
 import React from "react";
 import { Container, Typography, Paper, Box } from "@mui/material";
 import { StartLoadingComponent } from "./StartLoadingComponent";
+import { StartPlayerNewsLoadingComponent } from "./StartPlayerNewsLoadingComponent";
 import { GetAdminUserComponent } from "./GetAdminUserComponent";
 import { GetOperationComponent } from "./GetOperationComponent";
 import { UploadMatchesCsvComponent } from "./UploadMatchesCsvComponent";
@@ -25,6 +26,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ token }) => {
         </Paper>
         <Paper sx={{ p: 2 }}>
           <StartLoadingComponent token={token} />
+        </Paper>
+        <Paper sx={{ p: 2 }}>
+          <StartPlayerNewsLoadingComponent token={token} />
         </Paper>
         <Paper sx={{ p: 2 }}>
           <UploadMatchesCsvComponent token={token} />

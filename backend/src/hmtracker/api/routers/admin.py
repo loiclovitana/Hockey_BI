@@ -39,6 +39,11 @@ def start_team_alignement() -> None:
     admin.start_team_alignement()
 
 
+@router.post("/playernews/start")
+def start_loading_playernews() -> None:
+    admin.start_loading_playernews()
+
+
 class AdminUser(BaseModel):
     username: str
 

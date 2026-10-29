@@ -423,6 +423,20 @@ export type StartTeamAlignementAdminAutoteamStartPostResponses = {
     200: unknown;
 };
 
+export type StartLoadingPlayernewsAdminPlayernewsStartPostData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/playernews/start';
+};
+
+export type StartLoadingPlayernewsAdminPlayernewsStartPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type GetAdminUserAdminUserGetData = {
     body?: never;
     path?: never;

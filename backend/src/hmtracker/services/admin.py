@@ -129,6 +129,15 @@ def start_loading():
     loader.import_playerstats_from_ajax(database_url, hm_user, hm_password)
 
 
+@_Operation("Load SHN player news")
+def start_loading_playernews():
+    database_url = getenv(HM_DATABASE_URL_ENV_NAME)
+    if not database_url:
+        raise NoDatabaseError()
+
+    loader.import_playernews_from_shn(database_url)
+
+
 @_Operation("Align Team")
 def start_team_alignement():
     database_url = getenv(HM_DATABASE_URL_ENV_NAME)
