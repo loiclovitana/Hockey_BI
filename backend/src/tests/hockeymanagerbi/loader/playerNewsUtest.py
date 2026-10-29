@@ -11,7 +11,6 @@ from hmtracker.database.repository import RepositorySession
 from hmtracker.loader.playernews.extractor import (
     ArticlePlayerNews,
     PlayerAbsenceInfo,
-    PlayerReturnInfo,
     PlayerTransferInfo,
 )
 from hmtracker.loader.playernews.importer import import_player_news
@@ -31,31 +30,55 @@ class TestPlayerNews(unittest.TestCase):
                 },
             ),
             (
-                "Injury",
+                "Absence",
                 PlayerAbsenceInfo,
-                {"team": "Team A", "expected_return": "Two weeks"},
-            ),
-            (
-                "Suspension",
-                PlayerAbsenceInfo,
-                {"team": "Team B", "expected_return": "Three games"},
+                {
+                    "reason": "Injury",
+                    "team": "Team A",
+                    "is_return": False,
+                    "expected_duration_or_return": "Two weeks",
+                },
             ),
             (
                 "Absence",
                 PlayerAbsenceInfo,
-                {"team": None, "expected_return": "Unknown"},
+                {
+                    "reason": "Suspension",
+                    "team": "Team B",
+                    "is_return": False,
+                    "expected_duration_or_return": "Three games",
+                },
             ),
-            ("Return", PlayerReturnInfo, {"team": "Team C", "return_time": "Tonight"}),
+            (
+                "Absence",
+                PlayerAbsenceInfo,
+                {
+                    "reason": None,
+                    "team": None,
+                    "is_return": False,
+                    "expected_duration_or_return": "Unknown",
+                },
+            ),
+            (
+                "Absence",
+                PlayerAbsenceInfo,
+                {
+                    "reason": "Injury",
+                    "team": "Team C",
+                    "is_return": True,
+                    "expected_duration_or_return": "Tonight",
+                },
+            ),
             (
                 "Transfert",
                 PlayerTransferInfo,
-                {"from_team": None, "to_team": None, "transfer_time": "Unknown"},
+                {"from_team": None, "to_team": None, "transfer_time": None},
             ),
         ]
         self.players = [
             {
                 "player_name": f"  Player {index}  ",
-                "rumor": index == 0,
+                "confirmed": index != 0,
                 "info_type": kind,
                 **fields,
             }
@@ -69,6 +92,9 @@ class TestPlayerNews(unittest.TestCase):
         ):
             self.assertIsInstance(player, variant)
             self.assertEqual(player.player_name, f"Player {index}")
+            self.assertEqual(player.confirmed, index != 0)
+            for field, value in self.updates[index][2].items():
+                self.assertEqual(getattr(player, field), value)
         self.assertEqual(
             ArticlePlayerNews.model_validate_json(
                 result.model_dump_json(), strict=True
@@ -77,29 +103,43 @@ class TestPlayerNews(unittest.TestCase):
         )
 
     def test_variants_reject_other_team_fields_and_missing_required_fields(self):
-        for payload, (_, _, fields) in zip(self.players, self.updates):
+        for payload in self.players:
             invalid_field = "team" if payload["info_type"] == "Transfert" else "to_team"
             with self.subTest(kind=payload["info_type"], extra=invalid_field):
                 with self.assertRaises(ValidationError):
                     ArticlePlayerNews.model_validate(
                         {"players": [{**payload, invalid_field: "Other Team"}]}
                     )
-            for field in ("player_name", "info_type", *fields):
+            for field in payload:
                 with self.subTest(kind=payload["info_type"], missing=field):
                     incomplete = {
                         key: value for key, value in payload.items() if key != field
                     }
                     with self.assertRaises(ValidationError):
                         ArticlePlayerNews.model_validate({"players": [incomplete]})
-            timing_field = next(
-                key for key in fields if key not in ("team", "from_team", "to_team")
-            )
-            for field in ("player_name", timing_field):
+            nonempty_fields = ["player_name"]
+            if payload["info_type"] == "Absence":
+                nonempty_fields.append("expected_duration_or_return")
+            for field in nonempty_fields:
                 with self.subTest(kind=payload["info_type"], blank=field):
                     with self.assertRaises(ValidationError):
                         ArticlePlayerNews.model_validate(
                             {"players": [{**payload, field: "  "}]}
                         )
+
+    def test_absence_reason_rejects_non_absence_types(self):
+        for reason in ("Transfert", "Return", "Absence"):
+            with self.subTest(reason=reason), self.assertRaises(ValidationError):
+                ArticlePlayerNews.model_validate(
+                    {"players": [{**self.players[1], "reason": reason}]}
+                )
+
+    def test_absences_reject_legacy_discriminator_values(self):
+        for kind in ("Injury", "Suspension", "Return"):
+            with self.subTest(kind=kind), self.assertRaises(ValidationError):
+                ArticlePlayerNews.model_validate(
+                    {"players": [{**self.players[1], "info_type": kind}]}
+                )
 
     @patch("hmtracker.loader.playernews.importer.SwissHockeyNewsParser")
     def test_importer_persists_all_variants_in_existing_db_columns(
@@ -145,9 +185,17 @@ class TestPlayerNews(unittest.TestCase):
             )
             for index, record in enumerate(records):
                 self.assertEqual(record.player_name, f"Player {index}")
-                self.assertEqual(record.rumor, index == 0)
+                self.assertEqual(record.confirmed, index != 0)
                 self.assertEqual(
-                    record.info_type, PlayerInfoType(self.updates[index][0])
+                    record.info_type,
+                    [
+                        PlayerInfoType.TRANSFERT,
+                        PlayerInfoType.INJURY,
+                        PlayerInfoType.SUSPENSION,
+                        PlayerInfoType.ABSENCE,
+                        PlayerInfoType.RETURN,
+                        PlayerInfoType.TRANSFERT,
+                    ][index],
                 )
                 self.assertEqual(
                     (record.source, record.news_date, record.title),

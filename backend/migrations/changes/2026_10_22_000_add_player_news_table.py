@@ -24,7 +24,7 @@ class AddPlayerNewsTableMigration(Migration):
                 news_date DATE NOT NULL,
                 player_name VARCHAR NOT NULL,
                 title VARCHAR NOT NULL,
-                rumor BOOLEAN NOT NULL DEFAULT FALSE,
+                confirmed BOOLEAN NOT NULL DEFAULT FALSE,
                 info_type VARCHAR(10) NOT NULL,
                 current_team VARCHAR NULL,
                 new_team VARCHAR NULL,

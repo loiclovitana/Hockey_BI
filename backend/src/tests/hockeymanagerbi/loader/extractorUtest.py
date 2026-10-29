@@ -65,7 +65,7 @@ class TestPlayerNewsExtractor(unittest.TestCase):
                     "players": [
                         {
                             "player_name": "  Test Player  ",
-                            "rumor": False,
+                            "confirmed": True,
                             "info_type": "Transfert",
                             "from_team": None,
                             "to_team": "New Team",
@@ -87,7 +87,7 @@ class TestPlayerNewsExtractor(unittest.TestCase):
         self.assertEqual(player.to_team, "New Team")
         self.assertEqual(player.transfer_time, "Next season")
         self.assertIsNone(player.from_team)
-        self.assertFalse(player.rumor)
+        self.assertTrue(player.confirmed)
         prompts = [
             part.content
             for message in self.requests[0]

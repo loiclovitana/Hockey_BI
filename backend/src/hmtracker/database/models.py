@@ -157,7 +157,7 @@ class PlayerNews(HMDatabaseObject):
     news_date: Mapped[date] = mapped_column(Date, nullable=False)
     player_name: Mapped[str] = mapped_column(String, nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=False)
-    rumor: Mapped[bool] = mapped_column(
+    confirmed: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default=false()
     )
     info_type: Mapped[PlayerInfoType] = mapped_column(

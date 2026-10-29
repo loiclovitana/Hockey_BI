@@ -22,7 +22,7 @@ class _PlayerNewsBase(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
     player_name: str = Field(min_length=1, description="Full name of the player")
-    rumor: bool = Field(description="Whether the update is unconfirmed or speculative")
+    confirmed: bool = Field(description="Whether the abscence, return or transfert is certain and not speculative")
 
 
 class PlayerTransferInfo(_PlayerNewsBase):
@@ -33,34 +33,23 @@ class PlayerTransferInfo(_PlayerNewsBase):
     to_team: str | None = Field(
         description="Team the player is joining, or null if unknown"
     )
-    transfer_time: str = Field(
-        min_length=1,
-        description="Reported transfer timing; 'Unknown' if unstated",
+    transfer_time: str | None = Field(
+        description="Reported transfer timing or null if unstated",
     )
 
 
 class PlayerAbsenceInfo(_PlayerNewsBase):
-    info_type: Literal[
-        PlayerInfoType.INJURY, PlayerInfoType.SUSPENSION, PlayerInfoType.ABSENCE
-    ]
+    info_type: Literal[PlayerInfoType.ABSENCE]
+    reason: Literal[PlayerInfoType.INJURY, PlayerInfoType.SUSPENSION] | None = Field(description="Reason for abscence or null if not known")
     team: str | None = Field(description="Player's team, or null if unknown")
-    expected_return: str = Field(
-        min_length=1,
-        description="Reported absence duration or expected return timing; 'Unknown' if unstated",
-    )
-
-
-class PlayerReturnInfo(_PlayerNewsBase):
-    info_type: Literal[PlayerInfoType.RETURN]
-    team: str | None = Field(description="Player's team, or null if unknown")
-    return_time: str = Field(
-        min_length=1,
-        description="Reported return timing; 'Unknown' if unstated",
+    is_return: bool = Field(description="Whether the news indicates the end of an abscence")
+    expected_duration_or_return: str | None = Field(
+        description="Reported absence duration or expected return timing; null if unstated",
     )
 
 
 type PlayerNewsInfo = Annotated[
-    PlayerTransferInfo | PlayerAbsenceInfo | PlayerReturnInfo,
+    PlayerTransferInfo | PlayerAbsenceInfo,
     Field(discriminator="info_type"),
 ]
 

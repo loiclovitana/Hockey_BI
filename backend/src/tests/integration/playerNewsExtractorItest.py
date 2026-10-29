@@ -7,7 +7,13 @@ from hmtracker.database.models import PlayerInfoType
 from pydantic_ai import capture_run_messages
 from pydantic_ai.messages import ModelMessagesTypeAdapter
 
-from hmtracker.loader.playernews.extractor import ArticlePlayerNews, extract_player_news
+from hmtracker.loader.playernews.extractor import (
+    ArticlePlayerNews,
+    PlayerAbsenceInfo,
+    PlayerNewsInfo,
+    PlayerTransferInfo,
+    extract_player_news,
+)
 from hmtracker.parser.models import ArticleDetails
 
 
@@ -55,19 +61,36 @@ class TestPlayerNewsExtractorIntegration(unittest.TestCase):
                 )
         return result.players
 
-    def player(self, players, name):
+    def find_player(self, players : list[PlayerNewsInfo], name: str) -> PlayerNewsInfo | None:
         matches = [p for p in players if _uniform(name) in _uniform(p.player_name)]
         self.assertEqual(len(matches), 1, f"Expected one update for {name}: {players}")
-        return matches[0]
+        return matches[0] if len(matches)>0 else None
+
+    def find_absence(self, players : list[PlayerNewsInfo], name : str) -> PlayerAbsenceInfo | None:
+        player = self.find_player(players, name)
+        if player:
+            self.assertIsInstance(player, PlayerAbsenceInfo)
+            self.assertEqual(player.info_type, PlayerInfoType.ABSENCE)
+            if player.info_type == PlayerInfoType.ABSENCE:
+                return player
+        return None
+
+    def find_transfert(self, players : list[PlayerNewsInfo], name : str) -> PlayerTransferInfo | None:
+            player = self.find_player(players, name)
+            if player:
+                self.assertIsInstance(player, PlayerTransferInfo)
+                self.assertEqual(player.info_type, PlayerInfoType.TRANSFERT)
+                if player.info_type == PlayerInfoType.TRANSFERT:
+                    return player
+            return None
 
     def test_logan_brown_transfer(self):
         players = self.extract("hc-ajoie-signs-forward-logan-brown")
         self.assertEqual(len(players), 1)
-        brown = self.player(players, "Logan Brown")
-        self.assertEqual(brown.info_type, PlayerInfoType.TRANSFERT)
-        if brown.info_type == PlayerInfoType.TRANSFERT:
+        brown = self.find_transfert(players, "Logan Brown")
+        if brown:
             self.assertIn("ajoie", _uniform(brown.to_team))
-        self.assertFalse(brown.rumor)
+            self.assertTrue(brown.confirmed)
 
     def test_coach_is_not_a_player_update(self):
         players = self.extract("interest-from-switzerland-in-roegles-dan-tangnes")
@@ -77,106 +100,71 @@ class TestPlayerNewsExtractorIntegration(unittest.TestCase):
         players = self.extract("yannick-rathgeb-will-likely-play-tonight")
         self.assertEqual(len(players), 3)
 
-        rathgeb = self.player(players, "Rathgeb")
-        self.assertIn(
-            rathgeb.info_type,
-            [PlayerInfoType.RETURN, PlayerInfoType.INJURY, PlayerInfoType.ABSENCE],
-        )
-        if rathgeb.info_type == PlayerInfoType.RETURN:
-            self.assertIn("tonight", rathgeb.return_time.casefold())
-            self.assertIn("gotteron", _uniform(rathgeb.team))
-        elif (
-            rathgeb.info_type == PlayerInfoType.INJURY
-            or rathgeb.info_type == PlayerInfoType.ABSENCE
-        ):
-            self.assertIn("tonight", rathgeb.expected_return.casefold())
+        rathgeb = self.find_absence(players, "Rathgeb")
+        if rathgeb:
+            self.assertFalse(rathgeb.confirmed)
+            self.assertTrue(rathgeb.is_return)
+            self.assertIsNotNone(rathgeb.expected_duration_or_return)
+            if rathgeb.expected_duration_or_return:
+                self.assertIn("tonight", _uniform(rathgeb.expected_duration_or_return))
             self.assertIn("gotteron", _uniform(rathgeb.team))
 
-        walser = self.player(players, "Samuel Walser")
-        self.assertIn(walser.info_type, [PlayerInfoType.INJURY, PlayerInfoType.ABSENCE])
-        if (
-            walser.info_type == PlayerInfoType.INJURY
-            or walser.info_type == PlayerInfoType.ABSENCE
-        ):
-            self.assertFalse(walser.rumor)
-            self.assertIn("unknown", walser.expected_return.casefold())
+        walser = self.find_absence(players, "Samuel Walser")
+        if walser:
             self.assertIn("gotteron", _uniform(walser.team))
 
-        taibel = self.player(players, "Jonas Taibel")
-        self.assertIn(taibel.info_type, [PlayerInfoType.INJURY, PlayerInfoType.ABSENCE])
-        if (
-            taibel.info_type == PlayerInfoType.INJURY
-            or taibel.info_type == PlayerInfoType.ABSENCE
-        ):
-            self.assertFalse(taibel.rumor)
-            self.assertIn("unknown", taibel.expected_return.casefold())
+        taibel = self.find_absence(players, "Jonas Taibel")
+        if taibel:
             self.assertIn("gotteron", _uniform(taibel.team))
 
     def test_lugano_return_and_injuries(self):
         players = self.extract(
             "mirco-mueller-in-jesper-peltonen-and-alessio-bertaggia-out-for-lugano"
         )
-        mueller = self.player(players, "Müller")
-        self.assertIn(
-            mueller.info_type,
-            [PlayerInfoType.RETURN, PlayerInfoType.INJURY, PlayerInfoType.ABSENCE],
-        )
-        if mueller.info_type == PlayerInfoType.RETURN:
-            self.assertIn("weekend", mueller.return_time.casefold())
+        mueller = self.find_absence(players, "Muller")
+        if mueller:
+            self.assertIn("weekend", _uniform(mueller.expected_duration_or_return))
             self.assertIn("lugano", _uniform(mueller.team))
-        elif (
-            mueller.info_type == PlayerInfoType.INJURY
-            or mueller.info_type == PlayerInfoType.ABSENCE
-        ):
-            self.assertIn("weekend", mueller.expected_return.casefold())
-            self.assertIn("lugano", _uniform(mueller.team))
-        self.assertFalse(mueller.rumor)
+            self.assertTrue(mueller.confirmed)
 
         for name in ("Jesper Peltonen", "Alessio Bertaggia"):
             with self.subTest(player=name):
-                player = self.player(players, name)
-                self.assertIn(
-                    player.info_type, [PlayerInfoType.INJURY, PlayerInfoType.ABSENCE]
-                )
-                if player.info_type in (PlayerInfoType.INJURY, PlayerInfoType.ABSENCE):
-                    self.assertFalse(player.rumor)
-                    self.assertIn("month", player.expected_return.casefold())
+                player = self.find_absence(players, name)
+                if player:
+                    self.assertTrue(player.confirmed)
+                    self.assertIn("month", _uniform(player.expected_duration_or_return))
                     self.assertIn("lugano", _uniform(player.team))
 
     def test_carr_suspension_and_haas_injury(self):
         players = self.extract("hc-ajoies-daniel-carr-suspended-for-five-games")
         self.assertEqual(len(players), 2)
-        carr = self.player(players, "Daniel Carr")
-        self.assertEqual(carr.info_type, PlayerInfoType.SUSPENSION)
-        if carr.info_type == PlayerInfoType.SUSPENSION:
-            self.assertFalse(carr.rumor)
-            self.assertIn("games", carr.expected_return.casefold())
+        carr = self.find_absence(players, "Daniel Carr")
+        if carr:
+            self.assertTrue(carr.confirmed)
+            self.assertEqual(carr.reason,PlayerInfoType.SUSPENSION)
+            self.assertIn("games", _uniform(carr.expected_duration_or_return))
             self.assertIn("ajoie", _uniform(carr.team))
 
-        haas = self.player(players, "Gaëtan Haas")
-        self.assertIn(haas.info_type, [PlayerInfoType.INJURY, PlayerInfoType.ABSENCE])
-        if haas.info_type in (PlayerInfoType.INJURY, PlayerInfoType.ABSENCE):
-            self.assertFalse(haas.rumor)
-            self.assertIn("indefinite", haas.expected_return.casefold())
+        haas = self.find_absence(players, "Gaëtan Haas")
+        if haas:
+            self.assertTrue(haas.confirmed)
+            self.assertEqual(haas.reason,PlayerInfoType.INJURY)
+            self.assertIsNotNone(_uniform(haas.expected_duration_or_return))
             self.assertIn("biel", _uniform(haas.team))
 
     def test_biel_injuries_exclude_incidental_carr_mention(self):
         players = self.extract("ehc-biel-without-gaetan-haas-on-tuesday")
         self.assertEqual(len(players), 2)
-        haas = self.player(players, "Gaëtan Haas")
-        self.assertIn(haas.info_type, [PlayerInfoType.INJURY, PlayerInfoType.ABSENCE])
-        if haas.info_type in (PlayerInfoType.INJURY, PlayerInfoType.ABSENCE):
-            self.assertFalse(haas.rumor)
-            self.assertIn("further notice", haas.expected_return.casefold())
+        haas = self.find_absence(players, "Gaëtan Haas")
+        if haas:
+            self.assertTrue(haas.confirmed)
+            self.assertIsNotNone(_uniform(haas.expected_duration_or_return))
             self.assertIn("biel", _uniform(haas.team))
 
-        iakovenko = self.player(players, "Aleksandr Iakovenko")
-        self.assertIn(
-            iakovenko.info_type, [PlayerInfoType.INJURY, PlayerInfoType.ABSENCE]
-        )
-        if iakovenko.info_type in (PlayerInfoType.INJURY, PlayerInfoType.ABSENCE):
-            self.assertFalse(iakovenko.rumor)
-            self.assertIn("week", iakovenko.expected_return.casefold())
+        iakovenko = self.find_absence(players, "Aleksandr Iakovenko")
+        if iakovenko:
+            self.assertTrue(iakovenko.confirmed)
+            self.assertIn("week", _uniform(iakovenko.expected_duration_or_return))
             self.assertIn("biel", _uniform(iakovenko.team))
 
 

@@ -11,6 +11,7 @@ from pydantic_ai.exceptions import ModelHTTPError, UnexpectedModelBehavior
 from hmtracker.database.models import PlayerInfoType
 from hmtracker.loader.playernews.extractor import (
     ArticlePlayerNews,
+    PlayerAbsenceInfo,
     PlayerTransferInfo,
     extract_player_news,
 )
@@ -176,23 +177,45 @@ class TestPydanticPlayerNewsExtractor(unittest.TestCase):
             "players": [
                 {
                     "player_name": "  Test Player  ",
-                    "rumor": False,
+                    "confirmed": True,
                     "info_type": "Transfert",
                     "from_team": None,
                     "to_team": "New Team",
-                    "transfer_time": "Unknown",
-                }
+                    "transfer_time": None,
+                },
+                {
+                    "player_name": "Returning Player",
+                    "confirmed": False,
+                    "info_type": "Absence",
+                    "reason": "Injury",
+                    "team": "Team A",
+                    "is_return": True,
+                    "expected_duration_or_return": "Tonight",
+                },
             ]
         }
         for provider in ("openai", "ollama"):
             with self.subTest(provider=provider):
                 if provider == "ollama":
                     self.use_ollama()
-                player = extract_player_news(self.article).players[0]
+                players = extract_player_news(self.article).players
+                self.assertEqual(len(players), 2)
+                player = players[0]
                 self.assertIsInstance(player, PlayerTransferInfo)
                 self.assertEqual(player.player_name, "Test Player")
                 self.assertEqual(player.info_type, PlayerInfoType.TRANSFERT)
                 self.assertEqual(player.to_team, "New Team")
+                self.assertTrue(player.confirmed)
+                self.assertIsNone(player.transfer_time)
+                returning_player = players[1]
+                self.assertIsInstance(returning_player, PlayerAbsenceInfo)
+                self.assertEqual(returning_player.info_type, PlayerInfoType.ABSENCE)
+                self.assertEqual(returning_player.reason, PlayerInfoType.INJURY)
+                self.assertFalse(returning_player.confirmed)
+                self.assertTrue(returning_player.is_return)
+                self.assertEqual(
+                    returning_player.expected_duration_or_return, "Tonight"
+                )
 
     def test_invalid_player_update_is_retried(self):
         self.use_ollama()
@@ -201,11 +224,13 @@ class TestPydanticPlayerNewsExtractor(unittest.TestCase):
                 "players": [
                     {
                         "player_name": "Test Player",
-                        "rumor": False,
-                        "info_type": "Injury",
+                        "confirmed": True,
+                        "info_type": "Absence",
+                        "reason": "Injury",
                         "team": None,
+                        "is_return": False,
                         "to_team": "Invalid destination",
-                        "expected_return": "Unknown",
+                        "expected_duration_or_return": "Unknown",
                     }
                 ]
             },
