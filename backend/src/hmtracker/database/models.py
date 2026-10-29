@@ -4,6 +4,7 @@ from sqlalchemy import (
     CheckConstraint,
     Enum,
     ForeignKey,
+    ForeignKeyConstraint,
     Integer,
     String,
     DateTime,
@@ -45,10 +46,15 @@ class HockeyPlayer(HMDatabaseObject):
 
 class HockeyPlayerStats(HMDatabaseObject):
     __tablename__ = "HOCKEY_PLAYER_STATS"
-
-    player_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("HOCKEY_PLAYERS.id"), primary_key=True, nullable=False
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["player_id", "season_id"],
+            ["HOCKEY_PLAYERS.id", "HOCKEY_PLAYERS.season_id"],
+            name="hockey_player_stats_player",
+        ),
     )
+
+    player_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
     season_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("SEASONS.id"), primary_key=True, nullable=False
     )
@@ -109,17 +115,21 @@ class Manager(HMDatabaseObject):
 
 class Team(HMDatabaseObject):
     __tablename__ = "TEAM"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["player_id", "season_id"],
+            ["HOCKEY_PLAYERS.id", "HOCKEY_PLAYERS.season_id"],
+            name="team_player",
+        ),
+    )
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     team: Mapped[str] = mapped_column(String, unique=False, nullable=False)
     manager_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("MANAGER.id"), nullable=False
     )
-    player_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("HOCKEY_PLAYERS.id"), nullable=False
-    )
-    season_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("HOCKEY_PLAYERS.season_id"), nullable=False
-    )
+    player_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    season_id: Mapped[int] = mapped_column(Integer, nullable=False)
 
     from_datetime: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     to_datetime: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
@@ -146,6 +156,11 @@ class PlayerInfoType(StrEnum):
 class PlayerNews(HMDatabaseObject):
     __tablename__ = "PLAYER_NEWS"
     __table_args__ = (
+        ForeignKeyConstraint(
+            ["player_id", "season_id"],
+            ["HOCKEY_PLAYERS.id", "HOCKEY_PLAYERS.season_id"],
+            name="player_news_player",
+        ),
         CheckConstraint(
             "new_team IS NULL OR info_type = 'Transfert'",
             name="player_news_new_team_transfer_only",
@@ -153,6 +168,8 @@ class PlayerNews(HMDatabaseObject):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    season_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    player_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     source: Mapped[str] = mapped_column(String, nullable=False, index=True)
     news_date: Mapped[date] = mapped_column(Date, nullable=False)
     player_name: Mapped[str] = mapped_column(String, nullable=False)
@@ -174,3 +191,5 @@ class PlayerNews(HMDatabaseObject):
     current_team: Mapped[str | None] = mapped_column(String, nullable=True)
     new_team: Mapped[str | None] = mapped_column(String, nullable=True)
     availability_time: Mapped[str] = mapped_column(String, nullable=False)
+
+    player: Mapped[HockeyPlayer | None] = relationship("HockeyPlayer")
