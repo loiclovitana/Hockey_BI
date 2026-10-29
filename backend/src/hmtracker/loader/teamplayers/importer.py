@@ -25,11 +25,12 @@ def import_team(
     if at_datetime is None:
         at_datetime = datetime.now()
 
-    repository_session.session.begin_nested()
-    current_season: models.Season = repository_session.find_season(at_datetime)
+    current_season = repository_session.find_season(at_datetime)
     if current_season is None:
         logging.warning("No season are currently opened")
+        return
 
+    repository_session.session.begin_nested()
     season_team = repository_session.get_team(manager, current_season, team_code)
 
     actual_team = [p for p in season_team if p.to_datetime is None]

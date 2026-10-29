@@ -5,7 +5,6 @@ from hmtracker.database.models import PlayerNews
 from hmtracker.database.repository import RepositorySession
 from hmtracker.loader.playernews.extractor import (
     ArticlePlayerNews,
-    PlayerAbsenceInfo,
     PlayerNewsInfo,
     PlayerTransferInfo,
     extract_player_news,
@@ -18,13 +17,18 @@ from hmtracker.parser.shnparser import SwissHockeyNewsParser
 def _to_player_news(
     player: PlayerNewsInfo, article: ArticleDetails, source: str
 ) -> PlayerNews:
+    info_type: PlayerInfoType
     if isinstance(player, PlayerTransferInfo):
         info_type = player.info_type
         current_team = player.from_team
         new_team = player.to_team
-        availability_time = player.transfer_time or "Unknown"
+        availability_time = player.transfer_time
     else:
-        info_type = PlayerInfoType.RETURN if player.is_return else player.reason or player.info_type
+        info_type = (
+            PlayerInfoType.RETURN
+            if player.is_return
+            else player.reason or player.info_type
+        )
         current_team = player.team
         new_team = None
         availability_time = player.expected_duration_or_return

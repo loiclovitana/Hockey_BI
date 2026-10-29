@@ -2,6 +2,7 @@ import logging
 from threading import Thread
 from os import getenv
 from datetime import datetime
+from functools import wraps
 import traceback
 
 from hmtracker.common.exceptions import NoDatabaseError
@@ -79,7 +80,8 @@ def registerTask(task: models.Task):
 
 def _Operation(name: str):
     def decorator(method):
-        def wrapper():
+        @wraps(method)
+        def wrapper(*args, **kwargs):
             global _current_operation
             check_operation()
 
@@ -87,7 +89,7 @@ def _Operation(name: str):
                 start_time = datetime.now()
 
                 try:
-                    method()
+                    method(*args, **kwargs)
 
                     end_time = datetime.now()
                     registerTask(
@@ -136,6 +138,14 @@ def start_loading_playernews():
         raise NoDatabaseError()
 
     loader.import_playernews_from_shn(database_url)
+
+
+@_Operation("Match player news")
+def start_matching_playernews(since_d: int = 30, replace: bool = False):
+    database_url = getenv(HM_DATABASE_URL_ENV_NAME)
+    if not database_url:
+        raise NoDatabaseError()
+    loader.match_playernews_to_players(database_url, since_d, replace)
 
 
 @_Operation("Align Team")

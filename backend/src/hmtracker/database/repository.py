@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column
+from sqlalchemy import Column, func
 from sqlalchemy.orm import Session
 
 from hmtracker.database import models, database
@@ -58,6 +58,43 @@ class RepositorySession:
         }
         return [url for url in urls if url not in existing_urls]
 
+    def get_player_news_since(
+        self, since: datetime.date, replace: bool = False
+    ) -> list[models.PlayerNews]:
+        query = self.session.query(models.PlayerNews).filter(
+            models.PlayerNews.news_date >= since,
+            models.PlayerNews.news_date <= datetime.date.today(),
+        )
+        if not replace:
+            query = query.filter(models.PlayerNews.player_id.is_(None))
+        return query.order_by(models.PlayerNews.id).all()
+
+    def get_latest_player_clubs(self, season_id: int) -> dict[int, str]:
+        stats = models.HockeyPlayerStats
+        latest = (
+            self.session.query(
+                stats.player_id,
+                func.max(stats.validity_date).label("validity_date"),
+            )
+            .filter(
+                stats.season_id == season_id,
+                stats.validity_date <= datetime.datetime.now(),
+            )
+            .group_by(stats.player_id)
+            .subquery()
+        )
+        rows = (
+            self.session.query(stats.player_id, stats.club)
+            .join(
+                latest,
+                (stats.player_id == latest.c.player_id)
+                & (stats.validity_date == latest.c.validity_date),
+            )
+            .filter(stats.season_id == season_id)
+            .all()
+        )
+        return {player_id: club for player_id, club in rows}
+
     def get_players(
         self, player_ids: list | None = None, season_id: int | Column[int] | None = None
     ) -> list[models.HockeyPlayer]:
@@ -99,7 +136,7 @@ class RepositorySession:
 
     def find_season(
         self, validity_date: datetime.datetime, arcade: bool = False
-    ) -> models.Season:
+    ) -> models.Season | None:
         return (
             self.session.query(models.Season)
             .filter(
@@ -107,7 +144,7 @@ class RepositorySession:
                 models.Season.end >= validity_date,
                 models.Season.arcade == arcade,
             )
-            .one()
+            .one_or_none()
         )
 
     def get_team(

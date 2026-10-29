@@ -25,6 +25,7 @@ from hmtracker.loader.teamplayers.source.website import team_players_ajax_loader
 from hmtracker.loader.matches.importer import import_matches
 from hmtracker.loader.matches.mapper import parse_match_csv
 from hmtracker.loader.playernews.importer import import_player_news
+from hmtracker.loader.playernews.matcher import match_player_news
 
 
 def __connect_session(
@@ -145,6 +146,25 @@ def import_playernews_from_shn(
             database_session.session.close()
 
 
+def match_playernews_to_players(
+    db_access: Session | str | RepositorySession,
+    since_d: int = 30,
+    replace: bool = False,
+) -> int:
+    """Run the independent current-season player news matching pass."""
+    database_session = __connect_session(db_access)
+    try:
+        count = match_player_news(database_session, since_d, replace)
+        database_session.session.commit()
+        return count
+    except Exception:
+        database_session.session.rollback()
+        raise
+    finally:
+        if not isinstance(db_access, RepositorySession):
+            database_session.session.close()
+
+
 if __name__ == "__main__":
     argument_parser = argparse.ArgumentParser(
         description="Load data from hockey manager using ajax queries into a database"
@@ -196,6 +216,22 @@ if __name__ == "__main__":
         action="store_true",
         help="Import player news from Swiss Hockey News using OpenAI",
     )
+    argument_parser.add_argument(
+        "--match-player-news",
+        action="store_true",
+        help="Link recent news to current-season players",
+    )
+    argument_parser.add_argument(
+        "--since-d",
+        type=int,
+        default=30,
+        help="Number of days of news to match (default: 30)",
+    )
+    argument_parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="Also re-evaluate news already linked to a player",
+    )
 
     def check_exists(argument, name):
         if argument is None:
@@ -205,6 +241,21 @@ if __name__ == "__main__":
 
     arguments = argument_parser.parse_args()
     check_exists(arguments.database_url, "database-url")
+
+    if arguments.match_player_news:
+        if (
+            arguments.player_news
+            or arguments.matches
+            or arguments.teams
+            or arguments.source_csv
+        ):
+            argument_parser.error("--match-player-news cannot be combined with imports")
+        if arguments.since_d < 0:
+            argument_parser.error("--since-d must be non-negative")
+        match_playernews_to_players(
+            arguments.database_url, arguments.since_d, arguments.replace
+        )
+        sys.exit(0)
 
     if arguments.player_news:
         if arguments.matches or arguments.teams or arguments.source_csv:

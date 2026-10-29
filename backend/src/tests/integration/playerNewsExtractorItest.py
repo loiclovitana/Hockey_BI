@@ -61,12 +61,16 @@ class TestPlayerNewsExtractorIntegration(unittest.TestCase):
                 )
         return result.players
 
-    def find_player(self, players : list[PlayerNewsInfo], name: str) -> PlayerNewsInfo | None:
+    def find_player(
+        self, players: list[PlayerNewsInfo], name: str
+    ) -> PlayerNewsInfo | None:
         matches = [p for p in players if _uniform(name) in _uniform(p.player_name)]
         self.assertEqual(len(matches), 1, f"Expected one update for {name}: {players}")
-        return matches[0] if len(matches)>0 else None
+        return matches[0] if len(matches) > 0 else None
 
-    def find_absence(self, players : list[PlayerNewsInfo], name : str) -> PlayerAbsenceInfo | None:
+    def find_absence(
+        self, players: list[PlayerNewsInfo], name: str
+    ) -> PlayerAbsenceInfo | None:
         player = self.find_player(players, name)
         if player:
             self.assertIsInstance(player, PlayerAbsenceInfo)
@@ -75,14 +79,16 @@ class TestPlayerNewsExtractorIntegration(unittest.TestCase):
                 return player
         return None
 
-    def find_transfert(self, players : list[PlayerNewsInfo], name : str) -> PlayerTransferInfo | None:
-            player = self.find_player(players, name)
-            if player:
-                self.assertIsInstance(player, PlayerTransferInfo)
-                self.assertEqual(player.info_type, PlayerInfoType.TRANSFERT)
-                if player.info_type == PlayerInfoType.TRANSFERT:
-                    return player
-            return None
+    def find_transfert(
+        self, players: list[PlayerNewsInfo], name: str
+    ) -> PlayerTransferInfo | None:
+        player = self.find_player(players, name)
+        if player:
+            self.assertIsInstance(player, PlayerTransferInfo)
+            self.assertEqual(player.info_type, PlayerInfoType.TRANSFERT)
+            if player.info_type == PlayerInfoType.TRANSFERT:
+                return player
+        return None
 
     def test_logan_brown_transfer(self):
         players = self.extract("hc-ajoie-signs-forward-logan-brown")
@@ -141,14 +147,14 @@ class TestPlayerNewsExtractorIntegration(unittest.TestCase):
         carr = self.find_absence(players, "Daniel Carr")
         if carr:
             self.assertTrue(carr.confirmed)
-            self.assertEqual(carr.reason,PlayerInfoType.SUSPENSION)
+            self.assertEqual(carr.reason, PlayerInfoType.SUSPENSION)
             self.assertIn("games", _uniform(carr.expected_duration_or_return))
             self.assertIn("ajoie", _uniform(carr.team))
 
         haas = self.find_absence(players, "Gaëtan Haas")
         if haas:
             self.assertTrue(haas.confirmed)
-            self.assertEqual(haas.reason,PlayerInfoType.INJURY)
+            self.assertEqual(haas.reason, PlayerInfoType.INJURY)
             self.assertIsNotNone(_uniform(haas.expected_duration_or_return))
             self.assertIn("biel", _uniform(haas.team))
 

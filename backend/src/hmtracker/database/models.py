@@ -190,6 +190,33 @@ class PlayerNews(HMDatabaseObject):
     )
     current_team: Mapped[str | None] = mapped_column(String, nullable=True)
     new_team: Mapped[str | None] = mapped_column(String, nullable=True)
-    availability_time: Mapped[str] = mapped_column(String, nullable=False)
+    availability_time: Mapped[str | None] = mapped_column(String, nullable=True)
 
     player: Mapped[HockeyPlayer | None] = relationship("HockeyPlayer")
+
+
+class NewsTeamMatch(HMDatabaseObject):
+    """Reusable normalized team aliases learned by the news matcher."""
+
+    __tablename__ = "NEWS_TEAM_MATCH"
+
+    team_name: Mapped[str] = mapped_column(String, primary_key=True)
+    team_code: Mapped[str] = mapped_column(String, nullable=False)
+
+
+class NewsPlayerMatch(HMDatabaseObject):
+    """Successful LLM resolutions, scoped to a resolved team code and season."""
+
+    __tablename__ = "NEWS_PLAYER_MATCH"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["player_id", "season_id"],
+            ["HOCKEY_PLAYERS.id", "HOCKEY_PLAYERS.season_id"],
+            name="news_player_match_player",
+        ),
+    )
+
+    player_name: Mapped[str] = mapped_column(String, primary_key=True)
+    team_code: Mapped[str] = mapped_column(String, primary_key=True)
+    season_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    player_id: Mapped[int] = mapped_column(Integer, nullable=False)

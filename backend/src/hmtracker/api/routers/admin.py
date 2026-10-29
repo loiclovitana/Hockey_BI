@@ -44,6 +44,13 @@ def start_loading_playernews() -> None:
     admin.start_loading_playernews()
 
 
+@router.post("/playernews/match/start")
+def start_matching_playernews(
+    since_d: int = Query(30, ge=0), replace: bool = False
+) -> None:
+    admin.start_matching_playernews(since_d, replace)
+
+
 class AdminUser(BaseModel):
     username: str
 
