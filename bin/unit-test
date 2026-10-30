@@ -18,7 +18,7 @@ case $opt in
 esac
 done
 
-uv run python -m unittest discover -s $test_dir/hockeymanagerbi/ -p "*Utest.py"
+uv run python -m unittest discover -s $test_dir/hockeymanagerbi/ -p "*Utest.py" || exit $?
 
 # Echo "end" if interactive mode is enabled
 if [ "$interactive" = true ]; then

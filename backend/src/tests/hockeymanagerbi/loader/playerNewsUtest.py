@@ -56,7 +56,7 @@ class TestPlayerNews(unittest.TestCase):
                     "reason": None,
                     "team": None,
                     "is_return": False,
-                    "expected_duration_or_return": "Unknown",
+                    "expected_duration_or_return": None,
                 },
             ),
             (
@@ -178,9 +178,9 @@ class TestPlayerNews(unittest.TestCase):
                     ("Old Team", "New Team", "Next season"),
                     ("Team A", None, "Two weeks"),
                     ("Team B", None, "Three games"),
-                    (None, None, "Unknown"),
+                    (None, None, None),
                     ("Team C", None, "Tonight"),
-                    (None, None, "Unknown"),
+                    (None, None, None),
                 ],
             )
             for index, record in enumerate(records):

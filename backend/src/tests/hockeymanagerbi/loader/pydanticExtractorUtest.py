@@ -230,7 +230,7 @@ class TestPydanticPlayerNewsExtractor(unittest.TestCase):
                         "team": None,
                         "is_return": False,
                         "to_team": "Invalid destination",
-                        "expected_duration_or_return": "Unknown",
+                        "expected_duration_or_return": None,
                     }
                 ]
             },

@@ -95,7 +95,7 @@ class TestPlayerNewsMatcher(unittest.TestCase):
             current_team=team,
             confirmed=True,
             info_type=PlayerInfoType.INJURY,
-            availability_time="Unknown",
+            availability_time=None,
             **kwargs,
         )
         self.session.add(news)

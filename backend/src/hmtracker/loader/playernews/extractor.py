@@ -42,6 +42,7 @@ class PlayerAbsenceInfo(_PlayerNewsBase):
         description="Whether the news indicates the end of an abscence"
     )
     expected_duration_or_return: str | None = Field(
+        min_length=1,
         description="Reported absence duration or expected return timing; null if unstated",
     )
 
@@ -70,13 +71,10 @@ def _create_agent() -> Agent[None, ArticlePlayerNews]:
             "Return one entry per distinct player update, excluding incidental "
             "mentions and historical background. Return an empty players list "
             "if no relevant updates exist. Use only facts stated in the article; "
-            "do not invent names, teams or timing. Mark speculation as rumor. "
-            "Use null for unknown teams and 'Unknown' for unstated timing. "
-            "For transfers, use from_team, to_team and transfer_time. For injuries, "
-            "suspensions and other absences, use team and expected_return (duration "
-            "or expected return timing). For returns, use team and return_time. "
-            "Preserve timing as reported; do not calculate dates. Do not extract "
-            "article metadata."
+            "do not invent names, teams or timing. Set confirmed to false if the "
+            "does not state certainty in the abscence or transfert. Use null for unknown teams and unstated timing. "
+            "Preserve timing as reported; do not calculate dates. (exemple of valid time : 'tonight' or 'for a few weeks')"
+            "Do not extract article metadata. "
         ),
     )
 
