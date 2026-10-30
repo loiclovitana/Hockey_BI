@@ -134,10 +134,12 @@ def import_matches_from_csv(
 def import_playernews_from_shn(
     db_access: Session | str | RepositorySession,
 ) -> int:
-    """Fetch new SHN articles, extract player updates, and persist them."""
+    """Import SHN player updates, then match recent news to current players."""
     database_session = __connect_session(db_access)
     try:
-        return import_player_news(database_session)
+        count = import_player_news(database_session)
+        match_playernews_to_players(database_session)
+        return count
     except Exception:
         database_session.session.rollback()
         raise

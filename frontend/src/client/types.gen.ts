@@ -423,6 +423,20 @@ export type StartTeamAlignementAdminAutoteamStartPostResponses = {
     200: unknown;
 };
 
+export type StartLoadingPlayernewsAdminPlayernewsImportAndMatchStartPostData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/playernews/import-and-match/start';
+};
+
+export type StartLoadingPlayernewsAdminPlayernewsImportAndMatchStartPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type StartLoadingPlayernewsAdminPlayernewsStartPostData = {
     body?: never;
     path?: never;
@@ -431,6 +445,38 @@ export type StartLoadingPlayernewsAdminPlayernewsStartPostData = {
 };
 
 export type StartLoadingPlayernewsAdminPlayernewsStartPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type StartMatchingPlayernewsAdminPlayernewsMatchStartPostData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Since D
+         */
+        since_d?: number;
+        /**
+         * Replace
+         */
+        replace?: boolean;
+    };
+    url: '/admin/playernews/match/start';
+};
+
+export type StartMatchingPlayernewsAdminPlayernewsMatchStartPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type StartMatchingPlayernewsAdminPlayernewsMatchStartPostError = StartMatchingPlayernewsAdminPlayernewsMatchStartPostErrors[keyof StartMatchingPlayernewsAdminPlayernewsMatchStartPostErrors];
+
+export type StartMatchingPlayernewsAdminPlayernewsMatchStartPostResponses = {
     /**
      * Successful Response
      */

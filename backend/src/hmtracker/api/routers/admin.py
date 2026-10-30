@@ -40,7 +40,12 @@ def start_team_alignement() -> None:
 
 
 @router.post("/playernews/start")
+@router.post(
+    "/playernews/import-and-match/start",
+    summary="Import SHN player news and match players",
+)
 def start_loading_playernews() -> None:
+    """Start a background import, then match recent news to current-season players."""
     admin.start_loading_playernews()
 
 

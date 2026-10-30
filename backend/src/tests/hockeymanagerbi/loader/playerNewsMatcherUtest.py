@@ -1,7 +1,7 @@
 import json
 import unittest
 from datetime import date, datetime, timedelta
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import Session
@@ -17,7 +17,11 @@ from hmtracker.database.models import (
     Season,
 )
 from hmtracker.database.repository import RepositorySession
-from hmtracker.loader.main import match_playernews_to_players
+from hmtracker.loader.main import (
+    import_playernews_from_shn,
+    match_playernews_to_players,
+)
+from hmtracker.loader.playernews.extractor import ArticlePlayerNews
 from hmtracker.loader.playernews.matcher import (
     PlayerSelection,
     TeamSelection,
@@ -25,6 +29,7 @@ from hmtracker.loader.playernews.matcher import (
     select_player,
     select_team,
 )
+from hmtracker.parser.models import ArticleDetails
 
 MATCHER = "hmtracker.loader.playernews.matcher"
 
@@ -354,6 +359,58 @@ class TestPlayerNewsMatcher(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "LLM unavailable"):
             match_playernews_to_players(self.repository)
         self.assertIsNone(first.player_id)
+
+    def import_news(self):
+        parser = self.enterContext(
+            patch("hmtracker.loader.playernews.importer.SwissHockeyNewsParser")
+        ).return_value
+        parser.list_news.return_value = [Mock(url="https://example.com/new-news")]
+        parser.article_details.return_value = ArticleDetails(
+            date=date.today(),
+            title="Player update",
+            description="News",
+            text="Léon Muller is injured.",
+        )
+        agent = self.enterContext(
+            patch("hmtracker.loader.playernews.extractor._create_agent")
+        ).return_value
+        agent.run_sync.return_value.output = ArticlePlayerNews.model_validate(
+            {
+                "players": [
+                    {
+                        "info_type": "Absence",
+                        "player_name": "Léon Muller",
+                        "team": "Zürich",
+                        "reason": "Injury",
+                        "confirmed": True,
+                        "is_return": False,
+                        "expected_duration_or_return": None,
+                    }
+                ]
+            }
+        )
+        return import_playernews_from_shn(self.repository)
+
+    def test_import_loader_matches_and_commits_new_and_existing_news(self):
+        self.player(1)
+        self.news()
+        self.assertEqual(self.import_news(), 1)
+        with Session(self.engine) as session:
+            news = session.scalars(select(PlayerNews)).all()
+            self.assertEqual(len(news), 2)
+            self.assertEqual(
+                [(item.player_id, item.season_id) for item in news], [(1, 1)] * 2
+            )
+
+    def test_import_loader_preserves_imported_news_on_matching_failure(self):
+        self.player(1)
+        self.player(2)
+        self.player_llm.side_effect = RuntimeError("LLM unavailable")
+        with self.assertRaisesRegex(RuntimeError, "LLM unavailable"):
+            self.import_news()
+        with Session(self.engine) as session:
+            news = session.scalars(select(PlayerNews)).one()
+            self.assertIsNone(news.player_id)
 
 
 class TestMatchingLlmSelections(unittest.TestCase):

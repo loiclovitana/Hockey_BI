@@ -131,7 +131,7 @@ def start_loading():
     loader.import_playerstats_from_ajax(database_url, hm_user, hm_password)
 
 
-@_Operation("Load SHN player news")
+@_Operation("Load and match SHN player news")
 def start_loading_playernews():
     database_url = getenv(HM_DATABASE_URL_ENV_NAME)
     if not database_url:
