@@ -127,8 +127,8 @@ def select_player(
                 "news": {
                     "player_name": news.player_name,
                     "team_code": team_code,
-                    "title": news.title,
-                    "date": news.news_date.isoformat(),
+                    "title": news.article.title,
+                    "date": news.article.article_date.isoformat(),
                     "info_type": news.info_type,
                 },
                 "candidates": [

@@ -1,9 +1,10 @@
 import datetime
 
-from sqlalchemy import Column, func
+from sqlalchemy import Column, func, tuple_
 from sqlalchemy.orm import Session
 
 from hmtracker.database import models, database
+from hmtracker.common.news_urls import split_article_url
 
 
 def create_repository_session_maker(database_url: str):
@@ -43,27 +44,31 @@ class RepositorySession:
         return self.session.get(models.HockeyPlayer, (player_id, season_id))
 
     def filter_new_player_news_urls(self, urls: list[str]) -> list[str]:
-        """Return URLs absent from PlayerNews.source, preserving order and duplicates."""
+        """Return unprocessed article URLs, preserving order and duplicates."""
         if not urls:
             return []
 
-        existing_urls = {
-            source
-            for (source,) in (
-                self.session.query(models.PlayerNews.source)
-                .filter(models.PlayerNews.source.in_(set(urls)))
-                .distinct()
-                .all()
+        article = models.NewsArticle
+        keys = {url: split_article_url(url) for url in urls}
+        existing_urls = set(
+            self.session.query(article.base_url, article.article_url)
+            .filter(
+                tuple_(article.base_url, article.article_url).in_(set(keys.values()))
             )
-        }
-        return [url for url in urls if url not in existing_urls]
+            .all()
+        )
+        return [url for url in urls if keys[url] not in existing_urls]
 
     def get_player_news_since(
         self, since: datetime.date, replace: bool = False
     ) -> list[models.PlayerNews]:
-        query = self.session.query(models.PlayerNews).filter(
-            models.PlayerNews.news_date >= since,
-            models.PlayerNews.news_date <= datetime.date.today(),
+        query = (
+            self.session.query(models.PlayerNews)
+            .join(models.PlayerNews.article)
+            .filter(
+                models.NewsArticle.article_date >= since,
+                models.NewsArticle.article_date <= datetime.date.today(),
+            )
         )
         if not replace:
             query = query.filter(models.PlayerNews.player_id.is_(None))

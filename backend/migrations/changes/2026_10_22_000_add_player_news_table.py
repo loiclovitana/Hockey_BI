@@ -5,7 +5,7 @@ from hmtracker.database.base import Migration
 
 
 class AddPlayerNewsTableMigration(Migration):
-    """Add player news with optional player links and availability timing."""
+    """Add processed articles and player news with optional roster links."""
 
     @property
     def version(self) -> str:
@@ -13,19 +13,31 @@ class AddPlayerNewsTableMigration(Migration):
 
     @property
     def description(self) -> str:
-        return "Add Player News table"
+        return "Add News Article and Player News tables"
 
     def up(self, session: Session) -> None:
+        session.execute(
+            text("""
+            CREATE TABLE NEWS_ARTICLE (
+                id INTEGER PRIMARY KEY,
+                base_url VARCHAR NOT NULL,
+                article_url VARCHAR NOT NULL,
+                article_date DATE NOT NULL,
+                title VARCHAR NOT NULL,
+                processed_by VARCHAR NULL,
+                processed_date DATETIME NULL,
+                UNIQUE (base_url, article_url)
+            )
+        """)
+        )
         session.execute(
             text("""
             CREATE TABLE PLAYER_NEWS (
                 id INTEGER PRIMARY KEY,
                 season_id INTEGER NULL,
                 player_id INTEGER NULL,
-                source VARCHAR NOT NULL,
-                news_date DATE NOT NULL,
+                article_id INTEGER NOT NULL REFERENCES NEWS_ARTICLE (id),
                 player_name VARCHAR NOT NULL,
-                title VARCHAR NOT NULL,
                 confirmed BOOLEAN NOT NULL DEFAULT FALSE,
                 info_type VARCHAR(10) NOT NULL,
                 current_team VARCHAR NULL,
@@ -42,8 +54,11 @@ class AddPlayerNewsTableMigration(Migration):
         """)
         )
         session.execute(
-            text('CREATE INDEX "ix_PLAYER_NEWS_source" ON "PLAYER_NEWS" (source)')
+            text(
+                'CREATE INDEX "ix_PLAYER_NEWS_article_id" ON "PLAYER_NEWS" (article_id)'
+            )
         )
 
     def down(self, session: Session) -> None:
         session.execute(text("DROP TABLE PLAYER_NEWS"))
+        session.execute(text("DROP TABLE NEWS_ARTICLE"))

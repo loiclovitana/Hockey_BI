@@ -7,6 +7,7 @@ from sqlalchemy import (
     ForeignKeyConstraint,
     Integer,
     String,
+    UniqueConstraint,
     DateTime,
     Float,
     Date,
@@ -153,6 +154,23 @@ class PlayerInfoType(StrEnum):
     RETURN = "Return"
 
 
+class NewsArticle(HMDatabaseObject):
+    """Successfully processed articles, including those without player updates."""
+
+    __tablename__ = "NEWS_ARTICLE"
+    __table_args__ = (UniqueConstraint("base_url", "article_url"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    base_url: Mapped[str] = mapped_column(String, nullable=False)
+    article_url: Mapped[str] = mapped_column(String, nullable=False)
+    article_date: Mapped[date] = mapped_column(Date, nullable=False)
+    title: Mapped[str] = mapped_column(String, nullable=False)
+    # Historical imports did not record which model processed them.
+    processed_by: Mapped[str | None] = mapped_column(String, nullable=True)
+    # Server-local processing time.
+    processed_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
 class PlayerNews(HMDatabaseObject):
     __tablename__ = "PLAYER_NEWS"
     __table_args__ = (
@@ -170,10 +188,10 @@ class PlayerNews(HMDatabaseObject):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     season_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     player_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    source: Mapped[str] = mapped_column(String, nullable=False, index=True)
-    news_date: Mapped[date] = mapped_column(Date, nullable=False)
+    article_id: Mapped[int] = mapped_column(
+        ForeignKey("NEWS_ARTICLE.id"), nullable=False, index=True
+    )
     player_name: Mapped[str] = mapped_column(String, nullable=False)
-    title: Mapped[str] = mapped_column(String, nullable=False)
     confirmed: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default=false()
     )
@@ -193,6 +211,7 @@ class PlayerNews(HMDatabaseObject):
     availability_time: Mapped[str | None] = mapped_column(String, nullable=True)
 
     player: Mapped[HockeyPlayer | None] = relationship("HockeyPlayer")
+    article: Mapped[NewsArticle] = relationship("NewsArticle")
 
 
 class NewsTeamMatch(HMDatabaseObject):

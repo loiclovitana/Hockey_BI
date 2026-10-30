@@ -13,11 +13,24 @@ from pydantic_ai.providers.ollama import OllamaProvider
 from pydantic_ai.providers.openai import OpenAIProvider
 
 
+def news_model_name() -> str:
+    """Resolve the configured model for both inference and article provenance."""
+    model_name = (getenv("HM_PLAYER_NEWS_MODEL") or "").strip()
+    provider_name = (getenv("HM_PLAYER_NEWS_PROVIDER") or "openai").strip().lower()
+    if provider_name == "openai":
+        return model_name or "gpt-6-luna"
+    if provider_name == "ollama":
+        if not model_name:
+            raise ValueError("HM_PLAYER_NEWS_MODEL is required for Ollama")
+        return model_name
+    raise ValueError("HM_PLAYER_NEWS_PROVIDER must be 'openai' or 'ollama'")
+
+
 def create_news_agent[OutputT: BaseModel](
     output_type: type[OutputT], instructions: str
 ) -> Agent[None, OutputT]:
     provider_name = (getenv("HM_PLAYER_NEWS_PROVIDER") or "openai").strip().lower()
-    model_name = (getenv("HM_PLAYER_NEWS_MODEL") or "").strip()
+    model_name = news_model_name()
     model: OpenAIChatModel | OpenAIResponsesModel
 
     if provider_name == "openai":
@@ -25,7 +38,7 @@ def create_news_agent[OutputT: BaseModel](
         if not api_key:
             raise ValueError("OPENAI_API_KEY is required to process player news")
         model = OpenAIResponsesModel(
-            model_name or "gpt-6-luna",
+            model_name,
             provider=OpenAIProvider(
                 api_key=api_key,
                 base_url=getenv("OPENAI_BASE_URL") or "https://api.openai.com/v1",
@@ -33,8 +46,6 @@ def create_news_agent[OutputT: BaseModel](
             settings=OpenAIResponsesModelSettings(openai_store=False),
         )
     elif provider_name == "ollama":
-        if not model_name:
-            raise ValueError("HM_PLAYER_NEWS_MODEL is required for Ollama")
         provider = OllamaProvider(
             base_url=getenv("OLLAMA_BASE_URL") or "http://localhost:11434/v1",
         )

@@ -1,6 +1,7 @@
 import json
 import unittest
 from datetime import date, datetime, timedelta
+from uuid import uuid4
 from unittest.mock import Mock, patch
 
 from sqlalchemy import create_engine, event, select
@@ -10,6 +11,7 @@ from hmtracker.database.models import (
     HMDatabaseObject,
     HockeyPlayer,
     HockeyPlayerStats,
+    NewsArticle,
     NewsPlayerMatch,
     NewsTeamMatch,
     PlayerInfoType,
@@ -93,9 +95,13 @@ class TestPlayerNewsMatcher(unittest.TestCase):
 
     def news(self, name="Léon Muller", team="Zürich", days_ago=0, **kwargs):
         news = PlayerNews(
-            source="https://example.com/news",
-            news_date=date.today() - timedelta(days=days_ago),
-            title="Player update",
+            article=NewsArticle(
+                base_url="https://example.com",
+                article_url=f"https://example.com/{uuid4()}",
+                article_date=date.today() - timedelta(days=days_ago),
+                title="Player update",
+                processed_by="test-model",
+            ),
             player_name=name,
             current_team=team,
             confirmed=True,
@@ -281,9 +287,13 @@ class TestPlayerNewsMatcher(unittest.TestCase):
     def test_transfer_uses_destination_when_origin_is_unknown(self):
         self.player(1)
         news = PlayerNews(
-            source="https://example.com/transfer",
-            news_date=date.today(),
-            title="Transfer",
+            article=NewsArticle(
+                base_url="https://example.com",
+                article_url="https://example.com/transfer",
+                article_date=date.today(),
+                title="Transfer",
+                processed_by="test-model",
+            ),
             player_name="Leon Muller",
             current_team=None,
             new_team="Zurich",
@@ -426,8 +436,7 @@ class TestMatchingLlmSelections(unittest.TestCase):
     def test_player_selection_rejects_ids_outside_candidates(self, factory):
         news = PlayerNews(
             player_name="Test",
-            title="News",
-            news_date=date.today(),
+            article=NewsArticle(title="News", article_date=date.today()),
             info_type=PlayerInfoType.INJURY,
         )
         candidates = [HockeyPlayer(id=1, name="Test P.", season_id=1)]
@@ -441,8 +450,7 @@ class TestMatchingLlmSelections(unittest.TestCase):
     def test_player_prompt_includes_news_context_and_allows_no_match(self, factory):
         news = PlayerNews(
             player_name="Test",
-            title="News",
-            news_date=date.today(),
+            article=NewsArticle(title="News", article_date=date.today()),
             info_type=PlayerInfoType.TRANSFERT,
             current_team="Zurich",
             new_team="Ajoie",

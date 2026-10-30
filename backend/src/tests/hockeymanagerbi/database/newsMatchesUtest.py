@@ -3,12 +3,13 @@ import unittest
 from datetime import date
 from pathlib import Path
 
-from sqlalchemy import create_engine, event, inspect, text
+from sqlalchemy import create_engine, event, inspect, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from hmtracker.database.models import (
     HockeyPlayer,
+    NewsArticle,
     NewsPlayerMatch,
     NewsTeamMatch,
     PlayerInfoType,
@@ -63,9 +64,13 @@ class TestNewsMatchMigration(unittest.TestCase):
                 player_id=1,
                 season_id=1,
                 player_name="Test Player",
-                title="News",
-                source="https://example.com",
-                news_date=date.today(),
+                article=NewsArticle(
+                    base_url="https://example.com",
+                    article_url="/news",
+                    article_date=date.today(),
+                    title="News",
+                    processed_by=None,
+                ),
                 confirmed=True,
                 info_type=PlayerInfoType.INJURY,
                 availability_time="Tomorrow",
@@ -92,7 +97,7 @@ class TestNewsMatchMigration(unittest.TestCase):
             self.assertTrue(PlayerNews.__table__.c[name].nullable, name)
         self.assertEqual(self.session.get(PlayerNews, 1).availability_time, "Tomorrow")
         self.assertIn(
-            "ix_PLAYER_NEWS_source",
+            "ix_PLAYER_NEWS_article_id",
             {
                 index["name"]
                 for index in inspect(self.engine).get_indexes("PLAYER_NEWS")
@@ -106,9 +111,13 @@ class TestNewsMatchMigration(unittest.TestCase):
                 PlayerNews(
                     id=index,
                     player_name="Test Player",
-                    title="Timing unstated",
-                    source=f"https://example.com/{index}",
-                    news_date=date.today(),
+                    article=NewsArticle(
+                        title="Timing unstated",
+                        base_url="https://example.com",
+                        article_url=f"/{index}",
+                        article_date=date.today(),
+                        processed_by="test-model",
+                    ),
                     confirmed=True,
                     info_type=kind,
                     availability_time=None,
@@ -126,15 +135,100 @@ class TestNewsMatchMigration(unittest.TestCase):
             [None, None, None],
         )
 
-    def test_news_rollback_drops_only_news_table(self):
+    def test_news_rollback_drops_article_and_player_news_tables(self):
         self.session.get(PlayerNews, 1).availability_time = None
         self.session.commit()
         self.news_migration.down(self.session)
         self.session.commit()
         tables = inspect(self.engine).get_table_names()
         self.assertNotIn("PLAYER_NEWS", tables)
+        self.assertNotIn("NEWS_ARTICLE", tables)
         self.assertIn("NEWS_TEAM_MATCH", tables)
         self.assertIn("NEWS_PLAYER_MATCH", tables)
+        self.assertIsNotNone(self.session.get(HockeyPlayer, (1, 1)))
+
+    def test_article_schema_and_foreign_key(self):
+        columns = {c["name"] for c in inspect(self.engine).get_columns("PLAYER_NEWS")}
+        self.assertTrue({"source", "title", "news_date"}.isdisjoint(columns))
+        news = self.session.get(PlayerNews, 1)
+        self.assertEqual(news.article.article_url, "/news")
+        self.assertEqual(news.article.base_url, "https://example.com")
+        self.assertEqual(news.article.title, "News")
+        self.assertEqual(news.article.article_date, date.today())
+        self.assertIsNone(news.article.processed_by)
+        self.assertIsNone(news.article.processed_date)
+        article_columns = {
+            column["name"]: column
+            for column in inspect(self.engine).get_columns("NEWS_ARTICLE")
+        }
+        self.assertTrue(article_columns["processed_date"]["nullable"])
+        with self.assertRaises(IntegrityError):
+            self.session.execute(
+                text("UPDATE PLAYER_NEWS SET article_id = 999 WHERE id = 1")
+            )
+        self.session.rollback()
+        with self.assertRaises(IntegrityError):
+            self.session.execute(
+                text("UPDATE PLAYER_NEWS SET article_id = NULL WHERE id = 1")
+            )
+        self.session.rollback()
+        with self.assertRaises(IntegrityError):
+            self.session.execute(
+                text("""
+                INSERT INTO NEWS_ARTICLE (base_url, article_url, article_date, title)
+                SELECT base_url, article_url, article_date, title FROM NEWS_ARTICLE
+            """)
+            )
+        self.session.rollback()
+
+    def test_articles_without_updates_and_same_path_on_different_sites(self):
+        for base_url in ("https://other.com", "https://third.com"):
+            self.session.add(
+                NewsArticle(
+                    base_url=base_url,
+                    article_url="/news?q=1#update",
+                    article_date=date.today(),
+                    title="No player updates",
+                    processed_by="test-model",
+                )
+            )
+        self.session.commit()
+        articles = self.session.scalars(
+            select(NewsArticle).order_by(NewsArticle.id)
+        ).all()
+        self.assertEqual(len(articles), 3)
+        self.assertEqual(articles[1].article_url, "/news?q=1#update")
+        self.assertEqual(articles[1].processed_by, "test-model")
+        self.assertEqual(len(self.session.scalars(select(PlayerNews)).all()), 1)
+        self.assertEqual(
+            inspect(self.engine).get_unique_constraints("NEWS_ARTICLE")[0][
+                "column_names"
+            ],
+            ["base_url", "article_url"],
+        )
+        self.session.add(
+            NewsArticle(
+                base_url="https://other.com",
+                article_url="/news?q=1#update",
+                article_date=date.today(),
+                title="Duplicate",
+                processed_by="test-model",
+            )
+        )
+        with self.assertRaises(IntegrityError):
+            self.session.commit()
+        self.session.rollback()
+        self.assertEqual(
+            self.session.execute(text("PRAGMA foreign_key_check")).all(), []
+        )
+
+    def test_news_migration_can_be_reapplied_after_rollback(self):
+        self.news_migration.down(self.session)
+        self.session.commit()
+        self.news_migration.up(self.session)
+        self.session.commit()
+        self.assertEqual(self.session.scalars(select(NewsArticle)).all(), [])
+        self.assertEqual(self.session.scalars(select(PlayerNews)).all(), [])
         self.assertIsNotNone(self.session.get(HockeyPlayer, (1, 1)))
 
     def test_migrated_tables_accept_orm_records_and_preserve_news_links(self):

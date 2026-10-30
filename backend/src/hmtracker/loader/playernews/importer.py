@@ -1,7 +1,9 @@
 import logging
 from collections.abc import Callable
+from datetime import datetime
+from urllib.parse import urljoin
 
-from hmtracker.database.models import PlayerNews
+from hmtracker.database.models import NewsArticle, PlayerInfoType, PlayerNews
 from hmtracker.database.repository import RepositorySession
 from hmtracker.loader.playernews.extractor import (
     ArticlePlayerNews,
@@ -9,14 +11,13 @@ from hmtracker.loader.playernews.extractor import (
     PlayerTransferInfo,
     extract_player_news,
 )
-from hmtracker.database.models import PlayerInfoType
+from hmtracker.loader.playernews.llm import news_model_name
+from hmtracker.common.news_urls import split_article_url
 from hmtracker.parser.models import ArticleDetails
-from hmtracker.parser.shnparser import SwissHockeyNewsParser
+from hmtracker.parser.shnparser import SHN_URL, SwissHockeyNewsParser
 
 
-def _to_player_news(
-    player: PlayerNewsInfo, article: ArticleDetails, source: str
-) -> PlayerNews:
+def _to_player_news(player: PlayerNewsInfo, article: NewsArticle) -> PlayerNews:
     info_type: PlayerInfoType
     if isinstance(player, PlayerTransferInfo):
         info_type = player.info_type
@@ -34,9 +35,7 @@ def _to_player_news(
         availability_time = player.expected_duration_or_return
 
     return PlayerNews(
-        source=source,
-        news_date=article.date,
-        title=article.title,
+        article=article,
         player_name=player.player_name,
         confirmed=player.confirmed,
         info_type=info_type,
@@ -53,18 +52,32 @@ def import_player_news(
     """Commit each successful article independently and log failed articles."""
     parser = SwissHockeyNewsParser()
     try:
-        urls = list(dict.fromkeys(article.url for article in parser.list_news()))
+        urls = list(
+            dict.fromkeys(
+                urljoin(SHN_URL, article.url) for article in parser.list_news()
+            )
+        )
         new_urls = repository_session.filter_new_player_news_urls(urls)
         count = 0
         failed_count = 0
         for url in new_urls:
             try:
                 article = parser.article_details(url)
+                model_name = news_model_name()
                 extracted = extractor(article)
+                base_url, article_url = split_article_url(url)
+                source = NewsArticle(
+                    base_url=base_url,
+                    article_url=article_url,
+                    article_date=article.date,
+                    title=article.title,
+                    processed_by=model_name,
+                    processed_date=datetime.now(),
+                )
                 records = [
-                    _to_player_news(player, article, url)
-                    for player in extracted.players
+                    _to_player_news(player, source) for player in extracted.players
                 ]
+                repository_session.session.add(source)
                 repository_session.session.add_all(records)
                 repository_session.session.commit()
             except Exception:
