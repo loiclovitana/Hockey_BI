@@ -78,6 +78,13 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
             </TableRow>
           </TableHead>
           <TableBody>
+            {data.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={9} align="center" sx={{ py: 3 }}>
+                  No players match the current filters.
+                </TableCell>
+              </TableRow>
+            )}
             {visibleRows.map((row) => {
               return (
                 <TableRow
