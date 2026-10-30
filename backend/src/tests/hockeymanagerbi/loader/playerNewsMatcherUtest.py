@@ -149,7 +149,7 @@ class TestPlayerNewsMatcher(unittest.TestCase):
         news = self.news()
         self.assertEqual(self.match(), 1)
         self.assertEqual((news.player_id, news.season_id), (1, 1))
-        self.assertEqual(news.current_team, "Zürich")
+        self.assertEqual(news.current_team, "ZSC")
         self.team_llm.assert_not_called()
         self.player_llm.assert_not_called()
 
@@ -187,6 +187,7 @@ class TestPlayerNewsMatcher(unittest.TestCase):
         self.player_llm.return_value = 1
         self.assertEqual(self.match(), 1)
         self.assertEqual(news.player_id, 1)
+        self.assertEqual((news.current_team, news.new_team), ("AJO", "ZSC"))
         self.player_llm.assert_called_once()
         self.assertEqual({p.id for p in self.player_llm.call_args.args[1]}, {1, 2})
 
@@ -336,6 +337,7 @@ class TestPlayerNewsMatcher(unittest.TestCase):
         self.team_llm.return_value = "ZSC"
         self.assertEqual(self.match(), 2)
         self.assertEqual([first.player_id, second.player_id], [1, 1])
+        self.assertEqual([first.current_team, second.current_team], ["ZSC", "ZSC"])
         self.team_llm.assert_called_once()
         self.assertEqual(
             self.session.get(NewsTeamMatch, "the city lions").team_code, "ZSC"
@@ -347,6 +349,7 @@ class TestPlayerNewsMatcher(unittest.TestCase):
         news = self.news(team="Foreign club")
         self.assertEqual(self.match(), 1)
         self.assertEqual(news.player_id, 1)
+        self.assertEqual(news.current_team, "Foreign club")
         self.assertEqual(self.session.scalars(select(NewsTeamMatch)).all(), [])
 
     def test_transfer_uses_destination_when_origin_is_unknown(self):
@@ -370,6 +373,7 @@ class TestPlayerNewsMatcher(unittest.TestCase):
         self.session.flush()
         self.assertEqual(self.match(), 1)
         self.assertEqual(news.player_id, 1)
+        self.assertEqual((news.current_team, news.new_team), (None, "ZSC"))
 
     def test_since_d_and_replace_filter_records(self):
         self.player(1)
@@ -525,6 +529,7 @@ class TestPlayerNewsMatcher(unittest.TestCase):
         self.assertEqual(match_playernews_to_players(self.repository), 1)
         with Session(self.engine) as session:
             self.assertEqual(session.get(PlayerNews, news.id).player_id, 1)
+            self.assertEqual(session.get(PlayerNews, news.id).current_team, "ZSC")
 
     def test_loader_wrapper_rolls_back_on_llm_failure(self):
         self.player(1)

@@ -287,8 +287,11 @@ def match_player_news(
             cleared += 1
         if not players:
             continue
-        team_name = news.current_team or news.new_team
-        team_code = _resolve_team(repository, team_name, codes)
+        current_team_code = _resolve_team(repository, news.current_team, codes)
+        new_team_code = _resolve_team(repository, news.new_team, codes)
+        team_code = current_team_code if news.current_team else new_team_code
+        news.current_team = current_team_code or news.current_team
+        news.new_team = new_team_code or news.new_team
         # Unknown teams lack enough identity context for reusable decisions.
         key = (
             (_normalize(news.player_name), team_code, season.id)

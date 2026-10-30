@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from typing import Optional
-from pydantic import BaseModel, computed_field, field_validator
+from pydantic import BaseModel, ConfigDict, computed_field, field_validator
+
+from hmtracker.database.models import PlayerInfoType
 
 
 class Season(BaseModel):
@@ -17,6 +19,34 @@ class HockeyPlayer(BaseModel):
     name: str
     role: str
     foreigner: bool
+
+
+class NewsArticle(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    base_url: str
+    article_url: str
+    article_date: date
+    title: str
+    processed_by: str | None
+    processed_date: datetime | None
+
+
+class PlayerNews(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    season_id: int | None
+    player_id: int | None
+    article_id: int
+    player_name: str
+    confirmed: bool
+    info_type: PlayerInfoType
+    current_team: str | None
+    new_team: str | None
+    availability_time: str | None
+    article: NewsArticle
 
 
 class HockeyPlayerStats(BaseModel):

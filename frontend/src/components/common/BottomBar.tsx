@@ -4,12 +4,14 @@ import {
   Dashboard as DashboardIcon,
   Sports as SportsIcon,
   TrendingUp as TrendingUpIcon,
+  Newspaper as NewspaperIcon,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const menuItems = [
   { text: "Dashboard", icon: <DashboardIcon />, path: "/" },
   { text: "Players", icon: <SportsIcon />, path: "/players" },
+  { text: "News", icon: <NewspaperIcon />, path: "/news" },
   {
     text: "History",
     icon: <TrendingUpIcon />,

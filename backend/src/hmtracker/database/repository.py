@@ -1,7 +1,7 @@
 import datetime
 
 from sqlalchemy import Column, func, tuple_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, contains_eager
 
 from hmtracker.database import models, database
 from hmtracker.common.news_urls import split_article_url
@@ -58,6 +58,39 @@ class RepositorySession:
             .all()
         )
         return [url for url in urls if keys[url] not in existing_urls]
+
+    def get_player_news(
+        self,
+        limit: int = 50,
+        offset: int = 0,
+        player_ids: list[int] | None = None,
+        season_id: int | None = None,
+        time_limit: int | None = None,
+    ) -> list[models.PlayerNews]:
+        query = (
+            self.session.query(models.PlayerNews)
+            .join(models.PlayerNews.article)
+            .options(contains_eager(models.PlayerNews.article))
+        )
+        if player_ids is not None:
+            query = query.filter(models.PlayerNews.player_id.in_(player_ids))
+        if season_id is not None:
+            query = query.filter(models.PlayerNews.season_id == season_id)
+        if time_limit is not None:
+            today = datetime.date.today()
+            query = query.filter(
+                models.NewsArticle.article_date.between(
+                    today - datetime.timedelta(days=time_limit), today
+                )
+            )
+        return (
+            query.order_by(
+                models.NewsArticle.article_date.desc(), models.PlayerNews.id.desc()
+            )
+            .limit(limit)
+            .offset(offset)
+            .all()
+        )
 
     def get_player_news_since(
         self, since: datetime.date, replace: bool = False

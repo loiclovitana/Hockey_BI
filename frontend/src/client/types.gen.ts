@@ -262,6 +262,89 @@ export type MatchImportResponse = {
 };
 
 /**
+ * NewsArticle
+ */
+export type NewsArticle = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Base Url
+     */
+    base_url: string;
+    /**
+     * Article Url
+     */
+    article_url: string;
+    /**
+     * Article Date
+     */
+    article_date: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Processed By
+     */
+    processed_by: string | null;
+    /**
+     * Processed Date
+     */
+    processed_date: string | null;
+};
+
+/**
+ * PlayerInfoType
+ */
+export type PlayerInfoType = 'Injury' | 'Suspension' | 'Absence' | 'Transfert' | 'Return';
+
+/**
+ * PlayerNews
+ */
+export type PlayerNews = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Season Id
+     */
+    season_id: number | null;
+    /**
+     * Player Id
+     */
+    player_id: number | null;
+    /**
+     * Article Id
+     */
+    article_id: number;
+    /**
+     * Player Name
+     */
+    player_name: string;
+    /**
+     * Confirmed
+     */
+    confirmed: boolean;
+    info_type: PlayerInfoType;
+    /**
+     * Current Team
+     */
+    current_team: string | null;
+    /**
+     * New Team
+     */
+    new_team: string | null;
+    /**
+     * Availability Time
+     */
+    availability_time: string | null;
+    article: NewsArticle;
+};
+
+/**
  * Task
  */
 export type Task = {
@@ -394,6 +477,11 @@ export type ValidationError = {
      */
     type: string;
 };
+
+/**
+ * PlayerInfoType
+ */
+export type PlayerInfoTypeWritable = 'Injury' | 'Suspension' | 'Absence' | 'Transfert' | 'Return';
 
 export type StartLoadingAdminLoadStartPostData = {
     body?: never;
@@ -592,6 +680,54 @@ export type GetPlayersPlayersGetResponses = {
 };
 
 export type GetPlayersPlayersGetResponse = GetPlayersPlayersGetResponses[keyof GetPlayersPlayersGetResponses];
+
+export type GetPlayerNewsPlayersNewsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Offset
+         */
+        offset?: number;
+        /**
+         * Player Ids
+         */
+        player_ids?: Array<number> | null;
+        /**
+         * Season Id
+         */
+        season_id?: number | null;
+        /**
+         * Time Limit
+         * Article age limit in days; 0 means today.
+         */
+        time_limit?: number | null;
+    };
+    url: '/players/news';
+};
+
+export type GetPlayerNewsPlayersNewsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetPlayerNewsPlayersNewsGetError = GetPlayerNewsPlayersNewsGetErrors[keyof GetPlayerNewsPlayersNewsGetErrors];
+
+export type GetPlayerNewsPlayersNewsGetResponses = {
+    /**
+     * Response Get Player News Players News Get
+     * Successful Response
+     */
+    200: Array<PlayerNews>;
+};
+
+export type GetPlayerNewsPlayersNewsGetResponse = GetPlayerNewsPlayersNewsGetResponses[keyof GetPlayerNewsPlayersNewsGetResponses];
 
 export type GetPlayerPlayersIdPlayerIdGetData = {
     body?: never;
