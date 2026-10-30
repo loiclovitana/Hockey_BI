@@ -44,10 +44,19 @@ class TestPlayerStatsConverter(unittest.TestCase):
         self.assertIsNone(result[0]["foreigner"])
 
     def test_convert_invalid_data(self):
-        result = mapper._convert_data(
-            [{"id": "Id:12", "date": "today", "Ownership": "non", "foreigner": "very"}]
-        )
+        with self.assertLogs(level="WARNING") as warnings:
+            result = mapper._convert_data(
+                [
+                    {
+                        "id": "Id:12",
+                        "date": "today",
+                        "Ownership": "non",
+                        "foreigner": "very",
+                    }
+                ]
+            )
 
+        self.assertEqual(len(warnings.records), 4)
         self.assertEqual(1, len(result))
         self.assertIn("id", result[0])
         self.assertIsNone(result[0]["id"])
@@ -208,9 +217,11 @@ class TestMapPlayerStats(unittest.TestCase):
         mock_HockeyPlayerStats.return_value = MagicMock()
 
         # Act
-        players, players_stats = mapper.map_player_stats(player_stats_data)
+        with self.assertLogs(level="WARNING") as warnings:
+            players, players_stats = mapper.map_player_stats(player_stats_data)
 
         # Assert: Ensure the invalid fields are handled properly
+        self.assertEqual(len(warnings.records), 4)
         mock_HockeyPlayer.assert_called_once_with(
             id=None,  # Invalid id should be None
             name="Player Three",

@@ -117,6 +117,11 @@ def _attach_seasons(
     for player, stats in zip(players, players_stats):
         if stats.validity_date is None:
             continue
-        season_id = season_for_date[stats.validity_date].id
+        season = season_for_date[stats.validity_date]
+        if season is None:
+            raise ValueError(
+                f"No season found for player stats dated {stats.validity_date}"
+            )
+        season_id = season.id
         player.season_id = season_id
         stats.season_id = season_id

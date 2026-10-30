@@ -39,6 +39,23 @@ def start_team_alignement() -> None:
     admin.start_team_alignement()
 
 
+@router.post("/playernews/start")
+@router.post(
+    "/playernews/import-and-match/start",
+    summary="Import SHN player news and match players",
+)
+def start_loading_playernews() -> None:
+    """Start a background import, then match recent news to current-season players."""
+    admin.start_loading_playernews()
+
+
+@router.post("/playernews/match/start")
+def start_matching_playernews(
+    since_d: int = Query(30, ge=0), replace: bool = False
+) -> None:
+    admin.start_matching_playernews(since_d, replace)
+
+
 class AdminUser(BaseModel):
     username: str
 

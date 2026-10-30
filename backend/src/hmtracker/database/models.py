@@ -1,12 +1,18 @@
 from datetime import date, datetime
+from enum import StrEnum
 from sqlalchemy import (
+    CheckConstraint,
+    Enum,
     ForeignKey,
+    ForeignKeyConstraint,
     Integer,
     String,
+    UniqueConstraint,
     DateTime,
     Float,
     Date,
     Boolean,
+    false,
 )
 from sqlalchemy.orm import relationship, mapped_column, Mapped, DeclarativeBase
 from sqlalchemy.sql.functions import func
@@ -41,10 +47,15 @@ class HockeyPlayer(HMDatabaseObject):
 
 class HockeyPlayerStats(HMDatabaseObject):
     __tablename__ = "HOCKEY_PLAYER_STATS"
-
-    player_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("HOCKEY_PLAYERS.id"), primary_key=True, nullable=False
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["player_id", "season_id"],
+            ["HOCKEY_PLAYERS.id", "HOCKEY_PLAYERS.season_id"],
+            name="hockey_player_stats_player",
+        ),
     )
+
+    player_id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
     season_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("SEASONS.id"), primary_key=True, nullable=False
     )
@@ -105,17 +116,21 @@ class Manager(HMDatabaseObject):
 
 class Team(HMDatabaseObject):
     __tablename__ = "TEAM"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["player_id", "season_id"],
+            ["HOCKEY_PLAYERS.id", "HOCKEY_PLAYERS.season_id"],
+            name="team_player",
+        ),
+    )
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     team: Mapped[str] = mapped_column(String, unique=False, nullable=False)
     manager_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("MANAGER.id"), nullable=False
     )
-    player_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("HOCKEY_PLAYERS.id"), nullable=False
-    )
-    season_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("HOCKEY_PLAYERS.season_id"), nullable=False
-    )
+    player_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    season_id: Mapped[int] = mapped_column(Integer, nullable=False)
 
     from_datetime: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     to_datetime: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
@@ -129,3 +144,98 @@ class Match(HMDatabaseObject):
     home_club: Mapped[str] = mapped_column(String, nullable=False)
     away_club: Mapped[str] = mapped_column(String, nullable=False)
     match_datetime: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class PlayerInfoType(StrEnum):
+    INJURY = "Injury"
+    SUSPENSION = "Suspension"
+    ABSENCE = "Absence"
+    TRANSFERT = "Transfert"
+    RETURN = "Return"
+
+
+class NewsArticle(HMDatabaseObject):
+    """Successfully processed articles, including those without player updates."""
+
+    __tablename__ = "NEWS_ARTICLE"
+    __table_args__ = (UniqueConstraint("base_url", "article_url"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    base_url: Mapped[str] = mapped_column(String, nullable=False)
+    article_url: Mapped[str] = mapped_column(String, nullable=False)
+    article_date: Mapped[date] = mapped_column(Date, nullable=False)
+    title: Mapped[str] = mapped_column(String, nullable=False)
+    # Historical imports did not record which model processed them.
+    processed_by: Mapped[str | None] = mapped_column(String, nullable=True)
+    # Server-local processing time.
+    processed_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class PlayerNews(HMDatabaseObject):
+    __tablename__ = "PLAYER_NEWS"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["player_id", "season_id"],
+            ["HOCKEY_PLAYERS.id", "HOCKEY_PLAYERS.season_id"],
+            name="player_news_player",
+        ),
+        CheckConstraint(
+            "new_team IS NULL OR info_type = 'Transfert'",
+            name="player_news_new_team_transfer_only",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    season_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    player_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    article_id: Mapped[int] = mapped_column(
+        ForeignKey("NEWS_ARTICLE.id"), nullable=False, index=True
+    )
+    player_name: Mapped[str] = mapped_column(String, nullable=False)
+    confirmed: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
+    info_type: Mapped[PlayerInfoType] = mapped_column(
+        Enum(
+            PlayerInfoType,
+            values_callable=lambda enum: [member.value for member in enum],
+            native_enum=False,
+            create_constraint=True,
+            validate_strings=True,
+            name="player_news_info_type",
+        ),
+        nullable=False,
+    )
+    current_team: Mapped[str | None] = mapped_column(String, nullable=True)
+    new_team: Mapped[str | None] = mapped_column(String, nullable=True)
+    availability_time: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    player: Mapped[HockeyPlayer | None] = relationship("HockeyPlayer")
+    article: Mapped[NewsArticle] = relationship("NewsArticle")
+
+
+class NewsTeamMatch(HMDatabaseObject):
+    """Reusable normalized team aliases learned by the news matcher."""
+
+    __tablename__ = "NEWS_TEAM_MATCH"
+
+    team_name: Mapped[str] = mapped_column(String, primary_key=True)
+    team_code: Mapped[str] = mapped_column(String, nullable=False)
+
+
+class NewsPlayerMatch(HMDatabaseObject):
+    """Successful LLM resolutions, scoped to a resolved team code and season."""
+
+    __tablename__ = "NEWS_PLAYER_MATCH"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["player_id", "season_id"],
+            ["HOCKEY_PLAYERS.id", "HOCKEY_PLAYERS.season_id"],
+            name="news_player_match_player",
+        ),
+    )
+
+    player_name: Mapped[str] = mapped_column(String, primary_key=True)
+    team_code: Mapped[str] = mapped_column(String, primary_key=True)
+    season_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    player_id: Mapped[int] = mapped_column(Integer, nullable=False)

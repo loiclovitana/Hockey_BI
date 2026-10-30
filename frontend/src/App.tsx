@@ -4,6 +4,7 @@ import { BottomBar } from "./components/common/BottomBar";
 import { LogoutButton } from "./components/common/LogoutButton";
 import { Dashboard } from "./pages/Dashboard";
 import { Players } from "./pages/Players";
+import { News } from "./pages/News";
 import { Admin } from "./pages/Admin";
 import { TransferAnalytics } from "./pages/TransferAnalytics";
 import { PlayerStatsProvider } from "./context/PlayerStatsProvider";
@@ -55,6 +56,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/players" element={<Players />} />
+                <Route path="/news" element={<News />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route
                   path="/transfer-analytics"

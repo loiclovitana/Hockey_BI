@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Engine
+from sqlalchemy import create_engine, Engine, event
 
 from sqlalchemy.orm import sessionmaker, Session
 
@@ -10,6 +10,12 @@ def init_engine(database_url: str) -> Engine:
     :return: the database engine
     """
     engine = create_engine(database_url, connect_args={"check_same_thread": False})
+    if engine.dialect.name == "sqlite":
+
+        @event.listens_for(engine, "connect")
+        def enable_foreign_keys(dbapi_connection, _connection_record):
+            dbapi_connection.execute("PRAGMA foreign_keys=ON").close()
+
     return engine
 
 
