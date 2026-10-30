@@ -4,9 +4,10 @@ from datetime import date, datetime, timedelta
 from uuid import uuid4
 from unittest.mock import Mock, patch
 
-from sqlalchemy import create_engine, event, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from hmtracker.database.database import init_engine
 from hmtracker.database.models import (
     HMDatabaseObject,
     HockeyPlayer,
@@ -38,12 +39,7 @@ MATCHER = "hmtracker.loader.playernews.matcher"
 
 class TestPlayerNewsMatcher(unittest.TestCase):
     def setUp(self):
-        self.engine = create_engine("sqlite://")
-        event.listen(
-            self.engine,
-            "connect",
-            lambda conn, _: conn.execute("PRAGMA foreign_keys=ON"),
-        )
+        self.engine = init_engine("sqlite://")
         HMDatabaseObject.metadata.create_all(self.engine)
         self.addCleanup(self.engine.dispose)
         self.session = Session(self.engine, autoflush=False)
@@ -116,6 +112,18 @@ class TestPlayerNewsMatcher(unittest.TestCase):
     def match(self, **kwargs):
         return match_player_news(self.repository, **kwargs)
 
+    def add_old_season(self):
+        self.session.add(
+            Season(
+                id=2,
+                name="Old",
+                start=date(2000, 1, 1),
+                end=date(2001, 1, 1),
+                arcade=False,
+            )
+        )
+        self.session.flush()
+
     def test_no_current_season_skips_before_any_matching(self):
         self.session.delete(self.season)
         self.session.commit()
@@ -145,13 +153,42 @@ class TestPlayerNewsMatcher(unittest.TestCase):
         self.team_llm.assert_not_called()
         self.player_llm.assert_not_called()
 
-    def test_surname_team_takes_precedence_over_initial_elsewhere(self):
+    def test_conflicting_initial_and_team_require_review_of_both_players(self):
         self.player(1)
         self.player(2, "Muller R.", "AJO")
         news = self.news(team="Ajoie")
+        self.assertEqual(self.match(), 0)
+        self.assertIsNone(news.player_id)
+        self.player_llm.assert_called_once()
+        self.assertEqual({p.id for p in self.player_llm.call_args.args[1]}, {1, 2})
+
+    def test_single_conflicting_initial_requires_review(self):
+        self.player(1, "Muller R.")
+        news = self.news()
+        self.assertEqual(self.match(), 0)
+        self.assertIsNone(news.player_id)
+        self.player_llm.assert_called_once()
+        self.assertEqual([p.id for p in self.player_llm.call_args.args[1]], [1])
+
+    def test_single_conflicting_team_requires_review(self):
+        self.player(1, club="AJO")
+        news = self.news()
+        self.assertEqual(self.match(), 0)
+        self.assertIsNone(news.player_id)
+        self.player_llm.assert_called_once()
+
+    def test_transfer_context_can_resolve_a_team_conflict(self):
+        self.player(1)
+        self.player(2, "Muller R.", "AJO")
+        news = self.news(team="Ajoie")
+        news.info_type = PlayerInfoType.TRANSFERT
+        news.new_team = "Zurich"
+        news.article.title = "Leon Muller leaves Ajoie for Zurich"
+        self.player_llm.return_value = 1
         self.assertEqual(self.match(), 1)
-        self.assertEqual(news.player_id, 2)
-        self.player_llm.assert_not_called()
+        self.assertEqual(news.player_id, 1)
+        self.player_llm.assert_called_once()
+        self.assertEqual({p.id for p in self.player_llm.call_args.args[1]}, {1, 2})
 
     def test_initial_surname_without_team_or_stats(self):
         self.player(1, club=None)
@@ -227,14 +264,42 @@ class TestPlayerNewsMatcher(unittest.TestCase):
         saved = self.session.scalars(select(NewsPlayerMatch)).one()
         self.assertEqual(saved.team_code, "ZSC")
 
-    def test_unresolved_team_is_not_saved_as_player_match_team_name(self):
+    def test_unresolved_team_decision_is_not_cached(self):
         self.player(1)
         self.news("Leon Mullre", team="Foreign club")
         self.player_llm.return_value = 1
         self.assertEqual(self.match(), 1)
         self.assertIsNone(self.player_llm.call_args.kwargs["team_code"])
-        saved = self.session.scalars(select(NewsPlayerMatch)).one()
-        self.assertEqual(saved.team_code, "")
+        self.assertEqual(self.session.scalars(select(NewsPlayerMatch)).all(), [])
+
+    def test_unresolved_teams_do_not_share_decisions_or_reuse_legacy_empty_key(self):
+        self.player(1)
+        self.player(2, club="AJO")
+        self.session.add(
+            NewsPlayerMatch(
+                player_name="leon mullre", team_code="", season_id=1, player_id=1
+            )
+        )
+        self.session.flush()
+        first = self.news("Leon Mullre", team="Foreign club A")
+        second = self.news("Leon Mullre", team="Foreign club B")
+        self.player_llm.side_effect = [1, 2]
+        self.assertEqual(self.match(), 2)
+        self.assertEqual([first.player_id, second.player_id], [1, 2])
+        self.assertEqual(self.player_llm.call_count, 2)
+
+    def test_missing_team_does_not_reuse_an_unresolved_team_decision(self):
+        self.player(1)
+        self.session.add(
+            NewsPlayerMatch(
+                player_name="leon mullre", team_code="", season_id=1, player_id=1
+            )
+        )
+        self.session.flush()
+        news = self.news("Leon Mullre", team=None)
+        self.assertEqual(self.match(), 0)
+        self.assertIsNone(news.player_id)
+        self.player_llm.assert_called_once()
 
     def test_more_than_two_exact_matches_are_all_sent_to_llm(self):
         for player_id in range(1, 5):
@@ -325,6 +390,7 @@ class TestPlayerNewsMatcher(unittest.TestCase):
         self.player(1)
         self.player(2)
         news = self.news(player_id=1, season_id=1)
+        second = self.news(player_id=1, season_id=1)
         self.session.add(
             NewsPlayerMatch(
                 player_name="leon muller",
@@ -335,18 +401,118 @@ class TestPlayerNewsMatcher(unittest.TestCase):
         )
         self.session.flush()
         self.assertEqual(self.match(), 0)
-        self.player_llm.return_value = 2
-        self.assertEqual(self.match(replace=True), 1)
-        self.assertEqual(news.player_id, 2)
+        self.player_llm.side_effect = [2, 1]
+        self.assertEqual(self.match(replace=True), 2)
+        self.assertEqual([news.player_id, second.player_id], [2, 2])
+        self.player_llm.assert_called_once()
         self.assertEqual(
             self.session.get(NewsPlayerMatch, ("leon muller", "ZSC", 1)).player_id, 2
         )
+
+    def test_replace_reuses_decision_first_learned_during_this_run(self):
+        self.player(1)
+        self.player(2)
+        first, second = self.news(), self.news()
+        self.player_llm.side_effect = [2, 1]
+        self.assertEqual(self.match(replace=True), 2)
+        self.assertEqual([first.player_id, second.player_id], [2, 2])
+        self.player_llm.assert_called_once()
+        self.session.commit()
+        third = self.news()
+        self.assertEqual(self.match(), 1)
+        self.assertEqual(third.player_id, 2)
+        self.player_llm.assert_called_once()
 
     def test_replace_with_no_match_preserves_existing_link(self):
         self.player(1)
         news = self.news("Other Person", player_id=1, season_id=1)
         self.assertEqual(self.match(replace=True), 0)
         self.assertEqual((news.player_id, news.season_id), (1, 1))
+
+    def test_default_run_rematches_old_season_link_with_reused_player_id(self):
+        self.add_old_season()
+        current_player = self.player(1)
+        old_player = self.player(1, season_id=2)
+        news = self.news(player_id=1, season_id=2)
+        self.assertIs(news.player, old_player)
+        self.assertEqual(self.match(), 1)
+        self.assertEqual((news.player_id, news.season_id), (1, 1))
+        self.assertIs(news.player, current_player)
+        self.player_llm.assert_not_called()
+
+    def test_unmatched_old_links_are_cleared_with_or_without_replace(self):
+        self.add_old_season()
+        self.player(1)
+        old_player = self.player(99, "Other Person", season_id=2)
+        for replace in (False, True):
+            with self.subTest(replace=replace):
+                news = self.news("Other Person", player_id=99, season_id=2)
+                self.assertIs(news.player, old_player)
+                self.assertEqual(self.match(replace=replace), 0)
+                self.assertEqual((news.player_id, news.season_id), (None, None))
+                self.assertIsNone(news.player)
+
+    def test_old_link_is_cleared_when_current_roster_is_empty(self):
+        self.add_old_season()
+        self.player(99, season_id=2)
+        news = self.news(player_id=99, season_id=2)
+        self.assertEqual(self.match(), 0)
+        self.assertEqual((news.player_id, news.season_id), (None, None))
+        self.team_llm.assert_not_called()
+        self.player_llm.assert_not_called()
+
+    def test_old_links_outside_lookback_are_preserved(self):
+        self.add_old_season()
+        self.player(1)
+        self.player(99, season_id=2)
+        news = self.news(days_ago=31, player_id=99, season_id=2)
+        self.assertEqual(self.match(replace=True), 0)
+        self.assertEqual((news.player_id, news.season_id), (99, 2))
+
+    def test_old_season_cache_is_ignored(self):
+        self.add_old_season()
+        self.player(1)
+        self.player(99, season_id=2)
+        self.session.add(
+            NewsPlayerMatch(
+                player_name="leon mullre", team_code="ZSC", season_id=2, player_id=99
+            )
+        )
+        self.session.flush()
+        news = self.news("Leon Mullre")
+        self.player_llm.return_value = 1
+        self.assertEqual(self.match(), 1)
+        self.assertEqual((news.player_id, news.season_id), (1, 1))
+        self.assertEqual(
+            [(p.id, p.season_id) for p in self.player_llm.call_args.args[1]], [(1, 1)]
+        )
+
+    def test_legacy_cache_pointing_outside_current_roster_is_deleted_and_retried(self):
+        self.add_old_season()
+        self.player(1)
+        self.player(99, season_id=2)
+        news = self.news("Leon Mullre")
+        self.session.commit()
+        # Simulate invalid data written before application FK enforcement.
+        self.session.connection().exec_driver_sql("PRAGMA foreign_keys=OFF")
+        self.session.add(
+            NewsPlayerMatch(
+                player_name="leon mullre", team_code="ZSC", season_id=1, player_id=99
+            )
+        )
+        self.session.commit()
+        self.session.connection().exec_driver_sql("PRAGMA foreign_keys=ON")
+        self.assertEqual(self.match(), 0)
+        self.assertEqual((news.player_id, news.season_id), (None, None))
+        self.assertIsNone(self.session.get(NewsPlayerMatch, ("leon mullre", "ZSC", 1)))
+        self.player_llm.assert_called_once()
+        self.assertEqual([p.id for p in self.player_llm.call_args.args[1]], [1])
+        self.player_llm.return_value = 1
+        self.assertEqual(self.match(), 1)
+        self.assertEqual((news.player_id, news.season_id), (1, 1))
+        self.assertEqual(
+            self.session.get(NewsPlayerMatch, ("leon mullre", "ZSC", 1)).player_id, 1
+        )
 
     def test_invalid_lookback_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "since_d"):
@@ -454,6 +620,7 @@ class TestMatchingLlmSelections(unittest.TestCase):
             info_type=PlayerInfoType.TRANSFERT,
             current_team="Zurich",
             new_team="Ajoie",
+            availability_time="Next season",
         )
         factory.return_value.run_sync.return_value.output = PlayerSelection(
             player_id=None
@@ -465,8 +632,9 @@ class TestMatchingLlmSelections(unittest.TestCase):
         )
         prompt = json.loads(factory.return_value.run_sync.call_args.args[0])
         self.assertEqual(prompt["news"]["team_code"], "ZSC")
-        self.assertNotIn("current_team", prompt["news"])
-        self.assertNotIn("new_team", prompt["news"])
+        self.assertEqual(prompt["news"]["current_team"], "Zurich")
+        self.assertEqual(prompt["news"]["new_team"], "Ajoie")
+        self.assertEqual(prompt["news"]["availability_time"], "Next season")
         self.assertEqual(
             prompt["candidates"], [{"id": 1, "name": "Test P.", "team_code": "ZSC"}]
         )
