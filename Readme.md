@@ -1,56 +1,56 @@
 # Hockey BI
-Hockey BI is a project designed to gather, store, and analyze data from the Swiss hockey league. 
-By scraping data and storing it in a structured backend, this project enables in-depth analysis, player valuation insights, and actionable recommendations for fantasy hockey enthusiasts and analysts.
+
+Hockey BI is a web app for Swiss fantasy hockey managers. It collects data from Hockey Manager to help you follow player performance, track your teams, and assess transfers.
+
+[Open Hockey BI](https://aml.bunny-wyrm.ts.net/)
+
+- Explore player statistics, prices, and their evolution over time.
+- Track your teams’ value and compare potential transfers.
+- Read Swiss Hockey News articles linked to players and teams.
+
+See [Architecture](Architecture.md) for diagrams of the app and data flow.
 
 > [!CAUTION]
 > This project is not affiliated with, endorsed by, or connected to hockeymanager.ch or its owners.
 > The website hockeymanager.ch and its contents are protected by intellectual property laws and are the exclusive property of Redesign Sagl de Camorino.
 > Use of this software may violate the Terms of Service of hockeymanager.ch or other applicable laws. The authors of this project do not assume any responsibility for misuse. You are solely responsible for ensuring that your use of this software complies with all legal and contractual obligations.
 
----
+## Install and run locally
 
-## Tools Overview
+You need Python 3.13+, uv, Node.js 22.12+, pnpm, and a Hockey Manager account to import data and access your teams.
 
-## [`tools/analysis`](tools/analysis)
-Contains scripts and notebooks for analyzing data from the Swiss hockey league.
+From the repository root, install the backend dependencies and create your local configuration:
 
-## [`tools/hockeymanager`](tools/hockeymanager)
-Includes to:
-- JS script to Scrape data from the [Hockey Manager website](https://www.hockeymanager.ch/).
-- Notebook to transform and analyze the scraped data.
-
----
-
-## Backend [`src/hmtracker`](src/hmtracker)
-> [!WARNING]
-> Development in progress!
-
-This backend aim to:
-- Obtain a server that continuously keep track of hockey player evolution
-- Allows public to use thoses data for analysis
-- Allows user to track their teams evolution
-- Indicates optimal transfert for a given team
-
----
-### Setup Instructions
-
-#### Prerequisites
-- Python 3.8 or above
-- A valid [Hockey Manager account](https://www.hockeymanager.ch/)
-- python dependencies `pip install -r requirements.txt`
-
-#### Initialize the database
-This creates the necessary schema and tables for the backend. Also initialize the seasons.
-```shell
-python hmtracker/database/creation.py <database-url>
+```sh
+cd backend
+uv sync
+cp resources/.env_template .env.local
 ```
 
-#### Load the current player stats
-Scrape player data from the Hockey Manager website and store it in database.
-You will need your account credentials.
-```shell
-python hmtracker/loader/main.py -d <database-url> -u <hm-useremail> -p <password>
+Edit `backend/.env.local`:
+
+- Set `HM_DATABASE_URL=sqlite:///hockey.db` for a local database.
+- Fill in `HM_USER` and `HM_PASSWORD` with your Hockey Manager credentials.
+- Choose `HMTRACKER_ADMIN_USER` and `HMTRACKER_ADMIN_PASSWORD` for the app’s admin page.
+- Set `HM_SECRET_KEY` to a long random secret. You can generate one with `uv run python -c 'import secrets; print(secrets.token_hex(32))'`.
+- Leave `HM_ROOT_PATH` empty for local use. News processing is optional and requires `OPENAI_API_KEY` and a suitable `HM_PLAYER_NEWS_MODEL`.
+
+Still in `backend`, initialize the database once, import player data, and start the API:
+
+```sh
+uv run --env-file .env.local python -m hmtracker.database.creation
+uv run --env-file .env.local python -m hmtracker.loader.main
+uv run --env-file .env.local python main.py
 ```
-This script is aimed to be run regularly (every time player change price and performance). So better set a cron job for it.
 
+The API runs at http://localhost:8000, with API documentation at http://localhost:8000/docs. Repeat the player import regularly to keep statistics current and build historical data.
 
+In another terminal, from the repository root, start the web app:
+
+```sh
+cd frontend
+pnpm install
+pnpm dev
+```
+
+Open http://localhost:5173 and sign in with your Hockey Manager account to load your teams.
