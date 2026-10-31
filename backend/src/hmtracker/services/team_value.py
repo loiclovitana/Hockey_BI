@@ -122,12 +122,16 @@ def compute_team_value_sql(
             ps.player_id,
             ps.price,
             ps.hm_points,
-            ps.appearances
+            ps.appearances,
+            hp.role
         FROM max_validity_dates mvd
         JOIN "HOCKEY_PLAYER_STATS" ps
             ON ps.player_id = mvd.player_id
             AND ps.validity_date = mvd.max_validity_date
             AND ps.season_id = :season_id
+        JOIN "HOCKEY_PLAYERS" hp
+            ON hp.id = ps.player_id
+            AND hp.season_id = ps.season_id
     )
 
     -- Final aggregation: compute total value and theoretical value per date
@@ -136,10 +140,13 @@ def compute_team_value_sql(
         SUM(price) AS value,
         SUM(
             CASE
+                -- Match the dashboard: goalkeepers retain their market price.
+                WHEN role = 'GK' THEN price
                 WHEN appearances IS NOT NULL
                      AND appearances > 0
                      AND hm_points IS NOT NULL
-                THEN hm_points / appearances
+                -- Force floating-point division even when both inputs are integers.
+                THEN CAST(hm_points AS FLOAT) / appearances
                 ELSE price
             END
         ) AS theorical_value

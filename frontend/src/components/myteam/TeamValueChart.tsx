@@ -246,26 +246,26 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
   if (teamEvolution?.evolution && sortedTeamEvolution.length > 0) {
     series.push({
       data: sortedTeamEvolution.map((d) => d.value),
-      label: "Actual",
+      label: "Value",
       showMark: false,
       color: theme.palette.primary.main,
       id: "v1",
     });
     legendData.push({
-      label: "Actual",
+      label: "Value",
       color: theme.palette.primary.main,
       isDashed: false,
     });
 
     series.push({
       data: sortedTeamEvolution.map((d) => d.theorical_value),
-      label: "Actual (Target)",
+      label: "Theorical Value",
       showMark: false,
       color: theme.palette.primary.main,
       id: "vt1",
     });
     legendData.push({
-      label: "Actual (Target)",
+      label: "Theorical Value",
       color: theme.palette.primary.main,
       isDashed: true,
     });
@@ -287,14 +287,14 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
 
     series.push({
       data: sortedAdaptedEvolution.map((d) => d.theorical_value),
-      label: "Alternative (Target)",
+      label: "Alternative (Theorical)",
       showMark: false,
       color: "#ff9800",
       strokeDasharray: "5 5",
       id: "vt2",
     });
     legendData.push({
-      label: "Alternative (Target)",
+      label: "Alternative (Theorical)",
       color: "#ff9800",
       isDashed: true,
     });
