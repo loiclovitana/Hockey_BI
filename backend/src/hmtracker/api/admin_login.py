@@ -1,8 +1,9 @@
 from datetime import timedelta, datetime, timezone
 from os import getenv
+from typing import Annotated
 
 import jwt
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
 
@@ -32,25 +33,34 @@ def create_access_token(username: str, password: str) -> str:
     token = {
         "username": username,
         "is_admin": True,
-        "expiration": expire.isoformat(timespec="minutes"),
+        "exp": expire,
     }
     encrypted_token = jwt.encode(token, SECRET_KEY, algorithm=ENCRYPTION_ALGORITHM)
 
     return encrypted_token
 
 
-def decode_token(token):
-    if SECRET_KEY is None:
+def decode_token(token: str) -> str:
+    if not SECRET_KEY:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
     try:
-        decoded_token = jwt.decode(token, SECRET_KEY, algorithms=[ENCRYPTION_ALGORITHM])
+        decoded_token = jwt.decode(
+            token,
+            SECRET_KEY,
+            algorithms=[ENCRYPTION_ALGORITHM],
+            options={"require": ["exp", "username", "is_admin"]},
+        )
         username = decoded_token.get("username")
         is_admin = decoded_token.get("is_admin", False)
-        if username is None or not is_admin:
+        if (
+            not isinstance(username, str)
+            or not username.strip()
+            or is_admin is not True
+        ):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",
@@ -63,3 +73,7 @@ def decode_token(token):
             headers={"WWW-Authenticate": "Bearer"},
         )
     return username
+
+
+def require_admin(token: Annotated[str, Depends(admin_login_scheme)]) -> str:
+    return decode_token(token)

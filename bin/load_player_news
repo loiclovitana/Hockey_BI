@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -e
+
+API_BASE_URL="${API_BASE_URL:-http://localhost:8000}"
+ADMIN_USERNAME="${HMTRACKER_ADMIN_USER:-admin}"
+ADMIN_PASSWORD="${HMTRACKER_ADMIN_PASSWORD}"
+
+if [ -z "$ADMIN_PASSWORD" ]; then
+    echo "Error: HMTRACKER_ADMIN_PASSWORD environment variable is required"
+    exit 1
+fi
+
+echo "Authenticating as admin user..."
+if ! AUTH_RESPONSE=$(curl -fsS -X POST "$API_BASE_URL/admin/login" \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    --data-urlencode "username=$ADMIN_USERNAME" \
+    --data-urlencode "password=$ADMIN_PASSWORD"); then
+    echo "Error: Failed to authenticate"
+    exit 1
+fi
+
+ACCESS_TOKEN=$(echo "$AUTH_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin)['access_token'])")
+
+if [ -z "$ACCESS_TOKEN" ]; then
+    echo "Error: Failed to extract access token from response"
+    exit 1
+fi
+
+echo "Starting player news import and matching..."
+curl -fsS -X POST "$API_BASE_URL/admin/playernews/import-and-match/start" \
+    -H "Authorization: Bearer $ACCESS_TOKEN" \
+    -H "Content-Type: application/json"
+
+echo "Player news import and matching started successfully"

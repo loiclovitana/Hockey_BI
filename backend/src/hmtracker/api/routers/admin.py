@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, Request, UploadFile, File
 from fastapi import HTTPException, status
 from hmtracker.services import admin
-from hmtracker.api.admin_login import admin_login_scheme, decode_token
+from hmtracker.api.admin_login import require_admin
 from hmtracker.database import repository as repo
 from hmtracker.api import models as api_models
 from hmtracker.common.constants import HM_DATABASE_URL_ENV_NAME
@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from os import getenv
 
 router = APIRouter(
-    prefix="/admin", tags=["admin"], dependencies=[Depends(admin_login_scheme)]
+    prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin)]
 )
 
 _HM_DATABASE_URL = getenv(HM_DATABASE_URL_ENV_NAME)
@@ -61,8 +61,7 @@ class AdminUser(BaseModel):
 
 
 @router.get("/user")
-def get_admin_user(token: Annotated[str, Depends(admin_login_scheme)]) -> AdminUser:
-    username = decode_token(token)
+def get_admin_user(username: Annotated[str, Depends(require_admin)]) -> AdminUser:
     return AdminUser(username=username)
 
 

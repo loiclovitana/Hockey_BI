@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup, Tag
 from requests import Session
 
 from hmtracker.common.constants import HM_URL
+from hmtracker.common.exceptions import HMAuthenticationError, HMUnavailableError
 
 AJAX_URL = HM_URL + "ajaxrequest/"
 
@@ -63,15 +64,20 @@ class HMAjaxScrapper:
             f"fh_u={quote(user)}&fh_p={quote(password)}&randomNumber={_random_number()}"
         )
 
-        response = self.session.post(
-            AJAX_URL + "try-login", query_data, headers=AJAX_REQUEST_HEADER
-        )
-        connection_success = response.status_code == 200 and "1" == response.text
-        if not connection_success:
-            raise ConnectionError(
-                f"Couldn't connect to Hockey Manager: <{response.status_code}>\n{response.text}"
+        try:
+            response = self.session.post(
+                AJAX_URL + "try-login",
+                query_data,
+                headers=AJAX_REQUEST_HEADER,
+                timeout=(10, 30),
             )
-        self._load_main_dashboard()
+            if response.status_code != 200:
+                raise HMUnavailableError()
+            if response.text != "1":
+                raise HMAuthenticationError()
+            self._load_main_dashboard()
+        except requests.exceptions.RequestException as exc:
+            raise HMUnavailableError() from exc
 
     def get_all_players(self):
         """
@@ -192,10 +198,9 @@ class HMAjaxScrapper:
         """
         session = self._get_open_session()
         MAX_ATTEMPTS = 5
-        attempts = 0
-        while attempts < MAX_ATTEMPTS:
+        for _ in range(MAX_ATTEMPTS):
             response = session.get(
-                HM_URL + "/fr/dashboard", headers=PAGE_REQUEST_HEADER
+                HM_URL + "/fr/dashboard", headers=PAGE_REQUEST_HEADER, timeout=(10, 30)
             )
             dashboard_soup = BeautifulSoup(response.text, features="html.parser")
             if response.status_code != 200:
@@ -206,13 +211,12 @@ class HMAjaxScrapper:
                     AJAX_URL + "switch-classic-arcade",
                     query_data,
                     headers=AJAX_REQUEST_HEADER,
+                    timeout=(10, 30),
                 )  # switch mode
             else:
                 self.dashboard = dashboard_soup
-                break
-            attempts += 1
-        if attempts == MAX_ATTEMPTS:
-            raise Exception("Couldn't load the main page for HM")
+                return
+        raise HMUnavailableError()
 
     def _get_player_html_list(self, club: int = 0):
         session = self._get_open_session()

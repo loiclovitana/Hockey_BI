@@ -4,6 +4,7 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException
 from os import getenv
 from hmtracker.common.constants import HM_DATABASE_URL_ENV_NAME
+from hmtracker.common.exceptions import HMAuthenticationError
 from hmtracker.database import repository as repo
 from hmtracker.api import models as api_models
 from hmtracker.loader.main import import_teamplayers_from_loader
@@ -68,7 +69,7 @@ async def load(request: LoadRequest, session: SessionDep) -> DashBoardData:
 
     manager = session.get_manager_by_email(request.hm_user)
     if manager is None:
-        raise HTTPException(status_code=500, detail="Manager wasn't saved correctly")
+        raise HMAuthenticationError()
 
     current_season = session.get_current_season(arcade=False)
     if current_season is None:
@@ -102,7 +103,7 @@ async def register_for_autolinup(
 ) -> api_models.Manager:
     manager = session.get_manager_by_email(request.hm_user)
     if manager is None:
-        raise HTTPException(status_code=500, detail="Manager wasn't saved correctly")
+        raise HMAuthenticationError()
     connect_to_hm(request.hm_user, password=request.hm_password.get_secret_value())
 
     manager.encrypted_password = encrypt(request.hm_password.get_secret_value())
@@ -118,7 +119,7 @@ async def unregister_for_autolinup(
 ) -> api_models.Manager:
     manager = session.get_manager_by_email(request.hm_user)
     if manager is None:
-        raise HTTPException(status_code=500, detail="Manager wasn't saved correctly")
+        raise HMAuthenticationError()
     connect_to_hm(request.hm_user, password=request.hm_password.get_secret_value())
     manager.encrypted_password = None
     manager.autolineup = False
@@ -145,9 +146,8 @@ async def team_value_evolution(
     # Get the manager from the email
     manager = session.get_manager_by_email(request.hm_user)
     if manager is None:
-        raise HTTPException(status_code=404, detail="Manager not found")
+        raise HMAuthenticationError()
 
-    # Verify credentials
     connect_to_hm(request.hm_user, password=request.hm_password.get_secret_value())
 
     # Get current season
