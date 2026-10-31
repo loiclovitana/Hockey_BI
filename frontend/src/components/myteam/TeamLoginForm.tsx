@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
 import { LoginForm, type LoginFormField } from "../common/LoginForm";
+import { LoginProjectLinks } from "../common/ProjectLinks";
 import { loadMyteamLoadPost, type DashBoardData } from "../../client";
 import logoLottie from "../../assets/logo-lottie.json";
 import { Container } from "@mui/material";
@@ -79,6 +80,7 @@ export const TeamLoginForm: React.FC<TeamLoginFormProps> = ({ onSuccess }) => {
         loadingText="Loading..."
         onSubmit={handleSubmit}
       />
+      <LoginProjectLinks />
     </Container>
   );
 };
