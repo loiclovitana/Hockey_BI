@@ -1,0 +1,22 @@
+{
+  "id": "/",
+  "name": "Hockey BI",
+  "short_name": "Hockey BI",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "theme_color": "#1c1815",
+  "background_color": "#1c1815",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

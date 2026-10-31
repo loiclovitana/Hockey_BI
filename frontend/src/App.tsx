@@ -31,7 +31,14 @@ function App() {
               width: "100vw",
             }}
           >
-            <AppBar position="fixed">
+            <AppBar
+              position="fixed"
+              sx={{
+                pt: "env(safe-area-inset-top, 0px)",
+                pl: "env(safe-area-inset-left, 0px)",
+                pr: "env(safe-area-inset-right, 0px)",
+              }}
+            >
               <Toolbar>
                 <img
                   src="/ico.svg"
@@ -49,8 +56,12 @@ function App() {
               component="main"
               sx={{
                 flex: 1,
+                minHeight: 0,
                 overflow: "auto",
-                py: "64px",
+                pt: "calc(64px + env(safe-area-inset-top, 0px))",
+                pb: "calc(64px + env(safe-area-inset-bottom, 0px))",
+                pl: "env(safe-area-inset-left, 0px)",
+                pr: "env(safe-area-inset-right, 0px)",
               }}
             >
               <Routes>
