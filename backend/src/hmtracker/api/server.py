@@ -1,3 +1,4 @@
+from os import getenv
 from typing import Annotated, Literal
 
 from fastapi import FastAPI, Depends, Request
@@ -10,7 +11,7 @@ from hmtracker.common.exceptions import HMAuthenticationError, HMUnavailableErro
 from pydantic import BaseModel
 from .routers import admin, players, myteam
 
-api = FastAPI()
+api = FastAPI(root_path=getenv("HM_ROOT_PATH", ""))
 app = CORSMiddleware(
     app=api,
     allow_origins=["*"],
