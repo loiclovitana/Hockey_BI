@@ -42,7 +42,14 @@ export const TransferAnalytics: React.FC = () => {
             </ButtonGroup>
           </Box>
 
-          <Box sx={{ position: "relative", minHeight: "500px" }}>
+          <Box
+            sx={{
+              position: "relative",
+              minHeight: "500px",
+              // Keep the off-screen team panels from widening the page.
+              overflowX: "clip",
+            }}
+          >
             <Box
               sx={{
                 position: team === 0 ? "relative" : "absolute",
