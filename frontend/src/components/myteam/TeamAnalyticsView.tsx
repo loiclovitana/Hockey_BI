@@ -228,6 +228,8 @@ export const TeamAnalyticsView: React.FC<TeamAnalyticsViewProps> = ({
           <TransferListTable
             transfers={dashboardData.my_teams[team] || []}
             selectedDate={selectedTransfertDay}
+            availableDates={transfertTimes}
+            onDateSelect={setSelectedTransfertDay}
             selectedPlayerId={selectedTransfertId}
             onPlayerSelect={setSelectedTransfertId}
           />
