@@ -72,6 +72,12 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
             "& .MuiTableCell-root:nth-child(2)": {
               left: CLUB_COLUMN_WIDTH,
               pl: 0.5,
+              pr: { xs: 0.5, md: 2 },
+            },
+            "& .MuiTableCell-root": {
+              left: CLUB_COLUMN_WIDTH,
+              pl: { xs: 1, md: 2 },
+              pr: { xs: 1, md: 2 },
             },
           }}
         >

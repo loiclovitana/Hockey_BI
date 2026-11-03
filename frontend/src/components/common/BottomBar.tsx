@@ -40,6 +40,7 @@ export const BottomBar: React.FC = () => {
       showLabels
       sx={{
         position: "fixed",
+        zIndex: (theme) => theme.zIndex.appBar,
         bottom: 0,
         left: 0,
         right: 0,
