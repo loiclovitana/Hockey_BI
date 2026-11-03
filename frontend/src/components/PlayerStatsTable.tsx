@@ -77,10 +77,10 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
         >
           <TableHead>
             <TableRow>
-              <TableCell>Club</TableCell>
-              <TableCell>Player Name</TableCell>
+              <TableCell></TableCell>
+              <TableCell>Player</TableCell>
               <TableCell>Role</TableCell>
-              <TableCell align="right">HM Points</TableCell>
+              <TableCell align="right">HM Pts</TableCell>
               <TableCell
                 align="right"
                 sx={{ display: { xs: "none", md: "table-cell" } }}
@@ -100,7 +100,7 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
                 Matchs
               </TableCell>
               <TableCell align="right">Price</TableCell>
-              <TableCell align="right">Estimated Value</TableCell>
+              <TableCell align="right">Est. Value</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
