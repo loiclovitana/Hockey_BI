@@ -250,7 +250,7 @@ def _scrap_player_row(player_row_html: bs4.element.Tag) -> dict[str, str]:
         if player_row_html.img
         else "",
         "role": player_row_html.div.text if player_row_html.div else "",
-        "foreigner": str(len(player_row_html.select(".ch")) != 0),
+        "foreigner": str(player_row_html.select_one(".ch") is None),
     }
 
 

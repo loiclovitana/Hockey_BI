@@ -26,7 +26,7 @@ class TestScrappingFunctions(unittest.TestCase):
         self.assertEqual("Player 1", result["name"])
         self.assertEqual("Club1", result["club"])
         self.assertEqual("Forward", result["role"])
-        self.assertEqual("False", result["foreigner"])
+        self.assertEqual("True", result["foreigner"])
 
     def test_scrap_player_details(self):
         # Arrange
@@ -64,13 +64,32 @@ class TestScrappingFunctions(unittest.TestCase):
         self.assertEqual("Player 1", result[0]["name"])
         self.assertEqual("Club1", result[0]["club"])
         self.assertEqual("FW", result[0]["role"])
-        self.assertEqual("False", result[0]["foreigner"])
+        self.assertEqual("True", result[0]["foreigner"])
 
         self.assertEqual("2", result[1]["id"])
         self.assertEqual("Player 2", result[1]["name"])
         self.assertEqual("Club2", result[1]["club"])
         self.assertEqual("DF", result[1]["role"])
-        self.assertEqual("True", result[1]["foreigner"])
+        self.assertEqual("False", result[1]["foreigner"])
+
+    def test_foreigner_flag_survives_mapping(self):
+        from hmtracker.loader.playerstats.mapper import map_player_stats
+
+        for flag, expected_foreigner in (
+            ('<i class="flag ch"></i>', False),
+            ('<i class="flag ca"></i>', True),
+            ("", True),
+        ):
+            with self.subTest(flag=flag):
+                html = f"""
+                    <div class="row" attr="1">
+                        <span class="name">Player</span>
+                        <div>FW</div>
+                        {flag}
+                    </div>
+                """
+                players, _ = map_player_stats(hmparser._scrap_players_html_list(html))
+                self.assertIs(players[0].foreigner, expected_foreigner)
 
     def test_is_arcade(self):
         with resources.open_text("tests.resources", "main_page.html") as f:
