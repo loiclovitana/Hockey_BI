@@ -27,7 +27,7 @@ const CustomLegend: React.FC<CustomLegendProps> = ({ series }) => {
         flexWrap: "wrap",
         gap: 2,
         justifyContent: "center",
-        px: 2,
+        px: { xs: 0, md: 2 },
         pb: 2,
       }}
     >
@@ -72,6 +72,8 @@ interface TeamValueChartProps {
 interface TransferTimelineProps {
   transferDates: Date[];
   dates: Date[];
+  plotLeft: number;
+  plotRight: number;
   selectedTransfertDate?: string | null;
   onTransfertDayClick?: (day: string) => void;
 }
@@ -79,6 +81,8 @@ interface TransferTimelineProps {
 const TransferTimeline: React.FC<TransferTimelineProps> = ({
   transferDates,
   dates,
+  plotLeft,
+  plotRight,
   selectedTransfertDate,
   onTransfertDayClick,
 }) => {
@@ -94,7 +98,7 @@ const TransferTimeline: React.FC<TransferTimelineProps> = ({
   };
 
   return (
-    <Box sx={{ px: 2, pl: 8 }}>
+    <Box sx={{ pr: `${plotRight}px`, pl: `${plotLeft}px` }}>
       {transferDates.length > 0 && (
         <Box
           sx={{
@@ -103,7 +107,7 @@ const TransferTimeline: React.FC<TransferTimelineProps> = ({
             height: 40,
             backgroundColor: theme.palette.background.paper,
             borderRadius: 1,
-            border: `1px solid ${theme.palette.divider}`,
+            boxShadow: `inset 0 0 0 1px ${theme.palette.divider}`,
             mt: 1,
           }}
         >
@@ -195,6 +199,9 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  // Share the plot bounds with the timeline so their date positions match.
+  const chartMargin = isMobile ? 0 : 20;
+  const yAxisWidth = isMobile ? 45 : 65;
 
   if (!teamEvolution && !adaptedTeamEvolution) {
     return (
@@ -307,7 +314,12 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
 
   return (
     <Box
-      sx={{ pt: 3, width: "100%", overflow: "hidden", position: "relative" }}
+      sx={{
+        pt: { xs: 0, md: 3 },
+        width: "100%",
+        overflow: "hidden",
+        position: "relative",
+      }}
     >
       {/* Loading indicator for adapted evolution */}
       {adaptedLoading && (
@@ -342,6 +354,7 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
         }}
       >
         <LineChart
+          margin={chartMargin}
           series={series}
           xAxis={[
             {
@@ -361,6 +374,7 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
           ]}
           yAxis={[
             {
+              width: yAxisWidth,
               ...(!isMobile && { label: "Team Value" }),
             },
           ]}
@@ -405,6 +419,8 @@ export const TeamValueChart: React.FC<TeamValueChartProps> = ({
       <TransferTimeline
         transferDates={transferDates}
         dates={dates}
+        plotLeft={chartMargin + yAxisWidth}
+        plotRight={chartMargin}
         selectedTransfertDate={selectedTransfertDate}
         onTransfertDayClick={onTransfertDayClick}
       />

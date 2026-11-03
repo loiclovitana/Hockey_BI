@@ -208,7 +208,7 @@ export const TeamAnalyticsView: React.FC<TeamAnalyticsViewProps> = ({
       {error && <ErrorMessage error={error} title="Error Loading Team Data" />}
 
       {!loading && !error && teamValueEvolution && (
-        <Box sx={{ px: 2 }}>
+        <Box sx={{ pl: { xs: 0, md: 2 }, pr: { xs: "10px", md: 2 } }}>
           {playerStats && (
             <AdaptationsList
               modifications={teamModifications}
