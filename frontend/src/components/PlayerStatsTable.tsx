@@ -11,12 +11,16 @@ import {
   Typography,
   Box,
 } from "@mui/material";
+import PublicIcon from "@mui/icons-material/Public";
+import SwissIcon from "../assets/flag-switzerland.svg";
 import { type LastPlayerStats } from "../client/";
 import { ValueWithDifference } from "./common/ValueWithDifference";
 
 interface PlayerStatsTableProps {
   data: LastPlayerStats[];
 }
+
+const CLUB_COLUMN_WIDTH = 52;
 
 export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
   const [page, setPage] = useState(0);
@@ -48,12 +52,34 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
   return (
     <Paper sx={{ width: "100%", py: 1 }}>
       <TableContainer>
-        <Table aria-labelledby="tableTitle" size="small">
+        <Table
+          aria-labelledby="tableTitle"
+          size="small"
+          sx={{
+            "& .MuiTableCell-root:nth-child(-n + 2):not([colspan])": {
+              position: "sticky",
+              zIndex: 1,
+              bgcolor: "background.paper",
+            },
+            "& .MuiTableCell-root:first-child:not([colspan])": {
+              left: 0,
+              width: CLUB_COLUMN_WIDTH,
+              minWidth: CLUB_COLUMN_WIDTH,
+              maxWidth: CLUB_COLUMN_WIDTH,
+              boxSizing: "border-box",
+              pr: 0.5,
+            },
+            "& .MuiTableCell-root:nth-child(2)": {
+              left: CLUB_COLUMN_WIDTH,
+              pl: 0.5,
+            },
+          }}
+        >
           <TableHead>
             <TableRow>
+              <TableCell>Club</TableCell>
               <TableCell>Player Name</TableCell>
               <TableCell>Role</TableCell>
-              <TableCell>Club</TableCell>
               <TableCell align="right">HM Points</TableCell>
               <TableCell
                 align="right"
@@ -92,12 +118,6 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
                   tabIndex={-1}
                   key={row.player_info.id}
                 >
-                  <TableCell component="th" scope="row">
-                    <Typography variant="body2" fontWeight="medium">
-                      {row.player_info.name}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>{row.player_info.role}</TableCell>
                   <TableCell>
                     {row.player_stats?.club ? (
                       <Box
@@ -112,6 +132,29 @@ export const PlayerStatsTable: React.FC<PlayerStatsTableProps> = ({ data }) => {
                     ) : (
                       "-"
                     )}
+                  </TableCell>
+                  <TableCell component="th" scope="row">
+                    <Typography variant="body2" fontWeight="medium">
+                      {row.player_info.name}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      {row.player_info.role}
+                      {row.player_info.foreigner ? (
+                        <PublicIcon
+                          titleAccess="Foreign player"
+                          sx={{ fontSize: 16 }}
+                        />
+                      ) : (
+                        <Box
+                          component="img"
+                          src={SwissIcon}
+                          alt="Swiss player"
+                          sx={{ height: 16 }}
+                        />
+                      )}
+                    </Box>
                   </TableCell>
 
                   <TableCell align="right">
