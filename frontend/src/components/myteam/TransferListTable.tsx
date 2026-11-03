@@ -1,4 +1,4 @@
-import React, { useMemo, useContext } from "react";
+import React, { useMemo, useContext, useState, useId } from "react";
 import {
   Table,
   TableBody,
@@ -9,13 +9,19 @@ import {
   Paper,
   Typography,
   Box,
+  Button,
+  Menu,
+  MenuItem,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { type Team } from "../../client/";
 import { PlayerStatsContext } from "../../context/PlayerStatsContext";
 
 interface TransferListTableProps {
   transfers: Team[];
   selectedDate: string | null;
+  availableDates: Set<string>;
+  onDateSelect: (date: string) => void;
   selectedPlayerId: number | null;
   onPlayerSelect: (playerId: number) => void;
 }
@@ -23,10 +29,27 @@ interface TransferListTableProps {
 export const TransferListTable: React.FC<TransferListTableProps> = ({
   transfers,
   selectedDate,
+  availableDates,
+  onDateSelect,
   selectedPlayerId: selectedRowId,
   onPlayerSelect: onRowSelect,
 }) => {
   const { playerStats } = useContext(PlayerStatsContext);
+  const [dateMenuAnchor, setDateMenuAnchor] = useState<HTMLElement | null>(
+    null,
+  );
+  const dateMenuId = useId();
+  const dateButtonId = `${dateMenuId}-button`;
+  const dateOptions = [
+    { value: "start", label: "Starting Team" },
+    ...Array.from(availableDates)
+      .sort()
+      .map((date) => ({
+        value: date,
+        label: `Transfers on ${new Date(date).toLocaleDateString()}`,
+      })),
+    { value: "current", label: "Current Team" },
+  ];
 
   // Create a map of player_id to player info
   const playerMap = useMemo(() => {
@@ -103,13 +126,48 @@ export const TransferListTable: React.FC<TransferListTableProps> = ({
   return (
     <Paper sx={{ width: "100%", py: 1, mt: 3 }}>
       <Box sx={{ px: 2, py: 1 }}>
-        <Typography variant="h6" gutterBottom>
-          {getDisplayTitle()}
+        <Typography variant="h6" component="h2" gutterBottom>
+          <Button
+            id={dateButtonId}
+            aria-controls={dateMenuAnchor ? dateMenuId : undefined}
+            aria-haspopup="menu"
+            aria-expanded={dateMenuAnchor ? "true" : undefined}
+            onClick={(event) => setDateMenuAnchor(event.currentTarget)}
+            endIcon={<ExpandMoreIcon />}
+            sx={{
+              typography: "h6",
+              textTransform: "none",
+              color: "text.primary",
+              textAlign: "left",
+            }}
+          >
+            {getDisplayTitle()}
+          </Button>
         </Typography>
+        <Menu
+          id={dateMenuId}
+          anchorEl={dateMenuAnchor}
+          open={Boolean(dateMenuAnchor)}
+          onClose={() => setDateMenuAnchor(null)}
+          slotProps={{ list: { "aria-labelledby": dateButtonId } }}
+        >
+          {dateOptions.map(({ value, label }) => (
+            <MenuItem
+              key={value}
+              selected={selectedDate === value}
+              onClick={() => {
+                onDateSelect(value);
+                setDateMenuAnchor(null);
+              }}
+            >
+              {label}
+            </MenuItem>
+          ))}
+        </Menu>
       </Box>
 
       <TableContainer>
-        <Table aria-labelledby="transfersTable" size="small">
+        <Table aria-labelledby={dateButtonId} size="small">
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>

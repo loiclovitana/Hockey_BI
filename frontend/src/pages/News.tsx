@@ -1,6 +1,19 @@
 import React, { useContext, useMemo, useState } from "react";
-import { Box, Button, ButtonGroup, Link, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Chip,
+  Drawer,
+  IconButton,
+  Link,
+  Typography,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import SearchIcon from "@mui/icons-material/Search";
+import type { LastPlayerStats } from "../client";
 import { PlayerNewsFeed } from "../components/news/PlayerNewsFeed";
+import { HockeyPlayerSearch } from "../components/player/HockeyPlayerSearch";
 import { PlayerStatsContext } from "../context/PlayerStatsContext";
 import { useDashboard } from "../hooks/useDashboard";
 import type { PlayerNewsFilters } from "../hooks/usePlayerNews";
@@ -9,10 +22,20 @@ export const News: React.FC = () => {
   const { dashboardData } = useDashboard();
   const { playerStats } = useContext(PlayerStatsContext);
   const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<LastPlayerStats | null>(
+    null,
+  );
+  const [searchOpen, setSearchOpen] = useState(false);
   const team =
     selectedTeam === null ? undefined : dashboardData?.my_teams[selectedTeam];
 
   const filters = useMemo<PlayerNewsFilters>(() => {
+    if (selectedPlayer) {
+      return {
+        season_id: selectedPlayer.player_info.season_id,
+        player_ids: [selectedPlayer.player_info.id],
+      };
+    }
     if (!team) return {};
 
     // Both the player stats and dashboard endpoints return the current season.
@@ -36,7 +59,7 @@ export const News: React.FC = () => {
         ),
       ],
     };
-  }, [team, playerStats]);
+  }, [team, playerStats, selectedPlayer]);
 
   return (
     <Box sx={{ p: { xs: 1, sm: 3 }, maxWidth: 800, mx: "auto" }}>
@@ -63,9 +86,12 @@ export const News: React.FC = () => {
       {dashboardData && (
         <ButtonGroup fullWidth aria-label="Filter news by team" sx={{ mb: 2 }}>
           <Button
-            variant={!team ? "contained" : "outlined"}
-            aria-pressed={!team}
-            onClick={() => setSelectedTeam(null)}
+            variant={!team && !selectedPlayer ? "contained" : "outlined"}
+            aria-pressed={!team && !selectedPlayer}
+            onClick={() => {
+              setSelectedTeam(null);
+              setSelectedPlayer(null);
+            }}
             sx={{ minHeight: 44 }}
           >
             ALL
@@ -78,7 +104,10 @@ export const News: React.FC = () => {
               }
               aria-pressed={!!team && selectedTeam === index}
               disabled={!dashboardData.my_teams[index]}
-              onClick={() => setSelectedTeam(index)}
+              onClick={() => {
+                setSelectedTeam(index);
+                setSelectedPlayer(null);
+              }}
               sx={{ minHeight: 44 }}
             >
               Team {index + 1}
@@ -87,7 +116,72 @@ export const News: React.FC = () => {
         </ButtonGroup>
       )}
 
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
+        <Button
+          variant="outlined"
+          startIcon={<SearchIcon />}
+          disabled={!playerStats?.length}
+          onClick={() => setSearchOpen(true)}
+          sx={{ minHeight: 44 }}
+        >
+          Search players
+        </Button>
+        {selectedPlayer && (
+          <Chip
+            label={selectedPlayer.player_info.name}
+            onDelete={() => setSelectedPlayer(null)}
+            sx={{ alignSelf: "center" }}
+          />
+        )}
+      </Box>
+
       <PlayerNewsFeed key={JSON.stringify(filters)} filters={filters} />
+
+      <Drawer
+        variant="temporary"
+        anchor="bottom"
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        sx={{
+          "& .MuiDrawer-paper": {
+            width: "100%",
+            height: "80vh",
+            boxSizing: "border-box",
+            borderTopLeftRadius: 16,
+            borderTopRightRadius: 16,
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            p: 2,
+            borderBottom: 1,
+            borderColor: "divider",
+          }}
+        >
+          <Typography variant="h6">Select Player</Typography>
+          <IconButton
+            aria-label="Close player search"
+            onClick={() => setSearchOpen(false)}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Box sx={{ flex: 1, overflow: "hidden" }}>
+          <HockeyPlayerSearch
+            players={playerStats ?? []}
+            selectedPlayer={selectedPlayer}
+            setSelectedHockeyPlayer={(player) => {
+              setSelectedPlayer(player);
+              setSelectedTeam(null);
+              setSearchOpen(false);
+            }}
+          />
+        </Box>
+      </Drawer>
     </Box>
   );
 };

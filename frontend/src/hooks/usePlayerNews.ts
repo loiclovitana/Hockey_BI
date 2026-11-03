@@ -12,7 +12,7 @@ export type PlayerNewsFilters = Pick<
 
 const PAGE_SIZE = 25;
 
-// The feed remounts when filters change so pages from different teams never mix.
+// The feed remounts when filters change so pages from different selections never mix.
 export const usePlayerNews = (filters: PlayerNewsFilters) => {
   const [news, setNews] = useState<PlayerNews[]>([]);
   const [offset, setOffset] = useState(0);

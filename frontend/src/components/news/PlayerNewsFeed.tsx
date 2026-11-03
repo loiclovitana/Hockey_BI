@@ -52,7 +52,7 @@ export const PlayerNewsFeed: React.FC<PlayerNewsFeedProps> = ({ filters }) => {
           title="No News Available"
           message={
             filters.player_ids
-              ? "No news for this team's players in the current season."
+              ? "No news for the selected players in the current season."
               : "No player news is currently available. Please check back later."
           }
         />
